@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HealthLog - ログイン</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}" />
+</head>
+
+<body>
+    <div class="auth-page">
+        <div class="auth-card">
+
+            <!-- =========================================
+            左パネル — ブランドとイラスト
+            （表示専用のためバックエンド連携は不要）
+            ========================================= -->
+            <aside class="auth-brand">
+                <div class="auth-brand__logo">
+                    <img th:src="@{/image/logo.png}" alt="HealthLog" />
+                    <span>HealthLog</span>
+                </div>
+
+                <div class="auth-brand__art">
+                    <!-- 健康的な家族のイラスト（画像ファイルに依存しないSVG） -->
+                    <svg viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="150" cy="150" r="120" fill="#2F7A67" opacity="0.35" />
+                        <circle cx="150" cy="150" r="90" fill="#2F7A67" opacity="0.25" />
+
+                        <!-- 心拍 -->
+                        <path d="M55 155 H105 L120 120 L140 190 L160 130 L175 155 H245" stroke="#E8886A"
+                            stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+
+                        <!-- 3人の家族 -->
+                        <g fill="#FFFFFF">
+                            <circle cx="105" cy="95" r="16" />
+                            <rect x="85" y="115" width="40" height="46" rx="14" />
+                        </g>
+                        <g fill="#F3D9C4">
+                            <circle cx="150" cy="80" r="19" />
+                            <rect x="126" y="103" width="48" height="55" rx="16" />
+                        </g>
+                        <g fill="#FFFFFF" opacity="0.85">
+                            <circle cx="196" cy="98" r="14" />
+                            <rect x="179" y="115" width="34" height="40" rx="12" />
+                        </g>
+                    </svg>
+                </div>
+
+                <div class="auth-brand__copy">
+                    <h2>家族みんなの健康を、<br />ひとつに。</h2>
+                    <p>予定管理から通院記録まで、家族の健康情報をHealthLogでまとめて安心。</p>
+                    <div class="auth-brand__dots">
+                        <span></span><span></span><span></span><span></span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- =========================================
+            右パネル — ログインフォーム
+            ここから下がバックエンド連携箇所
+            ========================================= -->
+            <section class="auth-form-panel">
+                <div class="auth-form-panel__header">
+                    <h1>ログイン</h1>
+                    <p>アカウントにログインして、家族の健康ダッシュボードを確認しましょう。</p>
+                </div>
+
+                <!-- サーバーエラー表示: Controller から model.addAttribute("error", "...") -->
+                <div class="banner banner--error" th:if="${error}">
+                    <i data-lucide="alert-circle"></i>
+                    <span th:text="${error}"></span>
+                </div>
+
+                <!-- 成功メッセージ: 例）パスワード再設定完了、登録完了など -->
+                <div class="banner banner--success" th:if="${message}">
+                    <span th:text="${message}"></span>
+                </div>
+
+                <!-- メール未認証時のみ表示：確認メール再送 -->
+                <!-- アクション: POST /auth/resend-verification / 本文: email -->
+                <form th:if="${emailNotVerified}" th:action="@{/auth/resend-verification}" method="post"
+                    class="resend-form">
+                    <input type="hidden" name="email" th:value="${email}" />
+                    <button type="submit" class="submit-btn resend-btn">
+                        <i data-lucide="mail"></i>
+                        確認メールを再送する
+                    </button>
+                </form>
+
+                <!-- ログインフォーム本体 -->
+                <!-- アクション: POST /auth/login / 本文: email, password, remember -->
+                <form id="loginForm" th:action="@{/auth/login}" method="post" class="form" novalidate>
+
+                    <div class="input-group">
+                        <label for="email">メールアドレス</label>
+                        <div class="input-box">
+                            <i data-lucide="mail"></i>
+                            <input id="email" name="email" type="email" th:value="${email}"
+                                placeholder="you@example.com" autocomplete="email" />
+                        </div>
+                        <div id="emailError" class="field-error">
+                            <i data-lucide="alert-circle"></i>
+                            <span></span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="password">パスワード</label>
+                        <div class="input-box">
+                            <i data-lucide="lock"></i>
+                            <input id="password" name="password" type="password" placeholder="パスワードを入力"
+                                autocomplete="current-password" />
+                            <button id="togglePassword" type="button" class="toggle-password" aria-label="パスワードを表示">
+                                <i data-lucide="eye" id="eye"></i>
+                            </button>
+                        </div>
+                        <div id="passwordError" class="field-error">
+                            <i data-lucide="alert-circle"></i>
+                            <span></span>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="remember" />
+                            ログイン状態を保持する
+                        </label>
+                        <a class="forgot-link" th:href="@{/auth/forgot-password}">パスワードをお忘れですか？</a>
+                    </div>
+
+                    <button class="submit-btn" type="submit">
+                        <i data-lucide="log-in"></i>
+                        ログイン
+                    </button>
+                </form>
+
+                <div class="divider">または</div>
+
+                <!-- ソーシャルログイン（OAuth連携先のURLに置き換えてください） -->
+                <div class="social-row">
+                    <a th:href="@{/oauth2/authorization/google}" class="social-btn">
+                        <i data-lucide="chrome"></i> Google
+                    </a>
+                    <a th:href="@{/oauth2/authorization/facebook}" class="social-btn">
+                        <i data-lucide="facebook"></i> Facebook
+                    </a>
+                </div>
+
+                <div class="auth-footer">
+                    アカウントをお持ちでないですか？
+                    <a th:href="@{/auth/register}">新規登録</a>
+                </div>
+
+                <p class="security-note">健康データは安全に暗号化されて保存されます</p>
+            </section>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>lucide.createIcons();</script>
+    <script th:src="@{/js/common.js}"></script>
+    <script th:src="@{/js/login.js}"></script>
+</body>
+
+</html>

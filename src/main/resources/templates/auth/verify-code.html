@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HealthLog - 確認コード</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}" />
+</head>
+
+<body>
+    <div class="auth-page">
+        <div class="auth-card">
+
+            <!-- =========================================
+            左パネル — ブランドとイラスト（他の画面と共通）
+            ========================================= -->
+            <aside class="auth-brand">
+                <div class="auth-brand__logo">
+                    <img th:src="@{/image/logo.png}" alt="HealthLog" />
+                    <span>HealthLog</span>
+                </div>
+
+                <div class="auth-brand__art">
+                    <svg viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="150" cy="150" r="120" fill="#FFFFFF" opacity="0.12" />
+                        <circle cx="150" cy="150" r="90" fill="#FFFFFF" opacity="0.10" />
+                        <!-- 封筒とチェックマーク: コード送信済みを表現 -->
+                        <rect x="80" y="110" width="140" height="95" rx="10" fill="#FFFFFF" opacity="0.95" />
+                        <path d="M85 118 L150 165 L215 118" stroke="#4657E9" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                        <circle cx="205" cy="95" r="24" fill="#22C55E" />
+                        <path d="M195 95 L202 103 L217 87" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                    </svg>
+                </div>
+
+                <div class="auth-brand__copy">
+                    <h2>安心のセキュリティで、<br />家族の情報を守る。</h2>
+                    <p>確認コードでご本人確認を行い、大切な健康情報を安全に管理します。</p>
+                    <div class="auth-brand__dots">
+                        <span></span><span></span><span></span><span></span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- =========================================
+            右パネル — OTP入力
+            ここから下がバックエンド連携箇所
+            ========================================= -->
+            <section class="auth-form-panel">
+                <div class="auth-form-panel__header">
+                    <!--
+                        purpose: "register" | "forgot-password"（Controllerからmodelへ渡される値）
+                        2つのファイルを用意せず、用途に応じてタイトルと内容を切り替える。
+                    -->
+                    <h1 th:text="${purpose == 'register'} ? 'メールアドレスの確認' : 'パスワードの再設定'">
+                        確認コード
+                    </h1>
+                    <p>
+                        <span th:text="${email}">you@example.com</span> 宛に6桁の確認コードを送信しました。<br />
+                        メールを確認し、下の欄にコードを入力してください。
+                    </p>
+                </div>
+
+                <!-- サーバーエラー表示: コード不一致・期限切れなど -->
+                <div class="banner banner--error" th:if="${error}">
+                    <i data-lucide="alert-circle"></i>
+                    <span th:text="${error}"></span>
+                </div>
+
+                <!-- コード確認フォーム本体 -->
+                <!-- アクション: POST /auth/verify-code / 本文: email, purpose, code（6桁を結合した値） -->
+                <form id="verifyForm" th:action="@{/auth/verify-code}" method="post" class="form" novalidate>
+
+                    <input type="hidden" name="email" th:value="${email}" />
+                    <input type="hidden" name="purpose" th:value="${purpose}" />
+                    <!-- JSが6つのotp-boxの値を結合してここに設定してから送信する -->
+                    <input type="hidden" id="codeCombined" name="code" />
+
+                    <div class="input-group">
+                        <label>確認コード</label>
+                        <div class="otp-row" id="otpRow">
+                            <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" data-otp-index="0" />
+                            <input class="otp-box" type="text" inputmode="numeric" maxlength="1" data-otp-index="1" />
+                            <input class="otp-box" type="text" inputmode="numeric" maxlength="1" data-otp-index="2" />
+                            <input class="otp-box" type="text" inputmode="numeric" maxlength="1" data-otp-index="3" />
+                            <input class="otp-box" type="text" inputmode="numeric" maxlength="1" data-otp-index="4" />
+                            <input class="otp-box" type="text" inputmode="numeric" maxlength="1" data-otp-index="5" />
+                        </div>
+                        <div id="codeError" class="field-error">
+                            <i data-lucide="alert-circle"></i>
+                            <span></span>
+                        </div>
+                    </div>
+
+                    <div class="otp-meta">
+                        <span id="resendTimerText">60秒後に再送できます</span>
+                        <!-- アクション: POST /auth/resend-code / 本文: email, purpose -->
+                        <button type="button" id="resendBtn" class="otp-resend" disabled>
+                            コードを再送する
+                        </button>
+                    </div>
+
+                    <button class="submit-btn" type="submit">
+                        <i data-lucide="shield-check"></i>
+                        確認する
+                    </button>
+                </form>
+
+                <a class="back-link" th:href="${purpose == 'register'} ? @{/auth/register} : @{/auth/login}">
+                    <i data-lucide="arrow-left"></i>
+                    <span th:text="${purpose == 'register'} ? 'メールアドレスを修正する' : 'ログインに戻る'">戻る</span>
+                </a>
+            </section>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>lucide.createIcons();</script>
+    <script th:src="@{/js/common.js}"></script>
+    <script th:src="@{/js/verify-code.js}"></script>
+</body>
+
+</html>
