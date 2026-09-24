@@ -4,4 +4,5 @@ import com.healthlog.demo.dto.auth.VerifyCodeRequest;
 
 public interface VerifyCodeService {
     void verifyCode(VerifyCodeRequest request);
+    void resendCode(String email);
 }

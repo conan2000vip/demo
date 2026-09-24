@@ -15,7 +15,7 @@
             <!-- 左パネル — 他の画面と共通 -->
             <aside class="auth-brand">
                 <div class="auth-brand__logo">
-                    <img th:src="@{/image/logo.png}" alt="HealthLog" />
+                    <img th:src="@{/images/logo.png}" alt="HealthLog" />
                     <span>HealthLog</span>
                 </div>
 
@@ -38,7 +38,8 @@
                         </g>
                         <!-- 小さなプラス記号: 新規追加・登録の象徴 -->
                         <circle cx="215" cy="175" r="18" fill="#22C55E" />
-                        <path d="M215 167 V183 M207 175 H223" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" />
+                        <path d="M215 167 V183 M207 175 H223" stroke="#FFFFFF" stroke-width="4"
+                            stroke-linecap="round" />
                     </svg>
                 </div>
 
@@ -59,58 +60,69 @@
                 </div>
 
                 <!-- サーバーエラー表示: メール重複・パスワード不一致など -->
-                <div class="banner banner--error" th:if="${error}">
+                <div class="banner banner--error" th:if="${errorMessage}">
                     <i data-lucide="alert-circle"></i>
-                    <span th:text="${error}"></span>
+                    <span th:text="${errorMessage}"></span>
                 </div>
-                <!-- 成功メッセージ: 例）登録完了、確認メール送信済みなど -->
+                <!-- 成功メッセージ -->
                 <div class="banner banner--success" th:if="${message}">
                     <span th:text="${message}"></span>
                 </div>
-                <form id="registerForm" th:action="@{/auth/register}" method="post" class="form" novalidate>
 
+                <form id="registerForm" th:action="@{/auth/register}" th:object="${registerRequest}" method="post"
+                    class="form" novalidate>
+
+                    <!-- Email -->
                     <div class="input-group">
                         <label for="email">メールアドレス</label>
                         <div class="input-box">
                             <i data-lucide="mail"></i>
-                            <input id="email" name="email" type="email" th:value="${email}"
-                                   placeholder="you@example.com" autocomplete="email" />
+                            <input id="email" type="email" th:field="*{email}" placeholder="you@example.com"
+                                autocomplete="email" />
                         </div>
-                        <div id="emailError" class="field-error">
+                        <div id="emailError" class="field-error"
+                            th:classappend="${#fields.hasErrors('email')} ? 'is-visible'">
                             <i data-lucide="alert-circle"></i>
-                            <span></span>
+                            <span th:text="${#fields.hasErrors('email')} ? ${#fields.errors('email')[0]} : ''"></span>
                         </div>
                     </div>
 
+                    <!-- Password -->
                     <div class="input-group">
                         <label for="password">パスワード</label>
                         <div class="input-box">
                             <i data-lucide="lock"></i>
-                            <input id="password" name="password" type="password"
-                                   placeholder="8文字以上で入力" autocomplete="new-password" />
+                            <input id="password" type="password" th:field="*{password}" placeholder="8文字以上で入力"
+                                autocomplete="new-password" />
                             <button type="button" class="toggle-password" data-target="password" aria-label="パスワードを表示">
                                 <i data-lucide="eye"></i>
                             </button>
                         </div>
-                        <div id="passwordError" class="field-error">
+                        <div id="passwordError" class="field-error"
+                            th:classappend="${#fields.hasErrors('password')} ? 'is-visible'">
                             <i data-lucide="alert-circle"></i>
-                            <span></span>
+                            <span
+                                th:text="${#fields.hasErrors('password')} ? ${#fields.errors('password')[0]} : ''"></span>
                         </div>
                     </div>
 
+                    <!-- Confirm Password -->
                     <div class="input-group">
                         <label for="confirmPassword">パスワード（確認）</label>
                         <div class="input-box">
                             <i data-lucide="lock"></i>
-                            <input id="confirmPassword" name="confirmPassword" type="password"
-                                   placeholder="もう一度入力してください" autocomplete="new-password" />
-                            <button type="button" class="toggle-password" data-target="confirmPassword" aria-label="パスワードを表示">
+                            <input id="confirmPassword" type="password" th:field="*{confirmPassword}"
+                                placeholder="もう一度入力してください" autocomplete="new-password" />
+                            <button type="button" class="toggle-password" data-target="confirmPassword"
+                                aria-label="パスワードを表示">
                                 <i data-lucide="eye"></i>
                             </button>
                         </div>
-                        <div id="confirmPasswordError" class="field-error">
+                        <div id="confirmPasswordError" class="field-error"
+                            th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-visible'">
                             <i data-lucide="alert-circle"></i>
-                            <span></span>
+                            <span
+                                th:text="${#fields.hasErrors('confirmPassword')} ? ${#fields.errors('confirmPassword')[0]} : ''"></span>
                         </div>
                     </div>
 
@@ -124,10 +136,10 @@
 
                 <div class="social-row">
                     <a th:href="@{/oauth2/authorization/google}" class="social-btn">
-                        <i data-lucide="chrome"></i> Google
+                        <i data-lucide="globe"></i> Google
                     </a>
                     <a th:href="@{/oauth2/authorization/facebook}" class="social-btn">
-                        <i data-lucide="facebook"></i> Facebook
+                        <i data-lucide="globe"></i> Facebook
                     </a>
                 </div>
 
@@ -142,7 +154,6 @@
     </div>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script>lucide.createIcons();</script>
     <script th:src="@{/js/common.js}"></script>
     <script th:src="@{/js/register.js}"></script>
 </body>

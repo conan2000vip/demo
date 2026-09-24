@@ -43,7 +43,7 @@ public class RegisterServiceImpl implements RegisterService {
 
         // 2. メールアドレスが既に登録されているか確認
         if (userRepository.existsByEmail(email)) {
-            throw new BusinessException(HttpStatus.CONFLICT, "このメールアドレスは既に登録されています");
+            throw new BusinessException(HttpStatus.CONFLICT, "登録処理を完了できませんでした。入力内容をご確認ください。");
         }
 
         // 3. 新しいUserを作成 (emailVerifiedAtはまだ設定されていない)

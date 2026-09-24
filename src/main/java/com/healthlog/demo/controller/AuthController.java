@@ -1,5 +1,9 @@
 package com.healthlog.demo.controller;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -7,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.healthlog.demo.dto.auth.LoginRequest;
@@ -59,6 +64,10 @@ public class AuthController {
             return "redirect:/dashboard";
         } catch (BusinessException e) {
             model.addAttribute("errorMessage", e.getMessage());
+            if (e.getStatus() == HttpStatus.FORBIDDEN) {
+                model.addAttribute("emailNotVerified", true);
+                model.addAttribute("email", loginRequest.getEmail());
+            }
             return "auth/login";
         }
     }
@@ -171,10 +180,7 @@ public class AuthController {
     @PostMapping("/reset-password")
     public String handleResetPassword(
             @Valid @ModelAttribute("passwordResetConfirmRequest") PasswordResetConfirmRequest request,
-            BindingResult bindingResult,
-            HttpSession session,
-            Model model,
-            RedirectAttributes redirectAttributes) {
+            BindingResult bindingResult, HttpSession session, Model model, RedirectAttributes redirectAttributes) {
 
         String resetEmail = (String) session.getAttribute("RESET_EMAIL");
         if (resetEmail == null) {
@@ -187,15 +193,33 @@ public class AuthController {
 
         try {
             passwordResetService.resetPassword(resetEmail, request);
-
             session.removeAttribute("RESET_EMAIL");
-
             redirectAttributes.addFlashAttribute("message", "パスワードの再設定が完了しました。新しいパスワードでログインしてください。");
             return "redirect:/auth/login";
-
         } catch (BusinessException e) {
             model.addAttribute("errorMessage", e.getMessage());
             return "auth/reset-password";
         }
+    }
+
+    // 8. POST:ログアウト処理
+    @PostMapping("/logout")
+    public String logout(HttpServletRequest request, HttpServletResponse response) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null) {
+            new SecurityContextLogoutHandler().logout(request, response, auth);
+        }
+        return "redirect:/auth/login";
+    }
+
+    @PostMapping("/resend-code")
+    public String resendCode(@RequestParam String email, RedirectAttributes redirectAttributes) {
+        try {
+            verifyCodeService.resendCode(email); 
+            redirectAttributes.addFlashAttribute("message", "確認コードを再送信しました。");
+        } catch (BusinessException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/auth/verify-code";
     }
 }

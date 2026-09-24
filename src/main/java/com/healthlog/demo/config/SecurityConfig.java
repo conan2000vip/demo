@@ -20,27 +20,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable()) // カスタムフォームを使用するためCSRFを一時的に無効化
+            .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                // 1. 認証不要なURLパターンを指定
                 .requestMatchers("/auth/**", "/css/**", "/js/**", "/images/**").permitAll()
-                // 2. それ以外のリクエストは認証が必要
                 .anyRequest().authenticated()
             )
-            .formLogin(form -> form
-                // 3. ログインページのURLとログイン処理のURLを指定
-                .loginPage("/auth/login")
-                .loginProcessingUrl("/auth/login")
-                .defaultSuccessUrl("/dashboard", true)
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutUrl("/auth/logout")
-                .logoutSuccessUrl("/auth/login?logout")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-                .permitAll()
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) ->
+                    response.sendRedirect("/auth/login"))
             );
+        // formLogin と logout は削除 — AuthController が全て手動で処理するため
 
         return http.build();
     }
