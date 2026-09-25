@@ -1,12 +1,12 @@
-// common.js
+// 共通画面処理（common.js）
 document.addEventListener('DOMContentLoaded', () => {
 
-    // Lucide Icons Render
+    // Lucideアイコンを画面に描画する。
     if (window.lucide) {
         lucide.createIcons();
     }
 
-    // Toggle Show/Hide Password
+    // パスワードの表示と非表示を切り替える。
     document.querySelectorAll('.toggle-password').forEach((btn) => {
         btn.addEventListener('click', () => {
             let target;

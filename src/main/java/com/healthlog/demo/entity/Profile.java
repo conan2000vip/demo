@@ -1,8 +1,10 @@
 package com.healthlog.demo.entity;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -27,7 +29,8 @@ import lombok.Setter;
 @Entity
 @Table(name = "profiles", indexes = { @Index(name = "idx_profiles_user_id", columnList = "user_id"),
 		@Index(name = "idx_profiles_user_primary", columnList = "user_id, is_primary") })
-public class Profile {
+public class Profile implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -80,25 +83,16 @@ public class Profile {
     @Column(name = "daily_sleep_goal", precision = 3, scale = 1)
     private BigDecimal dailySleepGoal;
 
-    // // ===== 1対多の関連: 1つのProfileが複数種類のログを持つ =====
-    // @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
-    // private List<Memo> memoLogs = new ArrayList<>();
-
-    // @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
-    // private List<Sleep> sleepLogs = new ArrayList<>();
-
-    // @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
-    // private List<Step> stepLogs = new ArrayList<>();
-
-    // @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
-    // private List<Water> waterLogs = new ArrayList<>();
-
-    // @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
-    // private List<Weight> weightLogs = new ArrayList<>();
-
     public Profile(User user, String name, String relationship) {
         this.user = user;
         this.name = name;
         this.relationship = relationship;
+    }
+
+    public int getAge() {
+        if (this.birthDate == null) {
+            return 0;
+        }
+        return Period.between(this.birthDate, LocalDate.now()).getYears();
     }
 }

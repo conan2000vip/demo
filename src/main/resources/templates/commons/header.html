@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+</head>
+
+<body>
+    <header th:fragment="header(activePage)" class="app-header">
+        <div class="app-header__inner">
+            <!-- Logo: Khi chưa có Profile thì nhấp vào Logo không bị nhảy trang -->
+            <a th:href="${currentProfile != null} ? @{/profile/{id}/home(id=${currentProfile.id})} : 'javascript:void(0)'"
+                class="app-header__brand" th:style="${currentProfile == null} ? 'cursor: default;' : ''">
+                <span class="app-header__logo-icon">
+                    <img th:src="@{/image/logo.png}" alt="HealthLog Logo" class="app-header__logo-img" />
+                </span>
+                <span class="app-header__brand-name">HealthLog</span>
+            </a>
+
+            <button type="button" class="app-header__nav-toggle" id="menuToggle" aria-label="メニュー">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+
+            <!-- Navigation Bar -->
+            <nav class="app-header__nav">
+                <!-- Khi ĐÃ CÓ Profile: Các menu bấm bình thường -->
+                <th:block th:if="${currentProfile != null}">
+                    <a th:href="@{/profile/{id}/home(id=${currentProfile.id})}" class="app-header__nav-item"
+                        th:classappend="${activePage == 'home'} ? ' is-active' : ''">
+                        <img th:src="@{/image/home.png}" alt="" class="app-header__nav-icon" />
+                        <span>Home</span>
+                    </a>
+                    <a th:href="@{/profile/{id}/weight(id=${currentProfile.id})}" class="app-header__nav-item"
+                        th:classappend="${activePage == 'weight'} ? ' is-active' : ''">
+                        <img th:src="@{/image/scales.png}" alt="" class="app-header__nav-icon" />
+                        <span>体重</span>
+                    </a>
+                    <a th:href="@{/profile/{id}/sleep(id=${currentProfile.id})}" class="app-header__nav-item"
+                        th:classappend="${activePage == 'sleep'} ? ' is-active' : ''">
+                        <img th:src="@{/image/sleep.png}" alt="" class="app-header__nav-icon" />
+                        <span>睡眠</span>
+                    </a>
+                    <a th:href="@{/profile/{id}/water(id=${currentProfile.id})}" class="app-header__nav-item"
+                        th:classappend="${activePage == 'water'} ? ' is-active' : ''">
+                        <img th:src="@{/image/water.png}" alt="" class="app-header__nav-icon" />
+                        <span>水分</span>
+                    </a>
+                    <a th:href="@{/profile/{id}/step(id=${currentProfile.id})}" class="app-header__nav-item"
+                        th:classappend="${activePage == 'step'} ? ' is-active' : ''">
+                        <img th:src="@{/image/footstep.png}" alt="" class="app-header__nav-icon" />
+                        <span>歩数</span>
+                    </a>
+                    <a th:href="@{/profile/{id}/memo(id=${currentProfile.id})}" class="app-header__nav-item"
+                        th:classappend="${activePage == 'memo'} ? ' is-active' : ''">
+                        <img th:src="@{/image/notes.png}" alt="" class="app-header__nav-icon" />
+                        <span>健康メモ</span>
+                    </a>
+                    <a th:href="@{/profile/profile-manage}" class="app-header__nav-item"
+                        th:classappend="${activePage == 'profile'} ? ' is-active' : ''">
+                        <img th:src="@{/image/profile.png}" alt="" class="app-header__nav-icon" />
+                        <span>プロファイル</span>
+                    </a>
+                </th:block>
+
+                <!-- Khi CHƯA CÓ Profile (Tạo Profile đầu tiên): Vô hiệu hóa toàn bộ Menu -->
+                <th:block th:if="${currentProfile == null}">
+                    <span class="app-header__nav-item" style="opacity: 0.5; cursor: not-allowed;">
+                        <img th:src="@{/image/home.png}" alt="" class="app-header__nav-icon" />
+                        <span>Home</span>
+                    </span>
+                    <span class="app-header__nav-item" style="opacity: 0.5; cursor: not-allowed;">
+                        <img th:src="@{/image/scales.png}" alt="" class="app-header__nav-icon" />
+                        <span>体重</span>
+                    </span>
+                    <span class="app-header__nav-item" style="opacity: 0.5; cursor: not-allowed;">
+                        <img th:src="@{/image/sleep.png}" alt="" class="app-header__nav-icon" />
+                        <span>睡眠</span>
+                    </span>
+                    <span class="app-header__nav-item" style="opacity: 0.5; cursor: not-allowed;">
+                        <img th:src="@{/image/water.png}" alt="" class="app-header__nav-icon" />
+                        <span>水分</span>
+                    </span>
+                    <span class="app-header__nav-item" style="opacity: 0.5; cursor: not-allowed;">
+                        <img th:src="@{/image/footstep.png}" alt="" class="app-header__nav-icon" />
+                        <span>歩数</span>
+                    </span>
+                    <span class="app-header__nav-item" style="opacity: 0.5; cursor: not-allowed;">
+                        <img th:src="@{/image/notes.png}" alt="" class="app-header__nav-icon" />
+                        <span>健康メモ</span>
+                    </span>
+                    <!-- Nút Profile khóa không cho click chuyển trang -->
+                    <span class="app-header__nav-item is-active" style="cursor: not-allowed;">
+                        <img th:src="@{/image/profile.png}" alt="" class="app-header__nav-icon" />
+                        <span>プロファイル</span>
+                    </span>
+                </th:block>
+            </nav>
+
+            <!-- User Menu Right -->
+            <div class="app-header__right">
+                <div class="app-header__user-wrap">
+                    <button type="button" class="app-header__user" id="userMenuToggle" aria-haspopup="true"
+                        aria-expanded="false" th:style="${currentProfile == null} ? 'pointer-events: none;' : ''">
+                        <img class="app-header__avatar"
+                            th:src="@{/image/avatar/{name}.png(name=${currentProfile?.avatar ?: 'avatar_01'})}"
+                            alt="Avatar" />
+                        <span class="app-header__user-info">
+                            <span class="app-header__user-name" th:text="${currentProfile?.name ?: 'ゲスト'}">ゲスト</span>
+                            <span class="app-header__user-badge"
+                                th:text="${currentProfile != null ? (currentProfile.isPrimary ? '本人' : currentProfile.relationship) : 'ゲスト'}">ゲスト</span>
+                        </span>
+                        <img th:src="@{/image/chevron-down.png}" alt="" class="app-header__chevron" />
+                    </button>
+
+                    <div class="app-header__dropdown" id="userMenuDropdown" th:if="${currentProfile != null}">
+                        <ul class="app-header__profile-list" th:if="${profileList != null and !profileList.isEmpty()}">
+                            <li th:each="p : ${profileList}">
+                                <form th:action="@{/profile/switch/{id}(id=${p.id})}" method="post">
+                                    <button type="submit" class="app-header__profile-item"
+                                        th:classappend="${p.id == currentProfile.id} ? 'is-current'">
+                                        <img class="app-header__avatar"
+                                            th:src="@{/image/avatar/{name}.png(name=${p.avatar ?: 'avatar_01'})}"
+                                            alt="Avatar" />
+                                        <span class="app-header__profile-name-wrap">
+                                            <span class="app-header__profile-name" th:text="${p.name}">山田 太郎</span>
+                                            <span class="app-header__profile-relation"
+                                                th:text="${p.isPrimary} ? '本人' : ${p.relationship}">本人</span>
+                                        </span>
+                                        <span class="app-header__profile-check">
+                                            <img th:src="@{/image/check.png}" alt=""
+                                                th:if="${p.id == currentProfile.id}" />
+                                        </span>
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+
+                        <div class="app-header__dropdown-divider"
+                            th:if="${profileList != null and !profileList.isEmpty()}"></div>
+                        <a th:href="@{/profile/profile-manage}" class="app-header__manage-link">
+                            <img th:src="@{/image/profile.png}" alt="" class="app-header__nav-icon" />
+                            <span>プロファイル管理</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="app-header__divider"></div>
+                <form th:action="@{/auth/logout}" method="post" class="app-header__logout-form">
+                    <button type="submit" class="app-header__logout">
+                        <img th:src="@{/image/logout.png}" alt="" class="app-header__nav-icon" />
+                        <span>ログアウト</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </header>
+
+    <script th:src="@{/js/common.js}"></script>
+</body>
+
+</html>

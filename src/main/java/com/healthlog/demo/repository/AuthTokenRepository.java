@@ -19,10 +19,10 @@ public interface AuthTokenRepository extends JpaRepository<AuthToken, Long> {
 
 	boolean existsByToken(String token);
 
-	// idx_auth_tokens_token (unique) — トークン単体での照合
+	// idx_auth_tokens_token（一意）— トークン単体での照合
 	Optional<AuthToken> findByToken(String token);
 
-	// verifyEmail() / confirmPasswordReset() — トークン + 種別での照合
+	// メール認証・パスワード再設定処理で、トークンと種別を照合する。
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	Optional<AuthToken> findByTokenAndTokenType(String token, TokenType tokenType);
 

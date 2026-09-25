@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // resend-code
+        // 確認コード再送APIを呼び出す。
         fetch("/auth/resend-code", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },

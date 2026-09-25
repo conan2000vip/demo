@@ -14,16 +14,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.healthlog.demo.constant.SessionConstants;
 import com.healthlog.demo.dto.auth.LoginRequest;
 import com.healthlog.demo.dto.auth.PasswordResetConfirmRequest;
 import com.healthlog.demo.dto.auth.PasswordResetRequest;
 import com.healthlog.demo.dto.auth.RegisterRequest;
 import com.healthlog.demo.dto.auth.VerifyCodeRequest;
+import com.healthlog.demo.entity.User;
 import com.healthlog.demo.exception.BusinessException;
 import com.healthlog.demo.service.auth.LoginService;
 import com.healthlog.demo.service.auth.PasswordResetService;
 import com.healthlog.demo.service.auth.RegisterService;
 import com.healthlog.demo.service.auth.VerifyCodeService;
+import com.healthlog.demo.service.profile.ProfileService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -40,6 +43,7 @@ public class AuthController {
     private final RegisterService registerService;
     private final VerifyCodeService verifyCodeService;
     private final PasswordResetService passwordResetService;
+    private final ProfileService profileService; // Inject ProfileService để kết nối luồng Profile
 
     // 1. ログイン画面を表示し、ユーザーがメールアドレスとパスワードを入力できるフォームを準備する。
     @GetMapping("/login")
@@ -48,22 +52,30 @@ public class AuthController {
         return "auth/login";
     }
 
-    // 2. ログイン入力を検証し、問題がなければ認証サービスでユーザーを認証してダッシュボードへ遷移する。
+    // 2. ログイン入力を検証し、成功時はプロファイル存在チェックを行って画面を遷移する。
     @PostMapping("/login")
     public String login(
             @Valid @ModelAttribute("loginRequest") LoginRequest loginRequest, BindingResult bindingResult,
-            HttpServletRequest request, HttpServletResponse response, Model model) {
+            HttpServletRequest request, HttpServletResponse response, HttpSession session, Model model) {
 
         if (bindingResult.hasErrors()) {
             return "auth/login";
         }
 
         try {
-            // ログインサービスでパスワードとメール認証状態を確認し、認証成功後はダッシュボードへ移動する。
-            loginService.login(loginRequest);
-            return "redirect:/dashboard";
+            // ログイン認証を実行してUserオブジェクトを取得
+            User user = loginService.login(loginRequest);
+            session.setAttribute(SessionConstants.LOGIN_USER, user);
+
+            // プロファイルが存在しない場合は新規作成画面へ、存在する場合は選択画面へリダイレクト
+            if (!profileService.hasAnyProfile(user.getId())) {
+                return "redirect:/profile/new";
+            }
+
+            profileService.resolveCurrentProfile(session, user.getId());
+            return "redirect:/profile/select";
+
         } catch (BusinessException e) {
-            // 認証に失敗した場合はエラーメッセージを表示し、未認証ユーザーにはメールアドレスを再確認させる。
             model.addAttribute("errorMessage", e.getMessage());
             if (e.getStatus() == HttpStatus.FORBIDDEN) {
                 model.addAttribute("emailNotVerified", true);
@@ -90,7 +102,7 @@ public class AuthController {
         }
         try {
             registerService.register(request);
-            session.removeAttribute("IS_RESET_FLOW");
+            session.removeAttribute(SessionConstants.IS_RESET_FLOW);
             redirectAttributes.addFlashAttribute("email", request.getEmail());
             redirectAttributes.addFlashAttribute("message", "仮登録が完了しました。メールに送信された確認コードをご入力ください。");
             return "redirect:/auth/verify-code";
@@ -119,7 +131,7 @@ public class AuthController {
 
         try {
             passwordResetService.sendPasswordResetEmail(request.getEmail());
-            session.setAttribute("IS_RESET_FLOW", true);
+            session.setAttribute(SessionConstants.IS_RESET_FLOW, true);
             redirectAttributes.addFlashAttribute("email", request.getEmail());
             redirectAttributes.addFlashAttribute("message", "パスワード再設定用の確認コードを送信しました。");
             return "redirect:/auth/verify-code";
@@ -143,7 +155,7 @@ public class AuthController {
 
         VerifyCodeRequest request = new VerifyCodeRequest();
         request.setEmail(email);
-        Boolean isResetFlow = (Boolean) session.getAttribute("IS_RESET_FLOW");
+        Boolean isResetFlow = (Boolean) session.getAttribute(SessionConstants.IS_RESET_FLOW);
         model.addAttribute("verifyCodeRequest", request);
         model.addAttribute("email", email);
         model.addAttribute("maskedEmail", maskEmail(email));
@@ -156,29 +168,29 @@ public class AuthController {
     public String handleVerifyCode(
             @Valid @ModelAttribute("verifyCodeRequest") VerifyCodeRequest request,
             BindingResult bindingResult, HttpSession session, Model model, RedirectAttributes redirectAttributes) {
-        Boolean isResetFlow = (Boolean) session.getAttribute("IS_RESET_FLOW");
+        Boolean isResetFlow = (Boolean) session.getAttribute(SessionConstants.IS_RESET_FLOW);
         if (bindingResult.hasErrors()) {
             setupVerifyCodeModel(model, request.getEmail(), isResetFlow);
             return "auth/verify-code";
         }
         try {
             verifyCodeService.verifyCode(request);
-            // パスワード再設定フローの場合 -> 新しいパスワード入力画面へ
+            // パスワード再設定の場合は、新しいパスワード入力画面へ遷移する。
             if (Boolean.TRUE.equals(isResetFlow)) {
-                session.removeAttribute("IS_RESET_FLOW");
-                session.setAttribute("RESET_EMAIL", request.getEmail());
+                session.removeAttribute(SessionConstants.IS_RESET_FLOW);
+                session.setAttribute(SessionConstants.RESET_EMAIL, request.getEmail());
                 return "redirect:/auth/reset-password";
             }
-            // 新規会員登録フローの場合 -> ログイン画面へ
+            // 新規会員登録の場合は、ログイン画面へ遷移する。
             redirectAttributes.addFlashAttribute("message", "メールアドレスの認証が完了しました。ログインしてください。");
             return "redirect:/auth/login";
         } catch (BusinessException e) {
-            // コード間違い等のエラー時にも header 情報（isResetFlow, maskedEmail）を再設定する
             model.addAttribute("errorMessage", e.getMessage());
             setupVerifyCodeModel(model, request.getEmail(), isResetFlow);
             return "auth/verify-code";
         }
     }
+
     private void setupVerifyCodeModel(Model model, String email, Boolean isResetFlow) {
         model.addAttribute("email", email);
         model.addAttribute("maskedEmail", maskEmail(email));
@@ -188,13 +200,13 @@ public class AuthController {
     // 9. セッションに再設定対象のメールアドレスがある場合だけ、パスワード変更画面を表示する。
     @GetMapping("/reset-password")
     public String showResetPasswordForm(HttpSession session, Model model) {
-        String resetEmail = (String) session.getAttribute("RESET_EMAIL");
+        String resetEmail = (String) session.getAttribute(SessionConstants.RESET_EMAIL);
 
         if (resetEmail == null || resetEmail.isBlank()) {
             return "redirect:/auth/forgot-password";
         }
 
-        model.addAttribute("email", resetEmail); 
+        model.addAttribute("email", resetEmail);
         model.addAttribute("passwordResetConfirmRequest", new PasswordResetConfirmRequest());
         return "auth/reset-password";
     }
@@ -207,7 +219,7 @@ public class AuthController {
             @RequestParam(value = "email", required = false) String paramEmail,
             HttpSession session, Model model, RedirectAttributes redirectAttributes) {
 
-        String resetEmail = (String) session.getAttribute("RESET_EMAIL");
+        String resetEmail = (String) session.getAttribute(SessionConstants.RESET_EMAIL);
         if (resetEmail == null || resetEmail.isBlank()) {
             resetEmail = paramEmail;
         }
@@ -222,7 +234,7 @@ public class AuthController {
 
         try {
             passwordResetService.resetPassword(resetEmail, request);
-            session.removeAttribute("RESET_EMAIL"); 
+            session.removeAttribute(SessionConstants.RESET_EMAIL);
             redirectAttributes.addFlashAttribute("message", "パスワードの再設定が完了しました。新しいパスワードでログインしてください。");
             return "redirect:/auth/login";
         } catch (BusinessException e) {
@@ -237,7 +249,6 @@ public class AuthController {
     public String logout(HttpServletRequest request, HttpServletResponse response) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null) {
-            // Spring Securityのログアウト処理で認証情報とセッションを終了する。
             new SecurityContextLogoutHandler().logout(request, response, auth);
         }
         return "redirect:/auth/login";

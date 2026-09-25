@@ -11,13 +11,10 @@
 <body>
     <div class="auth-page">
         <div class="auth-card">
-            <!-- =========================================
-            左パネル — ブランドとイラスト
-            （表示専用のためバックエンド連携は不要）
-            ========================================= -->
+            <!-- 左パネル：ブランドとイラストを表示する（表示専用）。 -->
             <aside class="auth-brand">
                 <div class="auth-brand__logo">
-                    <img th:src="@{/images/logo.png}" alt="HealthLog" />
+                    <img th:src="@{/image/logo.png}" alt="HealthLog" />
                     <span>HealthLog</span>
                 </div>
 
@@ -58,10 +55,7 @@
                 </div>
             </aside>
 
-            <!-- =========================================
-            右パネル — ログインフォーム
-            ここから下がバックエンド連携箇所
-            ========================================= -->
+            <!-- 右パネル：ログインフォームとバックエンド連携部分。 -->
             <section class="auth-form-panel">
                 <div class="auth-form-panel__header">
                     <h1>ログイン</h1>
@@ -70,7 +64,7 @@
                     </p>
                 </div>
 
-                <!-- サーバーエラー表示: Controller から model.addAttribute("errorMessage", "...") -->
+                <!-- Controllerがmodelへ設定したサーバーエラーメッセージを表示する -->
                 <div class="banner banner--error" th:if="${errorMessage}">
                     <i data-lucide="alert-circle"></i>
                     <span th:text="${errorMessage}"></span>
@@ -82,7 +76,7 @@
                 </div>
 
                 <!-- メール未認証時のみ表示：確認メール再送 -->
-                <!-- アクション: POST /auth/resend-verification / 本文: email -->
+                <!-- 未認証ユーザーのメールアドレスへ確認コードを再送するフォーム -->
                 <form th:if="${emailNotVerified}" th:action="@{/auth/resend-code}" method="post" class="resend-form">
                     <input type="hidden" name="email" th:value="${email}" />
                     <button type="submit" class="submit-btn resend-btn">
@@ -92,7 +86,7 @@
                 </form>
 
                 <!-- ログインフォーム本体 -->
-                <!-- アクション: POST /auth/login / 本文: email, password, remember -->
+                <!-- メールアドレス、パスワード、ログイン状態を送信するログインフォーム -->
                 <form id="loginForm" th:action="@{/auth/login}" method="post" class="form" novalidate>
                     <div class="input-group">
                         <label for="email">メールアドレス</label>
@@ -141,12 +135,8 @@
 
                 <!-- ソーシャルログイン（OAuth連携先のURLに置き換えてください） -->
                 <div class="social-row">
-                    <a th:href="@{/oauth2/authorization/google}" class="social-btn">
-                        <i data-lucide="chrome"></i> Google
-                    </a>
-                    <a th:href="@{/oauth2/authorization/facebook}" class="social-btn">
-                        <i data-lucide="facebook"></i> Facebook
-                    </a>
+                    <a th:href="@{/oauth2/authorization/google}" class="social-btn">Google</a>
+                    <a th:href="@{/oauth2/authorization/facebook}" class="social-btn">Facebook</a>
                 </div>
 
                 <div class="auth-footer">

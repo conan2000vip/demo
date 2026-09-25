@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プロファイル管理 - HealthLog</title>
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+	<link rel="stylesheet" th:href="@{/css/profile.css}">
+</head>
+
+<body>
+    <!-- Header Common Fragment -->
+    <div th:replace="~{commons/header :: header('profile')}"></div>
+
+    <main class="profile-manage">
+        <!-- Thông báo Alert -->
+        <div th:if="${message}" class="alert alert--success">
+            <span th:text="${message}"></span>
+            <button type="button" class="alert__close" onclick="this.parentElement.remove()">&times;</button>
+        </div>
+        <div th:if="${error}" class="alert alert--error">
+            <span th:text="${error}"></span>
+            <button type="button" class="alert__close" onclick="this.parentElement.remove()">&times;</button>
+        </div>
+
+        <!-- Top Header -->
+        <div class="profile-manage__top">
+            <div>
+                <h1 class="profile-manage__title">プロファイル管理</h1>
+                <p class="profile-manage__subtitle">ご家族のプロファイル作成・編集およびデータ共有設定を行えます。</p>
+            </div>
+            <a th:href="@{/profile/new}" class="btn btn--primary">
+                + 新規プロファイル追加
+            </a>
+        </div>
+
+        <!-- Danh sách Profile Card -->
+        <div class="profile-manage__list">
+            <div th:each="p : ${profiles}" class="profile-manage__card"
+                th:classappend="${currentProfile != null and p.id == currentProfile.id} ? 'is-current'">
+
+                <!-- Avatar -->
+                <img th:src="@{/image/avatar/{name}.png(name=${p.avatar ?: 'avatar_01'})}" alt="Avatar"
+                    class="profile-manage__avatar" />
+
+                <!-- Thông tin Profile -->
+                <div class="profile-manage__info">
+                    <div class="profile-manage__name-row">
+                        <span class="profile-manage__name" th:text="${p.name}">山田 太郎</span>
+                        <span class="badge badge--primary" th:if="${p.isPrimary}">本人</span>
+                        <span class="badge badge--relation" th:unless="${p.isPrimary}"
+                            th:text="${p.relationship}">父</span>
+                        <span class="badge badge--selected"
+                            th:if="${currentProfile != null and p.id == currentProfile.id}">選択中</span>
+                    </div>
+
+                    <div class="profile-manage__meta">
+                        <span th:text="${#temporals.format(p.birthDate, 'yyyy-MM-dd')}">1980-01-01</span>
+                        <span>（身長: <th:block th:text="${p.height}">170</th:block> cm）</span>
+                    </div>
+                </div>
+
+                <!-- Thao tác Actions -->
+                <div class="profile-manage__actions">
+                    <!-- Nút Mở Modal Chia sẻ Dữ liệu -->
+                    <button type="button" class="btn btn--outline btn--sm"
+                        th:onclick="'openShareModal(' + ${p.id} + ')'">
+                        データ共有設定
+                    </button>
+
+                    <!-- Nút Sửa Profile (Bút chì) -->
+                    <a th:if="${currentProfile != null and (currentProfile.isPrimary or currentProfile.id == p.id)}"
+                        th:href="@{/profile/{id}/edit(id=${p.id})}" class="icon-btn" title="編集">
+                        <img th:src="@{/image/pencil.png}" alt="Edit" class="icon-btn-img" />
+                    </a>
+
+                    <!-- Nút Xóa Profile (Thùng rác) -->
+                    <form th:if="${!p.isPrimary}" th:action="@{/profile/delete}" method="post"
+                        onsubmit="return confirm('このプロファイル情報を削除してもよろしいですか？');" style="margin: 0;">
+                        <input type="hidden" name="profileId" th:value="${p.id}" />
+                        <button type="submit" class="icon-btn icon-btn--danger" title="削除">
+                            <img th:src="@{/image/trash.png}" alt="Delete" class="icon-btn-img" />
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Ma trận Phân quyền Chia sẻ Dữ liệu -->
+    <div id="shareSettingsModal" class="modal-overlay">
+        <div class="modal" style="max-width: 680px;">
+            <div class="modal__header">
+                <h2>データ共有設定</h2>
+                <button type="button" class="modal__close" onclick="closeShareModal()">&times;</button>
+            </div>
+
+            <div class="modal__body">
+                <p class="field-hint" style="margin-bottom: 16px;">
+                    家族メンバーに対する【体重・睡眠・水分・歩数・健康メモ】の閲覧・編集権限を設定します。
+                </p>
+
+                <div class="data-table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>メンバー</th>
+                                <th>体重</th>
+                                <th>睡眠</th>
+                                <th>水分</th>
+                                <th>歩数</th>
+                                <th>メモ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="shareMatrixBody">
+                            <!-- Render bằng JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="modal__footer">
+                <button type="button" class="btn btn--ghost" onclick="closeShareModal()">キャンセル</button>
+                <button type="button" class="btn btn--primary" id="btnSaveShareSettings" onclick="saveShareSettings()">
+                    保存する
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/common.js}"></script>
+    <script th:src="@{/js/profile-share.js}"></script>
+</body>
+
+</html>

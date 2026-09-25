@@ -1,4 +1,4 @@
-// register.js - Realtime & Submit Validation
+// register.js：入力中と送信時の登録フォーム検証
 document.addEventListener('DOMContentLoaded', () => {
 
     const form = document.getElementById('registerForm');
@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const passwordError = document.getElementById('passwordError');
     const confirmPasswordError = document.getElementById('confirmPasswordError');
 
-    // --- 1. Email Check ---
+    // --- 1. メールアドレスの検証 ---
     function validateEmail() {
         if (!emailInput || !emailError) return true;
         const val = emailInput.value.trim();
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return true;
     }
 
-    // --- 2. Password Check (Khớp 100% quy tắc @ValidPassword Java) ---
+    // --- 2. Javaの@ValidPasswordと同じルールでパスワードを検証 ---
     function validatePassword() {
         if (!passwordInput || !passwordError) return true;
         const val = passwordInput.value;
@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return true;
     }
 
-    // --- 3. Confirm Password Check ---
+    // --- 3. 確認用パスワードの検証 ---
     function validateConfirmPassword() {
         if (!confirmPasswordInput || !confirmPasswordError) return true;
         const val = confirmPasswordInput.value;
@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return true;
     }
 
-    // --- Events Realtime ---
+    // --- 入力中のリアルタイム検証イベント ---
     if (emailInput) emailInput.addEventListener('input', validateEmail);
     if (passwordInput) {
         passwordInput.addEventListener('input', () => {
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (confirmPasswordInput) confirmPasswordInput.addEventListener('input', validateConfirmPassword);
 
-    // --- Form Submit Event ---
+    // --- フォーム送信時の検証イベント ---
     if (form) {
         form.addEventListener('submit', (e) => {
             const vEmail = validateEmail();
@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const vConfirm = validateConfirmPassword();
 
             if (!vEmail || !vPass || !vConfirm) {
-                e.preventDefault(); // Chặn submit lên server nếu UI báo lỗi
+                e.preventDefault(); // 画面上にエラーがある場合はサーバーへの送信を中止する。
             }
         });
     }

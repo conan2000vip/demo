@@ -67,7 +67,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
     @Override
     @Transactional
-    // ★ ĐÃ SỬA: Thay resetToken bằng email
+    // 再設定トークンの代わりにメールアドレスを使用してパスワードを更新する。
     public void resetPassword(String email, PasswordResetConfirmRequest request) {
         if (!StringUtils.hasText(email)) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "有効なリクエストではありません。最初からやり直してください。");

@@ -46,7 +46,7 @@ public class RegisterServiceImpl implements RegisterService {
             throw new BusinessException(HttpStatus.CONFLICT, "登録処理を完了できませんでした。入力内容をご確認ください。");
         }
 
-        // 3. 新しいUserを作成 (emailVerifiedAtはまだ設定されていない)
+        // 3. メール認証日時を設定せず、新しいユーザーを作成する。
         User user = new User();
         user.setEmail(email);
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
@@ -62,7 +62,7 @@ public class RegisterServiceImpl implements RegisterService {
         );
         authTokenRepository.save(verifyToken);
 
-        // 5. 既存のメール送信関数を呼び出す
+        // 5. 既存のメール送信処理を呼び出す。
         emailService.sendRegistrationOtpEmail(user.getEmail(), otpCode);
         log.info("[REGISTER] Sent registration OTP to {}", email);
     }

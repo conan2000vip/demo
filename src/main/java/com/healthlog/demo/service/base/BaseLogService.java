@@ -25,10 +25,10 @@ public abstract class BaseLogService<T extends BaseLog, DTO> {
         this.profileAccessValidation = profileAccessValidation;
     }
 
-    // 抽象メソッド: 各サービスでEntityからDTOへの変換を実装する
+    // 抽象メソッド：各サービスでエンティティからDTOへの変換を実装する。
     protected abstract DTO mapToDto(T entity);
 
-    // === 1. Profileの認証・認可（IDOR対策） ===
+    // === 1. プロファイルの認証・認可（IDOR対策） ===
     protected Profile validateAndGetProfile(Long profileId, Long currentUserId) {
         return profileAccessValidation.validateAndGetProfile(profileId, currentUserId);
     }
@@ -89,7 +89,7 @@ public abstract class BaseLogService<T extends BaseLog, DTO> {
     @Transactional
     public void deleteLog(Long id, Long profileId, Long currentUserId) {
         validateAndGetProfile(profileId, currentUserId);
-        findEntityByIdAndProfile(id, profileId); // 存在とProfileの一致を確認
+        findEntityByIdAndProfile(id, profileId); // レコードの存在とプロファイルの一致を確認する。
         repository.deleteByIdAndProfile_Id(id, profileId);
     }
 }

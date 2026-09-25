@@ -1,5 +1,6 @@
 package com.healthlog.demo.entity;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +28,8 @@ import lombok.Setter;
 @Table(name = "users", indexes = {
 		@Index(name = "idx_users_email", columnList = "email", unique = true),
 })
-public class User {
+public class User implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

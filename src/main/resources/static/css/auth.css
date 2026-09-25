@@ -1,33 +1,21 @@
-/* =====================================================
-    HealthLog — 認証画面（ログイン）のスタイル
-    サンプル画像の構成に合わせた薄いグレーの背景と角丸の白いカード。
-    左側にイラストを含む青色パネル、右側にフォームを配置。
-   ===================================================== */
+/* HealthLog認証画面のスタイル：左側にイラスト、右側にフォームを配置する。 */
 
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap');
 
 :root {
     --color-primary: #4657E9;
-    /* メインの青色 - 左パネルとCTAボタン */
     --color-primary-dark: #3646D6;
-    /* ホバー時 */
     --color-primary-soft: #EEF0FE;
-    /* 補助的な薄い背景 */
-
     --color-bg-page: #EEEEEE;
-    /* ページ全体の背景 */
     --color-bg: #FFFFFF;
     --color-text: #1A1A2E;
     --color-text-muted: #8A8FA3;
     --color-border: #E3E5EC;
-
     --color-error: #DC2626;
     --color-error-bg: #FEF2F2;
     --color-success: #16A34A;
     --color-success-bg: #F0FDF4;
-
     --font-body: 'Noto Sans JP', -apple-system, sans-serif;
-
     --radius-sm: 8px;
     --radius-md: 10px;
     --radius-lg: 16px;
@@ -67,9 +55,7 @@ body {
     overflow: hidden;
 }
 
-/* =====================================================
-    左パネル — ブランドとイラスト
-   ===================================================== */
+/* 左パネル：ブランドとイラスト。 */
 .auth-brand {
     position: relative;
     background: var(--color-primary);
@@ -141,9 +127,7 @@ body {
     background: #fff;
 }
 
-/* =====================================================
-    右パネル — フォーム
-   ===================================================== */
+/* 右パネル：フォーム。 */
 .auth-form-panel {
     padding: 44px 48px;
     display: flex;
@@ -241,7 +225,7 @@ body {
 
 .input-box input {
     width: 100%;
-    padding: 10px 12px 10px 36px;
+    padding: 10px 40px 10px 36px;
     font-size: 13.5px;
     font-family: var(--font-body);
     border: 1px solid var(--color-border);
@@ -267,15 +251,27 @@ body {
 
 .toggle-password {
     position: absolute;
-    right: 10px;
+    right: 30px;
     top: 50%;
     transform: translateY(-50%);
-    background: none;
+    background: transparent;
     border: none;
+    outline: none;
     cursor: pointer;
     padding: 4px;
     color: var(--color-text-muted);
     display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    z-index: 2;
+}
+
+.toggle-password svg,
+.toggle-password [data-lucide] {
+    width: 16px;
+    height: 16px;
+    display: block;
 }
 
 .field-error {
@@ -436,9 +432,7 @@ body {
     color: var(--color-text-muted);
 }
 
-/* =====================================================
-    レスポンシブ設定
-   ===================================================== */
+/* レスポンシブ表示の設定。 */
 @media (max-width: 780px) {
     .auth-card {
         grid-template-columns: 1fr;
@@ -458,9 +452,7 @@ body {
     }
 }
 
-/* =====================================================
-    OTP / 確認コード画面（パスワード忘れと登録で共通）
-   ===================================================== */
+/* OTP確認コード画面のスタイル（パスワード再設定と登録で共通）。 */
 .otp-row {
     display: flex;
     gap: 10px;

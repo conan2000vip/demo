@@ -23,12 +23,11 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     @Transactional(readOnly = true)
-    public void login(LoginRequest request) {
-        String email = request.getEmail().trim().toLowerCase();
-
+    public User login(LoginRequest request) {
+        
         // 1. DBからユーザーを検索（サービス層ではEntityを使用）
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException(HttpStatus.UNAUTHORIZED, "メールアドレスまたはパスワードが正しくありません"));
+        User user = userRepository.findByEmail(request.getEmail().trim().toLowerCase())
+            .orElseThrow(() -> new BusinessException(HttpStatus.UNAUTHORIZED, "メールアドレスまたはパスワードが正しくありません。"));
 
         // 2. パスワードを確認
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
@@ -42,5 +41,6 @@ public class LoginServiceImpl implements LoginService {
 
         // 4. セキュアなセッションを設定
         securityContextUtil.authenticateUser(user.getEmail());
+        return user;
     }
 }

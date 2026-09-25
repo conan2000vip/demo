@@ -1,4 +1,4 @@
-// reset-password.js - Realtime & Submit Validation
+// reset-password.js：入力中と送信時のパスワード検証
 document.addEventListener('DOMContentLoaded', () => {
 
     const form = document.getElementById('resetPasswordForm');
@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const newPasswordError = document.getElementById('newPasswordError');
     const confirmPasswordError = document.getElementById('confirmPasswordError');
 
-    // --- 1. Validate Mật khẩu mới (Khớp 100% quy tắc @ValidPassword Java & register.js) ---
+    // --- 1. Javaの@ValidPasswordおよびregister.jsと同じルールで新しいパスワードを検証 ---
     function validateNewPassword() {
         if (!newPasswordInput || !newPasswordError) return true;
         const val = newPasswordInput.value;
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return true;
     }
 
-    // --- 2. Validate Xác nhận mật khẩu ---
+    // --- 2. 確認用パスワードを検証 ---
     function validateConfirmPassword() {
         if (!confirmPasswordInput || !confirmPasswordError) return true;
         const val = confirmPasswordInput.value;
@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return true;
     }
 
-    // --- Events Realtime (Kiểm tra khi gõ) ---
+    // --- 入力中のリアルタイム検証イベント ---
     if (newPasswordInput) {
         newPasswordInput.addEventListener('input', () => {
             validateNewPassword();
@@ -90,14 +90,14 @@ document.addEventListener('DOMContentLoaded', () => {
         confirmPasswordInput.addEventListener('input', validateConfirmPassword);
     }
 
-    // --- Form Submit Event ---
+    // --- フォーム送信時の検証イベント ---
     if (form) {
         form.addEventListener('submit', (e) => {
             const vPass = validateNewPassword();
             const vConfirm = validateConfirmPassword();
 
             if (!vPass || !vConfirm) {
-                e.preventDefault(); // Chặn submit nếu có lỗi
+                e.preventDefault(); // エラーがある場合は送信を中止する。
             }
         });
     }
