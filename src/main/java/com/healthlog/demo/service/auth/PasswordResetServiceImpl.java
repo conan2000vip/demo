@@ -27,7 +27,6 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
 
     private static final AuthToken.TokenType TOKEN_TYPE_OTP = AuthToken.TokenType.PASSWORD_RESET_OTP;
-    private static final AuthToken.TokenType TOKEN_TYPE_RESET = AuthToken.TokenType.PASSWORD_RESET;
     private static final long OTP_EXPIRY_MINUTES = 30;
 
     private final UserRepository userRepository;
@@ -48,9 +47,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "メールアドレスの形式が正しくありません");
         }
 
-        // メールアドレスが登録されていない場合でも、セキュリティ上の理由から成功として返す
         userRepository.findByEmail(normalizedEmail).ifPresent(user -> {
-            // 既存の未使用OTPを無効化
             List<AuthToken> oldTokens = authTokenRepository
                     .findByUser_IdAndTokenTypeAndUsedFlgFalse(user.getId(), TOKEN_TYPE_OTP);
             oldTokens.forEach(t -> t.setUsedFlg(true));
@@ -70,35 +67,31 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
     @Override
     @Transactional
-    public void resetPassword(String resetToken, PasswordResetConfirmRequest request) {
-        // パスワードと確認用パスワードが一致するかを確認
+    // ★ ĐÃ SỬA: Thay resetToken bằng email
+    public void resetPassword(String email, PasswordResetConfirmRequest request) {
+        if (!StringUtils.hasText(email)) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "有効なリクエストではありません。最初からやり直してください。");
+        }
+
+        // 1. パスワードと確認用パスワードが一致するかを確認
         if (!request.getNewPassword().equals(request.getConfirmPassword())) {
-            throw new BusinessException(HttpStatus.BAD_REQUEST, "パスワードと確認用パスワードが一致しません");
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "パスワードと確認用パスワードが一致しません。");
         }
 
-        // resetTokenが有効かどうかを確認
-        if (!StringUtils.hasText(resetToken)) {
-            throw new BusinessException(HttpStatus.BAD_REQUEST, "有効なリクエストではありません。最初からやり直してください");
-        }
+        // 2. メールアドレスからユーザーを取得
+        String normalizedEmail = email.trim().toLowerCase();
+        User user = userRepository.findByEmail(normalizedEmail)
+                .orElseThrow(() -> new BusinessException(HttpStatus.BAD_REQUEST, "ユーザーが見つかりません。"));
 
-        AuthToken authToken = authTokenRepository.findByTokenAndTokenType(resetToken, TOKEN_TYPE_RESET)
-            .orElseThrow(() -> new BusinessException(HttpStatus.BAD_REQUEST, "有効なリクエストではありません。もう一度お試しください。"));
-
-        if (authToken.isUsedFlg()) {
-            throw new BusinessException(HttpStatus.BAD_REQUEST, "この確認コードはすでに使用されています。再度リクエストしてください");
-        }
-        if (authToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new BusinessException(HttpStatus.BAD_REQUEST, "確認コードの有効期限が切れています。新しいコードを再発行してください");
-        }
-
-        // 3. 新しいパスワードを更新
-        User user = authToken.getUser();
+        // 3. 新しいパスワードを暗号化して更新
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
 
-        // 4. トークンを無効化
-        authToken.setUsedFlg(true);
-        authTokenRepository.save(authToken);
+        // 4. このユーザーの未使用OTPトークンをすべて無効化 (クリーンアップ)
+        List<AuthToken> activeTokens = authTokenRepository
+                .findByUser_IdAndTokenTypeAndUsedFlgFalse(user.getId(), TOKEN_TYPE_OTP);
+        activeTokens.forEach(t -> t.setUsedFlg(true));
+        authTokenRepository.saveAll(activeTokens);
     }
 
     private String generateOtp() {

@@ -34,34 +34,29 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
     @Override
     @Transactional
     public void verifyCode(VerifyCodeRequest request) {
+        if (request.getCode() == null || request.getCode().isBlank()) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "確認コードを入力してください。");
+        }
         String email = request.getEmail().trim().toLowerCase();
-
+        String inputCode = request.getCode().trim();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(HttpStatus.BAD_REQUEST, "確認コードが正しくないか、有効期限が切れています。"));
-
-        AuthToken.TokenType tokenType = (user.getEmailVerifiedAt() == null)
-                ? AuthToken.TokenType.EMAIL_VERIFICATION
-                : TOKEN_TYPE_OTP;
-
-        List<AuthToken> otpTokens = authTokenRepository
-                .findByUser_IdAndTokenTypeAndUsedFlgFalse(user.getId(), tokenType);
-
+        List<AuthToken> otpTokens = new java.util.ArrayList<>(authTokenRepository
+                .findByUser_IdAndTokenTypeAndUsedFlgFalse(user.getId(), AuthToken.TokenType.EMAIL_VERIFICATION));
+        otpTokens.addAll(authTokenRepository.findByUser_IdAndTokenTypeAndUsedFlgFalse(user.getId(), TOKEN_TYPE_OTP));
         @SuppressWarnings("null")
         AuthToken otpToken = otpTokens.stream()
                 .max(Comparator.comparing(AuthToken::getCreatedAt))
                 .orElseThrow(() -> new BusinessException(HttpStatus.BAD_REQUEST,
                         "確認コードが正しくないか、すでに有効期限が切れています。新しいコードを再発行してください。"));
-
         if (otpToken.getExpiresAt().isBefore(LocalDateTime.now())) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "確認コードの有効期限が切れています。新しいコードを再発行してください。");
         }
-        if (!otpToken.getToken().equals(request.getCode())) {
+        if (!otpToken.getToken().trim().equals(inputCode)) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "確認コードが正しくありません。もう一度入力してください。");
         }
-
         otpToken.setUsedFlg(true);
         authTokenRepository.save(otpToken);
-
         if (user.getEmailVerifiedAt() == null) {
             user.setEmailVerifiedAt(LocalDateTime.now());
             userRepository.save(user);
@@ -99,7 +94,8 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
         });
 
         String newCode = String.format("%06d", new SecureRandom().nextInt(1_000_000));
-        AuthToken newToken = new AuthToken(user, tokenType, newCode, LocalDateTime.now().plusMinutes(OTP_EXPIRY_MINUTES));
+        AuthToken newToken = new AuthToken(user, tokenType, newCode,
+                LocalDateTime.now().plusMinutes(OTP_EXPIRY_MINUTES));
         authTokenRepository.save(newToken);
 
         if (tokenType == AuthToken.TokenType.EMAIL_VERIFICATION) {

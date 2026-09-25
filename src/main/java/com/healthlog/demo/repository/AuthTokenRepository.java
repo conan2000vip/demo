@@ -26,6 +26,10 @@ public interface AuthTokenRepository extends JpaRepository<AuthToken, Long> {
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	Optional<AuthToken> findByTokenAndTokenType(String token, TokenType tokenType);
 
+	Optional<AuthToken> findTopByUser_IdAndUsedFlgFalseOrderByCreatedAtDesc(Long userId);
+
+	Optional<AuthToken> findTopByUser_IdAndTokenTypeAndUsedFlgFalseOrderByCreatedAtDesc(Long userId, TokenType tokenType);
+
 	// resendVerification() のクールダウン判定用 — ユーザー・種別ごとの最新トークン発行日時を取得
 	Optional<AuthToken> findFirstByUser_IdAndTokenTypeOrderByCreatedAtDesc(Long userId, TokenType tokenType);
 
@@ -45,6 +49,6 @@ public interface AuthTokenRepository extends JpaRepository<AuthToken, Long> {
 
 	// resendVerification() / requestPasswordReset() — 既存の未使用トークンを無効化
 	@Modifying
-	@Query("UPDATE AuthToken t SET t.usedFlg = true WHERE t.user.id = :userId AND t.tokenType = :tokenType AND t.usedFlg = false")
-	int invalidateActiveTokens(@Param("userId") Long userId, @Param("tokenType") String tokenType);
+    @Query("UPDATE AuthToken t SET t.usedFlg = true WHERE t.user.id = :userId AND t.tokenType = :tokenType AND t.usedFlg = false")
+    int invalidateActiveTokens(@Param("userId") Long userId, @Param("tokenType") TokenType tokenType);
 }
