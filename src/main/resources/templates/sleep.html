@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>睡眠管理 | HealthLog</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" />
+    <link rel="stylesheet" th:href="@{/css/common.css}" />
+    <link rel="stylesheet" th:href="@{/css/sleep.css}" />
+</head>
+
+<body>
+
+    <!-- ===== Header ===== -->
+    <div th:replace="~{commons/header :: header(activePage='sleep')}"></div>
+    <main class="sleep-page">
+        <div class="sleep-page__inner">
+
+            <!-- Page Header -->
+            <div class="sleep-page__header">
+                <div class="sleep-page__heading">
+                    <span class="sleep-page__icon">
+                        <img th:src="@{/image/sleep.png}" alt="" class="sleep-page__icon-img" />
+                    </span>
+                    <div>
+                        <h1>睡眠管理</h1>
+                        <p th:text="${currentProfile != null ? currentProfile.name + ' の睡眠記録' : 'ゲスト の睡眠記録'}"></p>
+                    </div>
+                </div>
+                <button type="button" class="btn btn--primary" id="openAddModalBtn">
+                    <i data-lucide="plus"></i>記録する
+                </button>
+            </div>
+
+            <!-- Business Error / Success -->
+            <div class="alert alert--error" th:if="${error}" id="errorAlert" data-auto-hide="true">
+                <i data-lucide="alert-circle"></i><span th:text="${error}"></span>
+                <button type="button" class="alert__close" onclick="this.closest('.alert').remove()">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="alert alert--success" th:if="${message}" id="successAlert" data-auto-hide="true">
+                <i data-lucide="check-circle"></i><span th:text="${message}"></span>
+                <button type="button" class="alert__close" onclick="this.closest('.alert').remove()">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <div th:replace="~{commons/data-controls :: feedbackList(feedbackList=${feedbackList})}"></div>
+
+            <!-- Summary Cards -->
+            <div class="summary-grid">
+                <!-- 最新 -->
+                <div class="summary-card">
+                    <span class="summary-card__label">最新睡眠</span>
+                    <span class="summary-card__value">
+                        <span th:text="${stats != null && stats.latest != null
+				                ? (stats.latest / 60 + '時間' + stats.latest % 60 + '分')
+				                : '--'}"></span>
+                    </span>
+                    <span class="summary-card__sub" th:if="${stats != null && stats.latestDate != null}"
+                        th:text="'最終記録：' + ${#temporals.format(stats.latestDate,'yyyy/MM/dd')}">
+                    </span>
+                </div>
+
+                <!-- 平均 -->
+                <div class="summary-card">
+                    <span class="summary-card__label" th:text="${stats.isCustomRange} ? '期間平均' : '今月平均'">
+                        今月平均
+                    </span>
+                    <span class="summary-card__value">
+                        <span th:text="${stats != null && stats.monthlyAverage != null
+				                ? (stats.monthlyAverage / 60 + '時間' + stats.monthlyAverage % 60 + '分')
+				                : '--'}"></span>
+                    </span>
+                    <span class="summary-card__sub" th:text="${stats.isCustomRange} ? '対象期間の1日平均' : '今月の1日平均'">
+                    </span>
+                </div>
+
+                <!-- 最短 -->
+                <div class="summary-card">
+                    <span class="summary-card__label" th:text="${stats.isCustomRange} ? '期間内最短' : '今月最短'">
+                        今月最短
+                    </span>
+                    <span class="summary-card__value">
+                        <span th:text="${stats != null && stats.shortest != null
+				                ? (stats.shortest / 60 + '時間' + stats.shortest % 60 + '分')
+				                : '--'}"></span>
+                    </span>
+                    <span class="summary-card__sub" th:if="${stats != null && stats.shortestDate != null}"
+                        th:text="'記録日：' + ${#temporals.format(stats.shortestDate,'yyyy/MM/dd')}">
+                    </span>
+                </div>
+
+                <!-- 最長 -->
+                <div class="summary-card">
+                    <span class="summary-card__label" th:text="${stats.isCustomRange} ? '期間内最長' : '今月最長'">
+                        今月最長
+                    </span>
+                    <span class="summary-card__value">
+                        <span th:text="${stats != null && stats.longest != null
+				                ? (stats.longest / 60 + '時間' + stats.longest % 60 + '分')
+				                : '--'}"></span>
+                    </span>
+                    <span class="summary-card__sub" th:if="${stats != null && stats.longestDate != null}"
+                        th:text="'記録日：' + ${#temporals.format(stats.longestDate,'yyyy/MM/dd')}">
+                    </span>
+                </div>
+            </div>
+
+            <!-- "今月" -->
+            <p class="stats-period-note" th:if="${stats?.isCustomRange == true}">
+                <i data-lucide="calendar"></i>
+                <span th:text="${'上記の統計は ' +
+						(filterStartDate != null ? #temporals.format(filterStartDate, 'yyyy/M/d') : '〜') +
+						' 〜 ' +
+						(filterEndDate != null ? #temporals.format(filterEndDate, 'yyyy/M/d') : '〜') +
+						' の期間で算出しています'}">
+                </span>
+            </p>
+
+            <!-- Filter Bar -->
+            <div th:replace="~{commons/data-controls :: filterBar(
+					actionUrl=@{/profile/{profileId}/sleep(profileId=${profileId})},
+					clearUrl=@{/profile/{profileId}/sleep(profileId=${profileId})},
+					filterStartDate=${filterStartDate},
+					filterEndDate=${filterEndDate})}">
+            </div>
+
+            <!-- Chart Card  -->
+            <div th:replace="~{commons/data-controls :: chartCard(
+					title='睡眠(時間)',
+					canvasId='sleepChart',
+					hasData=${not #lists.isEmpty(logs)},
+					chartUrl=@{/profile/{profileId}/sleep/chart-data(profileId=${profileId})},
+					category='sleep',
+					iconSrc=@{/image/sleep.png})}">
+            </div>
+
+            <!-- Table / Empty state -->
+            <section class="table-card">
+                <div class="data-table-scroll">
+                    <table class="sleep-table" data-history-table th:if="${not #lists.isEmpty(logs)}">
+                        <thead>
+                            <tr>
+                                <th>日付</th>
+                                <th>種別</th>
+                                <th>就寝</th>
+                                <th>起床</th>
+                                <th>睡眠時間</th>
+                                <th>メモ</th>
+                                <th class="sleep-table__actions-col"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="record : ${logs}" th:data-date="${record.recordedDate}"
+                                th:data-value="${record.sleepMinutes}">
+                                <td th:text="${record.recordedDate}">2026-07-14</td>
+                                <td>
+                                    <span class="badge"
+                                        th:classappend="${record.sleepType != null && record.sleepType.name() == 'NAP' ? 'badge--warning' : 'badge--normal'}"
+                                        th:text="${record.sleepType != null && record.sleepType.name() == 'NAP' ? '昼寝' : '夜間'}">夜間</span>
+                                </td>
+                                <td th:text="${record.startTime}">23:00</td>
+                                <td th:text="${record.endTime}">07:00</td>
+                                <td class="sleep-table__duration">
+                                    <span
+                                        th:text="${record.sleepMinutes != null ? (record.sleepMinutes / 60 + 'h' + record.sleepMinutes % 60 + 'm') : '--'}"></span>
+                                </td>
+                                <td class="sleep-table__memo memo-cell"
+                                    th:text="${record.memo != null ? record.memo : ''}"></td>
+                                <td class="sleep-table__actions">
+                                    <button type="button" class="icon-btn edit-btn" th:data-id="${record.id}"
+                                        th:data-date="${record.recordedDate}" th:data-start-time="${record.startTime}"
+                                        th:data-end-time="${record.endTime}"
+                                        th:data-sleep-type="${record.sleepType != null ? record.sleepType.name() : 'NIGHT'}"
+                                        th:data-memo="${record.memo}" aria-label="編集">
+                                        <img th:src="@{/image/edit.png}" alt="編集" class="icon-btn-img" />
+                                    </button>
+                                    <button type="submit" th:form="'deleteForm-' + ${record.id}"
+                                        class="icon-btn icon-btn--danger" aria-label="削除">
+                                        <img th:src="@{/image/delete.png}" alt="削除" class="icon-btn-img" />
+                                    </button>
+                                </td>
+                                <form th:id="'deleteForm-' + ${record.id}"
+                                    th:action="@{/profile/{profileId}/sleep/{id}/delete(profileId=${profileId},id=${record.id})}"
+                                    method="post" class="delete-form"
+                                    th:attr="data-confirm-message='「' + ${record.recordedDate} + '」の睡眠記録を削除しますか？&#10; この操作は取り消せません。'">
+                                </form>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination" th:if="${totalPages > 1}">
+                    <a th:if="${hasPrevious}"
+                        th:href="@{/profile/{profileId}/sleep(profileId=${profileId}, startDate=${filterStartDate}, endDate=${filterEndDate}, page=${currentPage - 1})}"
+                        class="pagination__nav">← 前へ</a>
+
+                    <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:href="@{/profile/{profileId}/sleep(profileId=${profileId}, startDate=${filterStartDate}, endDate=${filterEndDate}, page=${i})}"
+                        th:text="${i + 1}" th:classappend="${i == currentPage} ? 'is-active'"
+                        class="pagination__page"></a>
+
+                    <a th:if="${hasNext}"
+                        th:href="@{/profile/{profileId}/sleep(profileId=${profileId}, startDate=${filterStartDate}, endDate=${filterEndDate}, page=${currentPage + 1})}"
+                        class="pagination__nav">次へ →</a>
+                </div>
+
+                <!-- Trường hợp 1: chưa từng có bản ghi nào (không phụ thuộc việc có đang lọc hay không) -->
+                <div class="empty-state" th:if="${#lists.isEmpty(logs)} and ${!hasAnyLog}">
+                    <img th:src="@{/image/sleep.png}" alt="" class="sleep-page__icon-img" />
+                    <p>まだ睡眠が記録されていません</p>
+                    <button type="button" class="btn btn--primary" id="openAddModalBtnEmpty">
+                        <i data-lucide="plus"></i>最初の記録をつける
+                    </button>
+                </div>
+
+                <!-- Trường hợp 2: đã từng có bản ghi, nhưng bộ lọc hiện tại không có kết quả -->
+                <div class="empty-state" th:if="${#lists.isEmpty(logs) and hasAnyLog}">
+                    <i data-lucide="calendar-days"></i>
+                    <p>選択した期間に記録がありません</p>
+                    <button type="button" class="btn btn--primary" id="openAddModalBtnFiltered"
+                        th:data-date="${filterStartDate}">
+                        <i data-lucide="plus"></i>この期間の記録を追加する
+                    </button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- ===== Modal: 睡眠を記録する / 編集する ===== -->
+    <div class="modal-overlay" id="sleepModalOverlay">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="sleepModalTitle">
+            <div class="modal__header">
+                <h2 id="sleepModalTitle">睡眠を記録する</h2>
+                <button type="button" class="modal__close" id="closeModalBtn" aria-label="閉じる">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <form id="sleepForm" th:action="@{/profile/{profileId}/sleep/save(profileId=${profileId})}" method="post"
+                class="form" novalidate>
+                <input type="hidden" name="recordId" id="recordId" value="" />
+
+                <div class="input-group">
+                    <label for="recordedDate">就寝日 <span class="required">*</span> <span
+                            class="hint">（寝始めた日）</span></label>
+                    <input id="recordedDate" name="recordedDate" type="date" th:max="${T(java.time.LocalDate).now()}"
+                        required />
+                    <div id="recordedDateError" class="field-error"><span></span></div>
+                    <p id="wakeDateHint" class="hint" style="margin-top:4px; display:none;"></p>
+                </div>
+
+                <div class="input-group">
+                    <label for="sleepType">種別 <span class="required">*</span></label>
+                    <select id="sleepType" name="sleepType">
+                        <option value="NIGHT" selected>夜間睡眠</option>
+                        <option value="NAP">昼寝</option>
+                    </select>
+                    <div id="sleepTypeError" class="field-error"><span></span></div>
+                </div>
+
+                <div class="input-group">
+                    <label for="startTime">就寝時刻 <span class="required">*</span></label>
+                    <input id="startTime" name="startTime" type="time" required />
+                    <div id="startTimeError" class="field-error"><span></span></div>
+                </div>
+
+                <div class="input-group">
+                    <label for="endTime">起床時刻 <span class="required">*</span></label>
+                    <input id="endTime" name="endTime" type="time" required />
+                    <div id="endTimeError" class="field-error"><span></span></div>
+                </div>
+
+                <div class="input-group">
+                    <label for="memo">メモ</label>
+                    <textarea id="memo" name="memo" rows="3" maxlength="500" placeholder="気づいたことなど..."></textarea>
+                </div>
+
+                <div class="modal__footer">
+                    <button type="button" class="btn btn--ghost" id="cancelModalBtn">キャンセル</button>
+                    <button type="submit" class="btn btn--primary btn--block">
+                        <i data-lucide="check"></i>保存する
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== Confirm Modal (削除確認) ===== -->
+    <div th:replace="~{commons/confirm-modal :: deleteModal}"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script th:src="@{/js/common.js}"></script>
+    <script th:inline="javascript">
+        window.targetSleep = /*[[${currentProfile != null ? currentProfile.sleepGoalHours : null}]]*/ null;
+        window.sleepChartData = { labels: /*[[${labels}]]*/[], values: /*[[${values}]]*/[], chartMode: /*[[${chartMode}]]*/ "DAY", from: /*[[${chartFrom}]]*/ null, to: /*[[${chartTo}]]*/ null };
+    </script>
+    <script th:src="@{/js/sleep.js}"></script>
+
+</body>
+
+</html>

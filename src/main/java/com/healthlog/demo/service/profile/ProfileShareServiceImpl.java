@@ -55,17 +55,14 @@ public class ProfileShareServiceImpl implements ProfileShareService {
 
     @Override
     @Transactional
-    public void updateShareSettings(Long currentUserId, Long activeProfileId, List<ProfileShareSettingDto.Item> items) {
+    @SuppressWarnings("rawtypes")
+    public void updateShareSettings(Long currentUserId, Long activeProfileId, List items) {
         Profile activeProfile = validateProfileOwnership(currentUserId, activeProfileId);
 
-        for (ProfileShareSettingDto.Item item : items) {
+        for (Object value : items) {
+            ProfileShareSettingDto.Item item = (ProfileShareSettingDto.Item) value;
             // 2. 自分自身への共有を禁止する（制約に対応）。
             if (Objects.equals(activeProfile.getId(), item.getTargetProfileId())) {
-                continue;
-            }
-
-            // 3. サブプロファイルの場合は、他のプロファイルに対する設定変更を禁止する。
-            if (!activeProfile.isPrimary() && !item.isSelf()) {
                 continue;
             }
 

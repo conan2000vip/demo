@@ -75,6 +75,7 @@
 }
 
 .profile-manage__card {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 14px;
@@ -82,6 +83,30 @@
     border: 1px solid #e5e9ee;
     border-radius: 14px;
     padding: 16px 20px;
+}
+
+.profile-manage__switch-form {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    margin: 0;
+}
+
+.profile-manage__switch-target {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: inherit;
+    background: transparent;
+    cursor: pointer;
+}
+
+.profile-manage__switch-target:focus-visible {
+    outline: 2px solid #2ec4a0;
+    outline-offset: 2px;
 }
 
 .profile-manage__card.is-current {
@@ -133,6 +158,8 @@
 }
 
 .profile-manage__actions {
+    position: relative;
+    z-index: 2;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -185,6 +212,171 @@
     color: #999;
     margin-top: 4px;
     line-height: 1.4;
+}
+
+.share-settings-modal {
+    max-width: 760px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.share-settings-modal::-webkit-scrollbar {
+    display: none;
+}
+
+.share-settings-modal .modal__close {
+    display: inline-flex;
+    flex: 0 0 36px;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    font-size: 28px;
+    line-height: 1;
+}
+
+.modal-overlay {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.modal-overlay::-webkit-scrollbar {
+    display: none;
+}
+
+html.share-settings-open,
+body.share-settings-open {
+    overflow: hidden;
+}
+
+.share-settings-modal .modal__body {
+    padding: 16px 24px 20px;
+}
+
+.share-settings__hint {
+    margin: 0 0 16px;
+    color: #667085;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.share-settings__list {
+    display: grid;
+    gap: 12px;
+}
+
+.share-settings__member {
+    min-width: 0;
+    padding: 14px 16px;
+    border: 1px solid #e5e9ee;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.share-settings__member-header,
+.share-settings__member-info {
+    display: flex;
+    align-items: center;
+}
+
+.share-settings__member-header {
+    min-width: 0;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.share-settings__member-info {
+    min-width: 0;
+    flex: 1;
+    gap: 8px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.share-settings__member-name {
+    min-width: 0;
+    overflow: hidden;
+    color: #1f2937;
+    font-size: 15px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.share-settings__relationship {
+    flex-shrink: 0;
+    color: #667085;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.share-settings__active-badge {
+    flex-shrink: 0;
+    min-width: auto;
+    height: 24px;
+    padding: 0 9px;
+    font-size: 11px;
+}
+
+.share-settings__permissions {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.share-settings__permission {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.share-settings__permission label {
+    overflow: hidden;
+    color: #667085;
+    font-size: 12px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.share-settings__select {
+    width: 100%;
+    min-width: 0;
+    padding: 8px 9px;
+    border: 1px solid #d7dde5;
+    border-radius: 6px;
+    background: #fff;
+    color: #344054;
+    font: inherit;
+    font-size: 12px;
+}
+
+.share-settings__select:focus-visible {
+    border-color: #2ec4a0;
+    outline: 2px solid rgba(46, 196, 160, 0.2);
+    outline-offset: 1px;
+}
+
+.share-settings__select:disabled {
+    background: #f3f5f7;
+    color: #98a2b3;
+    cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+    .share-settings-modal .modal__body {
+        padding: 14px 16px 18px;
+    }
+
+    .share-settings__member {
+        padding: 12px;
+    }
+
+    .share-settings__permissions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px 8px;
+    }
 }
 
 .select-container {
@@ -584,15 +776,16 @@
 
     /* ---- Profile Manage: card ---- */
     .profile-manage__card {
-        flex-wrap: wrap;
-        padding: 14px 16px;
-        gap: 10px;
+        flex-wrap: nowrap;
+        min-width: 0;
+        padding: 10px 12px;
+        gap: 8px;
     }
 
     .profile-manage__avatar {
         flex-shrink: 0;
-        width: 48px;
-        height: 48px;
+        width: 38px;
+        height: 38px;
         border-radius: 50%;
         object-fit: cover;
         /* Giữ tỷ lệ ảnh tròn, không bị nén/méo */
@@ -600,27 +793,46 @@
     }
 
     .profile-manage__info {
+        flex: 1 1 auto;
         min-width: 0;
-        flex-basis: calc(100% - 50px);
+        flex-basis: 0;
     }
 
     .profile-manage__name-row {
-        flex-wrap: wrap;
-        row-gap: 4px;
+        min-width: 0;
+        flex-wrap: nowrap;
+        gap: 4px;
+        overflow: hidden;
     }
 
     .profile-manage__name {
-        font-size: 0.95rem;
+        flex: 0 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        font-size: 0.88rem;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .profile-manage__name-row .badge {
+        flex-shrink: 0;
+        min-width: 0;
+        height: 20px;
+        padding: 0 6px;
+        font-size: 10px;
     }
 
     .profile-manage__meta {
-        font-size: 0.8rem;
+        overflow: hidden;
+        font-size: 0.7rem;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .profile-manage__actions {
-        flex-basis: 100%;
-        justify-content: flex-end;
-        margin-top: 4px;
+        flex: 0 0 auto;
+        gap: 2px;
+        margin-top: 0;
     }
 
     /* ---- Select Profile Page ---- */
@@ -707,5 +919,40 @@
     .badge--primary {
         font-size: 11px;
         padding: 2px 8px;
+    }
+}
+
+@media (max-width: 380px) {
+    .profile-manage__card {
+        gap: 6px;
+        padding: 8px 9px;
+    }
+
+    .profile-manage__avatar {
+        width: 30px;
+        height: 30px;
+    }
+
+    .profile-manage__name {
+        font-size: 0.75rem;
+    }
+
+    .profile-manage__name-row .badge {
+        padding: 0 4px;
+        font-size: 9px;
+    }
+
+    .profile-manage__actions {
+        gap: 0;
+    }
+
+    .profile-manage__actions .icon-btn {
+        width: 28px;
+        height: 28px;
+    }
+
+    .profile-manage__actions .icon-btn-img {
+        width: 18px;
+        height: 18px;
     }
 }

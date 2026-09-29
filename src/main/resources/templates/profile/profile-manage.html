@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>プロファイル管理 - HealthLog</title>
     <link rel="stylesheet" th:href="@{/css/common.css}">
-	<link rel="stylesheet" th:href="@{/css/profile.css}">
+    <link rel="stylesheet" th:href="@{/css/profile.css}">
 </head>
 
 <body>
@@ -40,6 +40,13 @@
             <div th:each="p : ${profiles}" class="profile-manage__card"
                 th:classappend="${currentProfile != null and p.id == currentProfile.id} ? 'is-current'">
 
+                <form th:if="${currentProfile != null and p.id != currentProfile.id}"
+                    th:action="@{/profile/switch/{id}(id=${p.id})}" method="post"
+                    class="profile-manage__switch-form">
+                    <button type="submit" class="profile-manage__switch-target"
+                        th:attr="aria-label=|${p.name} プロファイルに切り替える|"></button>
+                </form>
+
                 <!-- Avatar -->
                 <img th:src="@{/image/avatar/{name}.png(name=${p.avatar ?: 'avatar_01'})}" alt="Avatar"
                     class="profile-manage__avatar" />
@@ -63,24 +70,26 @@
 
                 <!-- Thao tác Actions -->
                 <div class="profile-manage__actions">
-                    <!-- Nút Mở Modal Chia sẻ Dữ liệu -->
-                    <button type="button" class="btn btn--outline btn--sm"
-                        th:onclick="'openShareModal(' + ${p.id} + ')'">
-                        データ共有設定
+                    <button type="button" class="icon-btn icon-btn--share"
+                        th:onclick="|openShareModal(${p.id}, ${currentProfile.id}, ${currentProfile.isPrimary})|"
+                        data-tooltip="データ共有設定">
+                        <img th:src="@{/image/shield.png}" alt="共有設定" class="icon-btn-img" />
                     </button>
 
                     <!-- Nút Sửa Profile (Bút chì) -->
                     <a th:if="${currentProfile != null and (currentProfile.isPrimary or currentProfile.id == p.id)}"
-                        th:href="@{/profile/{id}/edit(id=${p.id})}" class="icon-btn" title="編集">
-                        <img th:src="@{/image/pencil.png}" alt="Edit" class="icon-btn-img" />
+                        th:href="@{/profile/{id}/edit(id=${p.id})}" class="icon-btn" data-tooltip="編集">
+                        <img th:src="@{/image/edit.png}" alt="編集" class="icon-btn-img" />
                     </a>
 
                     <!-- Nút Xóa Profile (Thùng rác) -->
-                    <form th:if="${!p.isPrimary}" th:action="@{/profile/delete}" method="post"
-                        onsubmit="return confirm('このプロファイル情報を削除してもよろしいですか？');" style="margin: 0;">
+                    <form th:if="${!p.isPrimary and currentProfile != null and (currentProfile.isPrimary or currentProfile.id == p.id)}"
+                        th:id="'deleteForm-' + ${p.id}" th:action="@{/profile/delete}"
+                        method="post" class="delete-form"
+                        th:attr="data-confirm-message='「' + ${p.name} + '」のプロファイルを削除しますか？&#10;この操作は取り消せません。'">
                         <input type="hidden" name="profileId" th:value="${p.id}" />
-                        <button type="submit" class="icon-btn icon-btn--danger" title="削除">
-                            <img th:src="@{/image/trash.png}" alt="Delete" class="icon-btn-img" />
+                        <button type="submit" class="icon-btn icon-btn--danger" data-tooltip="削除">
+                            <img th:src="@{/image/delete.png}" alt="削除" class="icon-btn-img" />
                         </button>
                     </form>
                 </div>
@@ -90,34 +99,18 @@
 
     <!-- Modal Ma trận Phân quyền Chia sẻ Dữ liệu -->
     <div id="shareSettingsModal" class="modal-overlay">
-        <div class="modal" style="max-width: 680px;">
+        <div class="modal share-settings-modal">
             <div class="modal__header">
                 <h2>データ共有設定</h2>
                 <button type="button" class="modal__close" onclick="closeShareModal()">&times;</button>
             </div>
 
             <div class="modal__body">
-                <p class="field-hint" style="margin-bottom: 16px;">
-                    家族メンバーに対する【体重・睡眠・水分・歩数・健康メモ】の閲覧・編集権限を設定します。
+                <p class="share-settings__hint">
+                    あなたのデータに対する、各メンバーの閲覧・編集権限を設定します。
                 </p>
 
-                <div class="data-table-scroll">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>メンバー</th>
-                                <th>体重</th>
-                                <th>睡眠</th>
-                                <th>水分</th>
-                                <th>歩数</th>
-                                <th>メモ</th>
-                            </tr>
-                        </thead>
-                        <tbody id="shareMatrixBody">
-                            <!-- Render bằng JS -->
-                        </tbody>
-                    </table>
-                </div>
+                <div class="share-settings__list" id="shareMatrixBody"></div>
             </div>
 
             <div class="modal__footer">
@@ -128,6 +121,9 @@
             </div>
         </div>
     </div>
+
+    <!-- ===== Confirm Modal (削除確認) ===== -->
+    <div th:replace="~{commons/confirm-modal :: deleteModal}"></div>
 
     <script th:src="@{/js/common.js}"></script>
     <script th:src="@{/js/profile-share.js}"></script>

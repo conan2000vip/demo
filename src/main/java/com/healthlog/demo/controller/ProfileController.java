@@ -155,10 +155,16 @@ public class ProfileController {
 
     // === 5. ProfileFormDtoを使用したプロファイル編集処理 ===
     @GetMapping("/{id}/edit")
-    public String editProfileForm(@PathVariable("id") Long id, HttpSession session, Model model) {
+    public String editProfileForm(@PathVariable("id") Long id, HttpSession session, Model model,
+            RedirectAttributes redirectAttributes) {
         User user = getCurrentUser(session);
         if (user == null) {
             return "redirect:/auth/login";
+        }
+
+        if (!canManageProfile(user.getId(), id, session)) {
+            redirectAttributes.addFlashAttribute("error", "このプロファイルを編集する権限がありません");
+            return "redirect:/profile/profile-manage";
         }
 
         try {
@@ -182,6 +188,11 @@ public class ProfileController {
         User user = getCurrentUser(session);
         if (user == null) {
             return "redirect:/auth/login";
+        }
+
+        if (!canManageProfile(user.getId(), id, session)) {
+            redirectAttributes.addFlashAttribute("error", "このプロファイルを編集する権限がありません");
+            return "redirect:/profile/profile-manage";
         }
 
         if (bindingResult.hasErrors()) {
@@ -215,6 +226,11 @@ public class ProfileController {
             return "redirect:/auth/login";
         }
 
+        if (!canManageProfile(user.getId(), profileId, session)) {
+            redirectAttributes.addFlashAttribute("error", "このプロファイルを削除する権限がありません");
+            return "redirect:/profile/profile-manage";
+        }
+
         try {
             profileService.delete(user.getId(), profileId, session);
             redirectAttributes.addFlashAttribute("message", "プロファイルを削除しました");
@@ -223,6 +239,11 @@ public class ProfileController {
         }
 
         return "redirect:/profile/profile-manage";
+    }
+
+    private boolean canManageProfile(Long userId, Long targetProfileId, HttpSession session) {
+        Profile currentProfile = profileService.resolveCurrentProfile(session, userId);
+        return currentProfile != null && (currentProfile.isPrimary() || currentProfile.getId().equals(targetProfileId));
     }
 
     // リダイレクト先URLを作成する補助処理。

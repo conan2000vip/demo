@@ -1,0 +1,365 @@
+document.addEventListener("DOMContentLoaded", () => {
+    initWeightDateFilter();
+    initChart();
+    initModal();
+});
+
+function initWeightDateFilter() {
+    const form = document.getElementById("filterForm");
+    const quickRangeBar = document.getElementById("quickRangeBar");
+    const startInput = document.getElementById("startDateInput");
+    const endInput = document.getElementById("endDateInput");
+    if (!form || !quickRangeBar || !startInput || !endInput || form.dataset.filterInitialized === "true") return;
+
+    form.dataset.filterInitialized = "true";
+
+    const toIsoDate = date => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    };
+
+    const subtractMonths = (date, months) => {
+        const result = new Date(date);
+        const originalDay = result.getDate();
+        result.setDate(1);
+        result.setMonth(result.getMonth() - months);
+        result.setDate(Math.min(originalDay, new Date(result.getFullYear(), result.getMonth() + 1, 0).getDate()));
+        return result;
+    };
+
+    const getRange = range => {
+        const end = new Date();
+        end.setHours(0, 0, 0, 0);
+        const start = new Date(end);
+        if (range === "1W") start.setDate(start.getDate() - 6);
+        if (range === "1M") start.setTime(subtractMonths(end, 1).getTime());
+        if (range === "6M") start.setTime(subtractMonths(end, 6).getTime());
+        if (range === "1Y") start.setTime(subtractMonths(end, 12).getTime());
+        if (range === "1M" || range === "6M" || range === "1Y") start.setDate(start.getDate() + 1);
+        return { start: toIsoDate(start), end: toIsoDate(end) };
+    };
+
+    const syncQuickRangeState = () => {
+        quickRangeBar.querySelectorAll("[data-range]").forEach(button => {
+            const range = getRange(button.dataset.range);
+            button.classList.toggle("is-active", startInput.value === range.start && endInput.value === range.end);
+        });
+    };
+
+    quickRangeBar.querySelectorAll("[data-range]").forEach(button => {
+        button.addEventListener("click", () => {
+            const range = getRange(button.dataset.range);
+            startInput.value = range.start;
+            endInput.value = range.end;
+            form.requestSubmit();
+        });
+    });
+
+    form.addEventListener("submit", event => {
+        endInput.setCustomValidity("");
+        if (startInput.value && endInput.value && startInput.value > endInput.value) {
+            event.preventDefault();
+            endInput.setCustomValidity("終了日は開始日以降の日付を指定してください。");
+            endInput.reportValidity();
+        }
+    });
+
+    startInput.addEventListener("change", syncQuickRangeState);
+    endInput.addEventListener("change", syncQuickRangeState);
+    syncQuickRangeState();
+}
+
+function initChart() {
+    const isSearching = Boolean(
+        document.getElementById("startDateInput")?.value ||
+        document.getElementById("endDateInput")?.value
+    );
+    const targetWeight = window.targetWeight !== null && window.targetWeight !== undefined
+        ? parseFloat(window.targetWeight)
+        : null;
+
+    const chart = HealthChart.create({
+        canvasId: "weightChart",
+        data: window.weightChartData,
+        unit: "kg",
+        type: "line",
+        days: 7,
+        isSearching,
+        targetValue: targetWeight
+    });
+    updateWeightChartLegend(window.weightChartData);
+
+    const wrapper = document.getElementById("chartWrapper");
+    const chartUrl = wrapper?.closest(".chart-card")?.dataset.chartUrl;
+    const from = window.weightChartData?.from;
+    const to = window.weightChartData?.to;
+    if (chart && wrapper && chartUrl && from && to) {
+        initChartSwipe({
+            chart,
+            wrapperEl: wrapper,
+            chartUrl,
+            initialFrom: from,
+            initialTo: to,
+            onRangeUpdate: updateWeightChartLegend
+        });
+    }
+}
+
+function updateWeightChartLegend(data) {
+    const valueElement = document.getElementById("weightChartValue");
+    if (!valueElement) return;
+
+    const values = Array.isArray(data?.values) ? data.values : [];
+    const latestValue = [...values].reverse().find(value => value != null && Number.isFinite(Number(value)));
+    valueElement.textContent = latestValue == null ? "-- kg" : `${Number(latestValue).toFixed(1)} kg`;
+}
+/* =========================================================
+   2) モーダル（新規登録 / 編集）— weight ページ専用
+   ========================================================= */
+function initModal() {
+    const overlay = document.getElementById("weightModalOverlay");
+    const openBtns = [
+        document.getElementById("openAddModalBtn"),
+        document.getElementById("openAddModalBtnEmpty"),
+        document.getElementById("openAddModalBtnFiltered"),
+    ].filter(Boolean);
+    const closeBtn = document.getElementById("closeModalBtn");
+    const cancelBtn = document.getElementById("cancelModalBtn");
+    const modalTitle = document.getElementById("weightModalTitle");
+    const form = document.getElementById("weightForm");
+
+    const recordId = document.getElementById("recordId");
+
+    // ★変更：表示用は日付のみのinput、送信用hiddenは従来通りdatetime-local文字列
+    const measuredAtDateInput = document.getElementById("measuredAtDate");
+    const measuredAtInput = document.getElementById("measuredAt"); // hidden
+
+    const weightInput = document.getElementById("weight");
+    const heightInput = document.getElementById("height");
+    const memoInput = document.getElementById("memo");
+
+    if (!overlay || !form) return;
+
+    // ★追加：現在開いているモーダルが create か edit かを保持
+    let currentMode = "create";
+
+    // 現在日時を YYYY-MM-DDTHH:MM 形式で返す（hidden input送信用）
+    function currentDateTimeLocal() {
+        const d = new Date();
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, "0");
+        const dd = String(d.getDate()).padStart(2, "0");
+        const hh = String(d.getHours()).padStart(2, "0");
+        const min = String(d.getMinutes()).padStart(2, "0");
+        return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+    }
+
+    // 現在日付を YYYY-MM-DD 形式で返す（date input用）
+    function currentDateOnly() {
+        return currentDateTimeLocal().slice(0, 10);
+    }
+
+    // date input の値 + 現在時刻 を合成して hidden(measuredAt) に反映
+    function syncMeasuredAtFromDate() {
+        if (!measuredAtDateInput.value) {
+            measuredAtInput.value = "";
+            return;
+        }
+        const now = new Date();
+        const hh = String(now.getHours()).padStart(2, "0");
+        const min = String(now.getMinutes()).padStart(2, "0");
+        measuredAtInput.value = `${measuredAtDateInput.value}T${hh}:${min}`;
+    }
+
+    function openModal({ mode = "create", id = "", measuredAt = "", weight = "", height = "", memo = "" } = {}) {
+        modalTitle.textContent = mode === "edit" ? "体重を編集する" : "体重を記録する";
+        currentMode = mode; // ★追加
+        recordId.value = id;
+
+        // ★変更：日付部分だけを date input にセット。未来日は選べないようmaxを設定
+        const initialDateTime = measuredAt || currentDateTimeLocal();
+        measuredAtDateInput.value = initialDateTime.slice(0, 10);
+        measuredAtDateInput.max = currentDateOnly();
+
+        // hidden側は「編集時は元の時刻を保持／新規時はその場で現在時刻」を初期セット
+        measuredAtInput.value = initialDateTime;
+
+        weightInput.value = weight;
+        // 新規登録の場合はprofileの身長を初期値にする
+        if (mode === "create") {
+            heightInput.value = window.profileHeight ?? "";
+        } else {
+            // 編集の場合は登録時の身長をそのまま表示
+            heightInput.value = height;
+        }
+        memoInput.value = memo;
+        clearAllErrors();
+        overlay.classList.add("is-open");
+        measuredAtDateInput.focus();
+    }
+
+    function closeModal() {
+        overlay.classList.remove("is-open");
+    }
+
+    openBtns.forEach((btn) => btn.addEventListener("click", () => openModal({ mode: "create", measuredAt: btn.dataset.measuredAt || "" })));
+    if (closeBtn) closeBtn.addEventListener("click", closeModal);
+    if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
+
+    overlay.addEventListener("click", (event) => {
+        if (event.target === overlay) closeModal();
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && overlay.classList.contains("is-open")) closeModal();
+    });
+
+    // 編集ボタン：行のデータ属性からモーダルへ値を渡す
+    document.querySelectorAll(".edit-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+            openModal({
+                mode: "edit",
+                id: btn.dataset.id || "",
+                measuredAt: btn.dataset.measuredAt || "",
+                weight: btn.dataset.weight || "",
+                height: btn.dataset.height || "",
+                memo: btn.dataset.memo || "",
+            });
+        });
+    });
+
+    // ★変更：日付が変更されたら、その時点の現在時刻と合成してhiddenへ反映
+    measuredAtDateInput.addEventListener("change", () => {
+        syncMeasuredAtFromDate();
+        clearError("measuredAt");
+    });
+
+    // 入力時にエラーをクリア（体重・身長は従来通り）
+    [weightInput, heightInput].forEach((input) => {
+        if (input) input.addEventListener("input", () => clearError(input.id));
+    });
+
+    // ★変更：バリデーション対象は「日付」のみ。時刻は自動付与のため未来チェック対象外
+    function validateMeasuredAt() {
+        if (!measuredAtDateInput.value) {
+            showError("measuredAt", "日付を入力してください");
+            return false;
+        }
+        const selectedDate = new Date(measuredAtDateInput.value + "T00:00:00");
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (selectedDate > today) {
+            showError("measuredAt", "未来の日付は入力できません");
+            return false;
+        }
+        clearError("measuredAt");
+        return true;
+    }
+
+    function validateWeight() {
+        const value = weightInput.value;
+        if (!value) {
+            showError("weight", "体重を入力してください");
+            return false;
+        }
+        const num = parseFloat(value);
+        if (Number.isNaN(num) || num < 1.0) {
+            showError("weight", "正しい体重を入力してください");
+            return false;
+        }
+
+        if (num > 200.0) {
+            showError("weight", "数値が大きすぎます。小数点の押し忘れはありませんか？");
+            return false;
+        }
+        clearError("weight");
+        return true;
+    }
+
+    // Biến ghi nhớ trạng thái đã cảnh báo hay chưa
+    let isWeightWarned = false;
+    function validateWeight() {
+        const value = weightInput.value;
+        if (!value) {
+            showError("weight", "体重を入力してください");
+            isWeightWarned = false;
+            return false;
+        }
+        const num = parseFloat(value);
+        if (Number.isNaN(num) || num < 1.0 || num > 1000.0) {
+            showError("weight", "正しい体重を入力してください (1〜1000kg)");
+            isWeightWarned = false;
+            return false;
+        }
+
+        // Nếu > 200kg và CHƯA từng cảnh báo -> Báo dòng chữ đỏ nhưng ghi nhớ trạng thái
+        if (num > 200.0 && !isWeightWarned) {
+            showError("weight", "数値が大きすぎます。小数点の押し忘れはありませんか？（※もう一度「保存」を押すとこのまま登録されます）");
+            isWeightWarned = true; // Đã cảnh báo rồi!
+            return false; // Lần 1: Chặn lại để người dùng đọc cảnh báo
+        }
+        clearError("weight");
+        return true; // Lần 2 (hoặc số bình thường <= 200kg): Cho phép đi tiếp để LƯU!
+    }
+    // Khi người dùng tự tay sửa lại số trong ô nhập -> Reset lại trạng thái cảnh báo
+    weightInput.addEventListener("input", () => {
+        isWeightWarned = false;
+        clearError("weight");
+    });
+
+    function validateHeight() {
+        const value = heightInput.value;
+        if (!value) {
+            clearError("height");
+            return true;
+        }
+        const num = parseFloat(value);
+        if (Number.isNaN(num) || num < 10 || num > 350) {
+            showError("height", "身長は10〜350cmの範囲で入力してください");
+            return false;
+        }
+        clearError("height");
+        return true;
+    }
+
+    form.addEventListener("submit", (event) => {
+        const isMeasuredAtValid = validateMeasuredAt();
+        const isWeightValid = validateWeight();
+        const isHeightValid = validateHeight();
+
+        if (!isMeasuredAtValid || !isWeightValid || !isHeightValid) {
+            event.preventDefault();
+            return;
+        }
+        if (currentMode === "create") {
+            syncMeasuredAtFromDate();
+        }
+    });
+
+    function showError(inputId, message) {
+        // ★変更：measuredAtのエラーは実際に見えている#measuredAtDateに付与する
+        const errorBox = document.getElementById(inputId + "Error");
+        const targetInput = inputId === "measuredAt" ? measuredAtDateInput : document.getElementById(inputId);
+        if (!targetInput || !errorBox) return;
+        targetInput.classList.add("invalid");
+        const span = errorBox.querySelector("span");
+        if (span) span.textContent = message;
+        errorBox.classList.add("show");
+    }
+
+    function clearError(inputId) {
+        const errorBox = document.getElementById(inputId + "Error");
+        const targetInput = inputId === "measuredAt" ? measuredAtDateInput : document.getElementById(inputId);
+        if (!targetInput || !errorBox) return;
+        targetInput.classList.remove("invalid");
+        const span = errorBox.querySelector("span");
+        if (span) span.textContent = "";
+        errorBox.classList.remove("show");
+    }
+
+    function clearAllErrors() {
+        ["measuredAt", "weight", "height"].forEach(clearError);
+    }
+}

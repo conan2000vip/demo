@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.healthlog.demo.dto.common.DateRangerFilter;
 import com.healthlog.demo.entity.BaseLog;
 import com.healthlog.demo.entity.Profile;
 import com.healthlog.demo.exception.BusinessException;
@@ -43,9 +44,11 @@ public abstract class BaseLogService<T extends BaseLog, DTO> {
 
     // === 3. 条件で絞り込んだ一覧を取得（4条件） ===
     @Transactional(readOnly = true)
-    public List<DTO> getLogs(Long profileId, Long currentUserId, LocalDate from, LocalDate to) {
+    public List<DTO> getLogs(Long profileId, Long currentUserId, DateRangerFilter dateRange) {
         validateAndGetProfile(profileId, currentUserId);
-        
+        LocalDate from = dateRange != null ? dateRange.getFrom() : null;
+        LocalDate to = dateRange != null ? dateRange.getTo() : null;
+
         List<T> logs;
         if (from != null && to != null) {
             logs = repository.findByProfile_IdAndRecordedDateBetweenOrderByRecordedDateDesc(profileId, from, to);
@@ -60,9 +63,12 @@ public abstract class BaseLogService<T extends BaseLog, DTO> {
     }
 
     @Transactional(readOnly = true)
-    public Page<DTO> getLogsPaged(Long profileId, Long currentUserId, LocalDate from, LocalDate to, Pageable pageable) {
+    public Page<DTO> getLogsPaged(
+            Long profileId, Long currentUserId, DateRangerFilter dateRange, Pageable pageable) {
         validateAndGetProfile(profileId, currentUserId);
-        
+        LocalDate from = dateRange != null ? dateRange.getFrom() : null;
+        LocalDate to = dateRange != null ? dateRange.getTo() : null;
+
         Page<T> logs;
         if (from != null && to != null) {
             logs = repository.findByProfile_IdAndRecordedDateBetweenOrderByRecordedDateDesc(profileId, from, to, pageable);

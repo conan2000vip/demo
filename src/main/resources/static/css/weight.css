@@ -1,0 +1,332 @@
+/* =========================================================
+   Weight Page
+   ========================================================= */
+
+.weight-page {
+	min-height: calc(100vh - 72px);
+}
+
+.weight-page__inner {
+	max-width: 1080px;
+	margin: 0 auto;
+	padding: 32px 24px 64px;
+}
+
+/* ---------- Page Header ---------- */
+
+.weight-page__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 24px;
+}
+
+.weight-page__heading {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+}
+
+.weight-page__icon-img {
+	width: 35px;
+	height: 35px;
+	max-width: 35px;
+	max-height: 35px;
+	object-fit: contain;
+	display: block;
+}
+
+.weight-page__heading h1 {
+	margin: 0;
+	font-size: 22px;
+	font-weight: 800;
+}
+
+.weight-page__heading p {
+	margin: 2px 0 0;
+	font-size: 13px;
+	color: var(--wp-text-muted);
+}
+
+/* =========================================================
+   Weight Table Only
+   ========================================================= */
+
+.weight-table {
+	width: 100%;
+	table-layout: fixed;
+}
+
+/* 日付 */
+.weight-table th:nth-child(1),
+.weight-table td:nth-child(1) {
+	width: 120px;
+	white-space: nowrap;
+}
+
+/* 時間 */
+.weight-table th:nth-child(2),
+.weight-table td:nth-child(2) {
+	width: 90px;
+	text-align: center;
+	white-space: nowrap;
+	color: var(--wp-text-muted);
+}
+
+/* 体重 */
+.weight-table th:nth-child(3),
+.weight-table td:nth-child(3) {
+	width: 160px;
+	text-align: center;
+	white-space: nowrap;
+}
+
+/* BMI */
+.weight-table th:nth-child(4),
+.weight-table td:nth-child(4) {
+	width: 120px;
+	text-align: center;
+	white-space: nowrap;
+}
+
+.weight-table__weight {
+	font-weight: 700;
+	text-align: center;
+}
+
+.weight-table__memo {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: var(--wp-text-muted);
+}
+
+.weight-table__actions {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 6px;
+}
+
+.weight-table__actions-col {
+	width: 90px;
+}
+
+.weight-chart-legend {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: 10px 20px;
+	padding: 0 24px 12px;
+	color: var(--wp-text-muted);
+	font-size: 13px;
+	order: -1;
+}
+
+.weight-chart-legend__item {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+}
+
+.weight-chart-legend__item strong {
+	color: var(--wp-text);
+	font-weight: 700;
+}
+
+.weight-chart-legend__marker {
+	position: relative;
+	display: inline-block;
+	width: 22px;
+	height: 10px;
+	flex: 0 0 22px;
+}
+
+.weight-chart-legend__marker--weight::before {
+	position: absolute;
+	top: 4px;
+	left: 0;
+	width: 22px;
+	border-top: 2px solid var(--chart-primary, #e11d48);
+	content: "";
+}
+
+.weight-chart-legend__marker--weight::after {
+	position: absolute;
+	top: 1px;
+	left: 8px;
+	width: 8px;
+	height: 8px;
+	border: 2px solid #fff;
+	border-radius: 50%;
+	background: var(--chart-primary, #e11d48);
+	box-shadow: 0 0 0 1px var(--chart-primary, #e11d48);
+	content: "";
+}
+
+.weight-chart-legend__marker--target::before {
+	position: absolute;
+	top: 4px;
+	left: 0;
+	width: 22px;
+	border-top: 2px dashed #0284c7;
+	content: "";
+}
+
+.chart-card--weight .chart-card__body {
+	box-sizing: border-box;
+	width: 100%;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.chart-card--weight .chart-card__body canvas {
+	display: block;
+	width: 100% !important;
+	height: 100% !important;
+}
+
+.weight-page .filter-bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 14px;
+	box-sizing: border-box;
+}
+
+.weight-page .filter-bar__quick-area {
+	flex: 0 0 auto;
+	gap: 8px;
+}
+
+.weight-page .filter-bar__quick {
+	gap: 6px;
+	flex-wrap: nowrap;
+}
+
+.weight-page .filter-bar__date-area {
+	display: flex;
+	flex: 1 1 auto;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 8px;
+	width: auto;
+}
+
+.weight-page .filter-bar input[type="date"] {
+	width: 145px;
+	min-width: 120px;
+}
+
+@media (max-width: 860px) {
+	.weight-page .filter-bar {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.weight-page .filter-bar__quick-area,
+	.weight-page .filter-bar__date-area {
+		width: 100%;
+	}
+
+	.weight-page .filter-bar__date-area {
+		justify-content: flex-start;
+	}
+}
+
+@media (max-width: 600px) {
+	.chart-card--weight .chart-card__body {
+		max-width: 100%;
+		padding-right: 12px;
+		padding-left: 12px;
+	}
+
+	.weight-page .filter-bar {
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		gap: 12px;
+	}
+
+	.weight-page .filter-bar__quick-area {
+		width: 100%;
+		align-items: stretch;
+	}
+
+	.weight-page .filter-bar__quick {
+		display: grid;
+		grid-template-columns: repeat(5, minmax(0, 1fr));
+		width: 100%;
+	}
+
+	.weight-page .filter-bar__quick .quick-btn {
+		min-width: 0;
+		padding: 0 4px;
+	}
+
+	.weight-page .filter-bar__date-area {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 8px;
+	}
+
+	.weight-page .filter-bar__date-label,
+	.weight-page .filter-bar__search-btn,
+	.weight-page .filter-bar__reset {
+		grid-column: 1 / -1;
+	}
+
+	.weight-page .filter-bar input[type="date"] {
+		grid-column: auto;
+		width: 100%;
+		min-width: 0;
+	}
+
+	.weight-page .filter-bar__sep {
+		display: none;
+	}
+
+	.weight-page .filter-bar__search-btn {
+		width: 100%;
+	}
+
+	.weight-page .filter-bar__reset {
+		text-align: right;
+	}
+}
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+@media (max-width: 768px) {
+
+	.weight-table {
+		table-layout: auto;
+	}
+
+	.weight-page__inner {
+		padding: 20px 14px 48px;
+	}
+
+	.weight-page__header {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.weight-table th,
+	.weight-table td {
+		width: auto !important;
+	}
+
+	.weight-table th:nth-child(5),
+	.weight-table td:nth-child(5) {
+		display: none;
+	}
+
+	.weight-table {
+		font-size: 13px;
+	}
+}
