@@ -30,6 +30,7 @@
 				th:if="${filterStartDate != null or filterEndDate != null}"> クリア </a>
 		</div>
 	</form>
+
 	<!-- フィードバック一覧を表示するセクション -->
 	<section th:fragment="feedbackList(feedbackList)" class="feedback-list" id="feedbackSection"
 		th:if="${feedbackList != null and not #lists.isEmpty(feedbackList)}">
@@ -49,23 +50,52 @@
 			th:if="${feedbackList != null and #lists.size(feedbackList) > 3}"
 			th:text="${'今日のフィードバックをすべて見る（' + #lists.size(feedbackList) + '件）'}"> 今日のフィードバックをすべて見る </button>
 	</section>
+
 	<!-- データグラフを表示するカード -->
-	<section th:fragment="chartCard(title, canvasId, hasData, chartUrl, category, iconSrc)" class="chart-card"
-		th:classappend="'chart-card--' + ${category}" th:if="${hasData}" th:attr="data-chart-url=${chartUrl}">
+	<section th:fragment="chartCard(title, canvasId, hasData, chartUrl, category, iconSrc, seriesLabel, targetText)"
+		class="chart-card" th:classappend="'chart-card--' + ${category}" th:if="${hasData}"
+		th:attr="data-chart-url=${chartUrl}">
 		<div class="chart-card__header">
 			<span class="chart-card__icon">
 				<img th:src="${iconSrc}" alt="" class="chart-card__icon-img" />
 			</span>
-			<h2>
-				<span th:text="${title}">グラフ</span>
-				<span class="chart-card__unit" th:if="${unit}" th:text="'(' + ${unit} + ')'"></span>
-			</h2>
-			<button type="button" class="link-btn" id="toggleChartBtn">非表示</button>
+			<h2 th:text="${title}">グラフ</h2>
+
+			<div class="chart-legend" th:if="${seriesLabel != null}">
+				<div class="chart-legend__item">
+					<span class="chart-legend__marker chart-legend__marker--series"></span>
+					<span th:text="${seriesLabel}">体重</span>
+				</div>
+				<div class="chart-legend__item" th:if="${targetText != null}">
+					<span class="chart-legend__marker chart-legend__marker--target"></span>
+					<span>目標</span>
+					<strong th:text="${targetText}">50.0 kg</strong>
+				</div>
+			</div>
 		</div>
 		<div class="chart-card__body" id="chartWrapper">
-			<canvas th:id="${canvasId}" height="260"></canvas>
+			<div class="chart-card__canvas">
+				<canvas th:id="${canvasId}"></canvas>
+			</div>
 		</div>
 	</section>
+
+	<!-- ページネーション -->
+	<nav th:fragment="pagination(baseUrl, startDate, endDate, currentPage, totalPages, hasPrevious, hasNext)"
+		class="pagination" th:if="${totalPages > 1}">
+
+		<a th:if="${hasPrevious}"
+			th:href="@{${baseUrl}(startDate=${startDate}, endDate=${endDate}, page=${currentPage - 1})}"
+			class="pagination__nav">← 前へ</a>
+
+		<a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+			th:href="@{${baseUrl}(startDate=${startDate}, endDate=${endDate}, page=${i})}" th:text="${i + 1}"
+			th:classappend="${i == currentPage} ? 'is-active'" class="pagination__page"></a>
+
+		<a th:if="${hasNext}"
+			th:href="@{${baseUrl}(startDate=${startDate}, endDate=${endDate}, page=${currentPage + 1})}"
+			class="pagination__nav">次へ →</a>
+	</nav>
 </body>
 
 </html>

@@ -125,17 +125,42 @@ function initFilterForm() {
         });
     });
 
+    function removeFilterError() {
+        document.getElementById('filterErrorAlert')?.remove();
+    }
+
+    function showFilterError(message) {
+        removeFilterError();
+        const alert = document.createElement('div');
+        alert.className = 'alert alert--error';
+        alert.id = 'filterErrorAlert';
+        alert.innerHTML =
+            '<i data-lucide="alert-circle"></i><span></span>' +
+            '<button type="button" class="alert__close"><i data-lucide="x"></i></button>';
+        alert.querySelector('span').textContent = message;
+        alert.querySelector('.alert__close').addEventListener('click', () => alert.remove());
+        form.parentNode.insertBefore(alert, form);
+        if (window.lucide) lucide.createIcons();
+        window.setTimeout(() => alert.remove(), 10000);
+    }
+
     form.addEventListener('submit', event => {
-        endInput.setCustomValidity('');
         if (startInput.value && endInput.value && startInput.value > endInput.value) {
             event.preventDefault();
-            endInput.setCustomValidity('終了日は開始日以降の日付を指定してください。');
-            endInput.reportValidity();
+            showFilterError('終了日は開始日以降の日付を指定してください。');
+            return;
         }
+        removeFilterError();
     });
 
-    startInput.addEventListener('input', syncActiveRange);
-    endInput.addEventListener('input', syncActiveRange);
+    const onDateChange = () => {
+        removeFilterError();
+        syncActiveRange();
+    };
+    startInput.addEventListener('input', onDateChange);
+    startInput.addEventListener('change', onDateChange);
+    endInput.addEventListener('input', onDateChange);
+    endInput.addEventListener('change', onDateChange);
     syncActiveRange();
 }
 
@@ -269,7 +294,7 @@ window.HealthChart = (() => {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                layout: { padding: { left: 15, right: 25, top: 25, bottom: 10 } },
+                layout: { padding: { left: 10, right: 15, top: 5, bottom: 5 } },
                 plugins: {
                     legend: { display: false },
                     tooltip: { enabled: false }

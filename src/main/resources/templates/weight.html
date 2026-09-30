@@ -113,32 +113,14 @@
 					filterEndDate=${filterEndDate})}">
             </div>
 
-            <!-- Chart Card  -->
-            <section class="chart-card chart-card--weight" th:if="${not #lists.isEmpty(logs)}"
-                th:attr="data-chart-url=@{/profile/{profileId}/weight/chart-data(profileId=${profileId})}">
-                <div class="chart-card__header">
-                    <span class="chart-card__icon">
-                        <img th:src="@{/image/scales.png}" alt="" class="chart-card__icon-img" />
-                    </span>
-                    <h2>体重(Kg)</h2>
-                    <button type="button" class="link-btn" id="toggleChartBtn">非表示</button>
-                </div>
-                <div class="chart-card__body" id="chartWrapper">
-                    <canvas id="weightChart" height="260"></canvas>
-                </div>
-                <div class="weight-chart-legend">
-                    <div class="weight-chart-legend__item">
-                        <span class="weight-chart-legend__marker weight-chart-legend__marker--weight"></span>
-                        <span>体重</span>
-                        <strong id="weightChartValue">-- kg</strong>
-                    </div>
-                    <div class="weight-chart-legend__item" th:if="${currentProfile?.targetWeight != null}">
-                        <span class="weight-chart-legend__marker weight-chart-legend__marker--target"></span>
-                        <span>目標</span>
-                        <strong th:text="${#numbers.formatDecimal(currentProfile.targetWeight, 1, 1) + ' kg'}">50.0 kg</strong>
-                    </div>
-                </div>
-            </section>
+            <div
+                th:replace="~{commons/data-controls :: chartCard(
+                    '体重(Kg)', 'weightChart', ${not #lists.isEmpty(logs)},
+                    @{/profile/{profileId}/weight/chart-data(profileId=${profileId})},
+                    'weight', @{/image/scales.png},
+                    '体重',
+                    ${currentProfile?.targetWeight != null ? #numbers.formatDecimal(currentProfile.targetWeight, 1, 1) + ' kg' : null})}">
+            </div>
 
             <!-- Table / Empty state -->
             <section class="table-card">
@@ -198,19 +180,8 @@
                     </table>
                 </div>
 
-                <div class="pagination" th:if="${totalPages > 1}">
-                    <a th:if="${hasPrevious}"
-                        th:href="@{/profile/{profileId}/weight(profileId=${profileId}, startDate=${filterStartDate}, endDate=${filterEndDate}, page=${currentPage - 1})}"
-                        class="pagination__nav">← 前へ</a>
-
-                    <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                        th:href="@{/profile/{profileId}/weight(profileId=${profileId}, startDate=${filterStartDate}, endDate=${filterEndDate}, page=${i})}"
-                        th:text="${i + 1}" th:classappend="${i == currentPage} ? 'is-active'"
-                        class="pagination__page"></a>
-
-                    <a th:if="${hasNext}"
-                        th:href="@{/profile/{profileId}/weight(profileId=${profileId}, startDate=${filterStartDate}, endDate=${filterEndDate}, page=${currentPage + 1})}"
-                        class="pagination__nav">次へ →</a>
+                <div
+                    th:replace="~{commons/data-controls :: pagination(@{/profile/{profileId}/weight(profileId=${profileId})},${filterStartDate}, ${filterEndDate},${currentPage}, ${totalPages}, ${hasPrevious}, ${hasNext})}">
                 </div>
 
                 <!-- Trường hợp 1: chưa từng có bản ghi nào (không liên quan đến việc có đang lọc hay không) -->

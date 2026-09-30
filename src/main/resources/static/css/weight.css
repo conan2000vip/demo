@@ -113,82 +113,6 @@
 	width: 90px;
 }
 
-.weight-chart-legend {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	justify-content: center;
-	gap: 10px 20px;
-	padding: 0 24px 12px;
-	color: var(--wp-text-muted);
-	font-size: 13px;
-	order: -1;
-}
-
-.weight-chart-legend__item {
-	display: inline-flex;
-	align-items: center;
-	gap: 7px;
-}
-
-.weight-chart-legend__item strong {
-	color: var(--wp-text);
-	font-weight: 700;
-}
-
-.weight-chart-legend__marker {
-	position: relative;
-	display: inline-block;
-	width: 22px;
-	height: 10px;
-	flex: 0 0 22px;
-}
-
-.weight-chart-legend__marker--weight::before {
-	position: absolute;
-	top: 4px;
-	left: 0;
-	width: 22px;
-	border-top: 2px solid var(--chart-primary, #e11d48);
-	content: "";
-}
-
-.weight-chart-legend__marker--weight::after {
-	position: absolute;
-	top: 1px;
-	left: 8px;
-	width: 8px;
-	height: 8px;
-	border: 2px solid #fff;
-	border-radius: 50%;
-	background: var(--chart-primary, #e11d48);
-	box-shadow: 0 0 0 1px var(--chart-primary, #e11d48);
-	content: "";
-}
-
-.weight-chart-legend__marker--target::before {
-	position: absolute;
-	top: 4px;
-	left: 0;
-	width: 22px;
-	border-top: 2px dashed #0284c7;
-	content: "";
-}
-
-.chart-card--weight .chart-card__body {
-	box-sizing: border-box;
-	width: 100%;
-	margin: 0;
-	display: flex;
-	flex-direction: column;
-}
-
-.chart-card--weight .chart-card__body canvas {
-	display: block;
-	width: 100% !important;
-	height: 100% !important;
-}
-
 .weight-page .filter-bar {
 	display: flex;
 	align-items: center;
@@ -238,12 +162,6 @@
 }
 
 @media (max-width: 600px) {
-	.chart-card--weight .chart-card__body {
-		max-width: 100%;
-		padding-right: 12px;
-		padding-left: 12px;
-	}
-
 	.weight-page .filter-bar {
 		display: flex;
 		flex-direction: column;

@@ -1006,11 +1006,24 @@ body {
     overflow: hidden;
 }
 
+.chart-card__canvas {
+    position: relative;
+    height: 300px;
+    width: 100%;
+    min-width: 0;
+}
+
+.chart-card__canvas canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+}
+
 .chart-card__header {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 16px 24px;
+    padding: 12px 18px;
     background: linear-gradient(130deg, rgb(241, 241, 241), rgb(241, 241, 241));
 }
 
@@ -1038,35 +1051,66 @@ body {
     white-space: nowrap;
 }
 
-.chart-card__header .link-btn {
-    justify-self: end;
+.chart-card__header {
+    position: relative;
 }
 
-.link-btn {
-    background: none;
-    border: none;
-    color: var(--wp-text, #000);
+.chart-legend {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    gap: 16px;
     font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    padding: 4px;
-    text-decoration: none;
+    white-space: nowrap;
 }
 
-.link-btn:hover {
-    filter: brightness(0.85);
+.chart-legend__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.chart-legend__item strong {
+    color: var(--wp-text);
+    font-weight: 700;
+}
+
+.chart-legend__marker {
+    display: inline-block;
+    width: 20px;
+    height: 0;
+    position: relative;
+}
+
+.chart-legend__marker--series {
+    border-top: 2px solid var(--chart-primary, #e11d48);
+}
+
+.chart-legend__marker--series::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: -5px;
+    width: 8px;
+    height: 8px;
+    margin-left: -4px;
+    border-radius: 50%;
+    background: var(--chart-primary, #e11d48);
+}
+
+.chart-legend__marker--target {
+    border-top: 2px dashed #0284c7;
 }
 
 .chart-card__body {
     position: relative;
-    height: 350px;
+    height: auto;
     width: 100%;
     touch-action: pan-y;
     padding: 0 24px 8px;
-}
-
-.chart-card__body:hover .chart-target-label {
-    opacity: 1;
 }
 
 .chart-card__empty {
@@ -1792,6 +1836,23 @@ body {
 
     .modal {
         max-height: calc(100dvh - var(--app-header-height) - 24px);
+    }
+
+    /* Chart legend */
+    .chart-card__header {
+        flex-wrap: wrap;
+    }
+
+    .chart-legend {
+        position: static;
+        transform: none;
+        width: 100%;
+        justify-content: center;
+        margin-top: 4px;
+    }
+
+    .chart-card__body {
+        padding: 0 8px 8px;
     }
 }
 

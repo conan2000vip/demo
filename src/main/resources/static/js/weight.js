@@ -1,75 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
-    initWeightDateFilter();
     initChart();
     initModal();
 });
-
-function initWeightDateFilter() {
-    const form = document.getElementById("filterForm");
-    const quickRangeBar = document.getElementById("quickRangeBar");
-    const startInput = document.getElementById("startDateInput");
-    const endInput = document.getElementById("endDateInput");
-    if (!form || !quickRangeBar || !startInput || !endInput || form.dataset.filterInitialized === "true") return;
-
-    form.dataset.filterInitialized = "true";
-
-    const toIsoDate = date => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-        return `${year}-${month}-${day}`;
-    };
-
-    const subtractMonths = (date, months) => {
-        const result = new Date(date);
-        const originalDay = result.getDate();
-        result.setDate(1);
-        result.setMonth(result.getMonth() - months);
-        result.setDate(Math.min(originalDay, new Date(result.getFullYear(), result.getMonth() + 1, 0).getDate()));
-        return result;
-    };
-
-    const getRange = range => {
-        const end = new Date();
-        end.setHours(0, 0, 0, 0);
-        const start = new Date(end);
-        if (range === "1W") start.setDate(start.getDate() - 6);
-        if (range === "1M") start.setTime(subtractMonths(end, 1).getTime());
-        if (range === "6M") start.setTime(subtractMonths(end, 6).getTime());
-        if (range === "1Y") start.setTime(subtractMonths(end, 12).getTime());
-        if (range === "1M" || range === "6M" || range === "1Y") start.setDate(start.getDate() + 1);
-        return { start: toIsoDate(start), end: toIsoDate(end) };
-    };
-
-    const syncQuickRangeState = () => {
-        quickRangeBar.querySelectorAll("[data-range]").forEach(button => {
-            const range = getRange(button.dataset.range);
-            button.classList.toggle("is-active", startInput.value === range.start && endInput.value === range.end);
-        });
-    };
-
-    quickRangeBar.querySelectorAll("[data-range]").forEach(button => {
-        button.addEventListener("click", () => {
-            const range = getRange(button.dataset.range);
-            startInput.value = range.start;
-            endInput.value = range.end;
-            form.requestSubmit();
-        });
-    });
-
-    form.addEventListener("submit", event => {
-        endInput.setCustomValidity("");
-        if (startInput.value && endInput.value && startInput.value > endInput.value) {
-            event.preventDefault();
-            endInput.setCustomValidity("終了日は開始日以降の日付を指定してください。");
-            endInput.reportValidity();
-        }
-    });
-
-    startInput.addEventListener("change", syncQuickRangeState);
-    endInput.addEventListener("change", syncQuickRangeState);
-    syncQuickRangeState();
-}
 
 function initChart() {
     const isSearching = Boolean(
@@ -87,9 +19,10 @@ function initChart() {
         type: "line",
         days: 7,
         isSearching,
-        targetValue: targetWeight
+        targetValue: targetWeight,
+        showDataLabels: true
+        
     });
-    updateWeightChartLegend(window.weightChartData);
 
     const wrapper = document.getElementById("chartWrapper");
     const chartUrl = wrapper?.closest(".chart-card")?.dataset.chartUrl;
@@ -102,19 +35,10 @@ function initChart() {
             chartUrl,
             initialFrom: from,
             initialTo: to,
-            onRangeUpdate: updateWeightChartLegend
         });
     }
 }
 
-function updateWeightChartLegend(data) {
-    const valueElement = document.getElementById("weightChartValue");
-    if (!valueElement) return;
-
-    const values = Array.isArray(data?.values) ? data.values : [];
-    const latestValue = [...values].reverse().find(value => value != null && Number.isFinite(Number(value)));
-    valueElement.textContent = latestValue == null ? "-- kg" : `${Number(latestValue).toFixed(1)} kg`;
-}
 /* =========================================================
    2) モーダル（新規登録 / 編集）— weight ページ専用
    ========================================================= */
