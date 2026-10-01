@@ -31,9 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-
-    // 削除確認モーダルを有効化する。
     initDeleteConfirm();
+    initAjaxPagination();
 });
 
 function initAlertAutoDismiss() {
@@ -164,6 +163,41 @@ function initFilterForm() {
     syncActiveRange();
 }
 
+// Chống load lại trang 
+function initAjaxPagination() {
+    const card = document.querySelector('.table-card');
+    if (!card) return;
+
+    async function loadPage(url, push) {
+        let response;
+        try {
+            response = await fetch(url, { headers: { Accept: 'text/html' } });
+        } catch {
+            window.location.href = url;
+            return;
+        }
+        if (!response.ok) { window.location.href = url; return; }
+
+        const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
+        const newCard = doc.querySelector('.table-card');
+        if (!newCard) { window.location.href = url; return; }
+
+        card.innerHTML = newCard.innerHTML;
+        if (push) history.pushState(null, '', url);
+        if (window.lucide) lucide.createIcons();
+        document.dispatchEvent(new CustomEvent('table:updated'));
+    }
+
+    card.addEventListener('click', (event) => {
+        const link = event.target.closest('.pagination a');
+        if (!link) return;
+        event.preventDefault();
+        loadPage(link.href, true);
+    });
+
+    window.addEventListener('popstate', () => loadPage(window.location.href, false));
+}
+
 function initDeleteConfirm() {
     const overlay = document.getElementById('deleteModalOverlay');
     if (!overlay) return;
@@ -188,12 +222,11 @@ function initDeleteConfirm() {
         pendingForm = null;
     }
 
-    document.querySelectorAll('.delete-form').forEach((form) => {
-        form.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const msg = form.dataset.confirmMessage || null;
-            openDeleteModal(form, msg);
-        });
+    document.addEventListener('submit', (event) => {
+        const form = event.target;
+        if (!form.classList || !form.classList.contains('delete-form')) return;
+        event.preventDefault();
+        openDeleteModal(form, form.dataset.confirmMessage || null);
     });
 
     confirmBtn?.addEventListener('click', () => {
@@ -460,4 +493,23 @@ function initChartSwipe({ chart, wrapperEl, chartUrl, initialFrom, initialTo, on
         }
         loadRange(from, to);
     }, { passive: true });
+}
+
+// mở rộng ô memo
+function initMemoExpand() {
+    document.addEventListener('click', (e) => {
+        const cell = e.target.closest('.memo-cell');
+        if (!cell) {
+            document.querySelectorAll('.memo-cell.is-expanded').forEach((c) => {
+                c.classList.remove('is-expanded');
+            });
+            return;
+        }
+
+        if (!cell.textContent.trim()) return;
+        document.querySelectorAll('.memo-cell.is-expanded').forEach((c) => {
+            if (c !== cell) c.classList.remove('is-expanded');
+        });
+        cell.classList.toggle('is-expanded');
+    });
 }

@@ -16,6 +16,7 @@
 
     <!-- ===== Header ===== -->
     <div th:replace="~{commons/header :: header(activePage='sleep')}"></div>
+
     <main class="sleep-page">
         <div class="sleep-page__inner">
 
@@ -49,6 +50,7 @@
                 </button>
             </div>
 
+            <!-- Feedback -->
             <div th:replace="~{commons/data-controls :: feedbackList(feedbackList=${feedbackList})}"></div>
 
             <!-- Summary Cards -->
@@ -57,87 +59,72 @@
                 <div class="summary-card">
                     <span class="summary-card__label">最新睡眠</span>
                     <span class="summary-card__value">
-                        <span th:text="${stats != null && stats.latest != null
-				                ? (stats.latest / 60 + '時間' + stats.latest % 60 + '分')
-				                : '--'}"></span>
+                        <span
+                            th:text="${stats != null && stats.latest != null ? (stats.latest / 60 + '時間' + stats.latest % 60 + '分') : '--'}"></span>
                     </span>
                     <span class="summary-card__sub" th:if="${stats != null && stats.latestDate != null}"
-                        th:text="'最終記録：' + ${#temporals.format(stats.latestDate,'yyyy/MM/dd')}">
-                    </span>
+                        th:text="'最終記録：' + ${#temporals.format(stats.latestDate, 'yyyy/MM/dd')}"></span>
                 </div>
 
                 <!-- 平均 -->
                 <div class="summary-card">
-                    <span class="summary-card__label" th:text="${stats.isCustomRange} ? '期間平均' : '今月平均'">
-                        今月平均
-                    </span>
+                    <span class="summary-card__label" th:text="${stats?.isCustomRange} ? '期間平均' : '今月平均'">今月平均</span>
                     <span class="summary-card__value">
-                        <span th:text="${stats != null && stats.monthlyAverage != null
-				                ? (stats.monthlyAverage / 60 + '時間' + stats.monthlyAverage % 60 + '分')
-				                : '--'}"></span>
+                        <span
+                            th:text="${stats != null && stats.monthlyAverage != null ? (stats.monthlyAverage / 60 + '時間' + stats.monthlyAverage % 60 + '分') : '--'}"></span>
                     </span>
-                    <span class="summary-card__sub" th:text="${stats.isCustomRange} ? '対象期間の1日平均' : '今月の1日平均'">
-                    </span>
+                    <span class="summary-card__sub" th:text="${stats?.isCustomRange} ? '対象期間の1日平均' : '今月の1日平均'"></span>
                 </div>
 
                 <!-- 最短 -->
                 <div class="summary-card">
-                    <span class="summary-card__label" th:text="${stats.isCustomRange} ? '期間内最短' : '今月最短'">
-                        今月最短
-                    </span>
+                    <span class="summary-card__label" th:text="${stats?.isCustomRange} ? '期間内最短' : '今月最短'">今月最短</span>
                     <span class="summary-card__value">
-                        <span th:text="${stats != null && stats.shortest != null
-				                ? (stats.shortest / 60 + '時間' + stats.shortest % 60 + '分')
-				                : '--'}"></span>
+                        <span
+                            th:text="${stats != null && stats.shortest != null ? (stats.shortest / 60 + '時間' + stats.shortest % 60 + '分') : '--'}"></span>
                     </span>
                     <span class="summary-card__sub" th:if="${stats != null && stats.shortestDate != null}"
-                        th:text="'記録日：' + ${#temporals.format(stats.shortestDate,'yyyy/MM/dd')}">
-                    </span>
+                        th:text="'記録日：' + ${#temporals.format(stats.shortestDate, 'yyyy/MM/dd')}"></span>
                 </div>
 
                 <!-- 最長 -->
                 <div class="summary-card">
-                    <span class="summary-card__label" th:text="${stats.isCustomRange} ? '期間内最長' : '今月最長'">
-                        今月最長
-                    </span>
+                    <span class="summary-card__label" th:text="${stats?.isCustomRange} ? '期間内最長' : '今月最長'">今月最長</span>
                     <span class="summary-card__value">
-                        <span th:text="${stats != null && stats.longest != null
-				                ? (stats.longest / 60 + '時間' + stats.longest % 60 + '分')
-				                : '--'}"></span>
+                        <span
+                            th:text="${stats != null && stats.longest != null ? (stats.longest / 60 + '時間' + stats.longest % 60 + '分') : '--'}"></span>
                     </span>
                     <span class="summary-card__sub" th:if="${stats != null && stats.longestDate != null}"
-                        th:text="'記録日：' + ${#temporals.format(stats.longestDate,'yyyy/MM/dd')}">
-                    </span>
+                        th:text="'記録日：' + ${#temporals.format(stats.longestDate, 'yyyy/MM/dd')}"></span>
                 </div>
             </div>
 
-            <!-- "今月" -->
+            <!-- 期間指定時の注記 -->
             <p class="stats-period-note" th:if="${stats?.isCustomRange == true}">
                 <i data-lucide="calendar"></i>
-                <span th:text="${'上記の統計は ' +
-						(filterStartDate != null ? #temporals.format(filterStartDate, 'yyyy/M/d') : '〜') +
-						' 〜 ' +
-						(filterEndDate != null ? #temporals.format(filterEndDate, 'yyyy/M/d') : '〜') +
-						' の期間で算出しています'}">
-                </span>
+                <span
+                    th:text="${'上記の統計は ' + (filterStartDate != null ? #temporals.format(filterStartDate, 'yyyy/M/d') : '〜') + ' 〜 ' + (filterEndDate != null ? #temporals.format(filterEndDate, 'yyyy/M/d') : '〜') + ' の期間で算出しています'}"></span>
             </p>
 
             <!-- Filter Bar -->
             <div th:replace="~{commons/data-controls :: filterBar(
-					actionUrl=@{/profile/{profileId}/sleep(profileId=${profileId})},
-					clearUrl=@{/profile/{profileId}/sleep(profileId=${profileId})},
-					filterStartDate=${filterStartDate},
-					filterEndDate=${filterEndDate})}">
+                    actionUrl=@{/profile/{profileId}/sleep(profileId=${profileId})},
+                    clearUrl=@{/profile/{profileId}/sleep(profileId=${profileId})},
+                    filterStartDate=${filterStartDate},
+                    filterEndDate=${filterEndDate})}">
             </div>
 
-            <!-- Chart Card  -->
-            <div th:replace="~{commons/data-controls :: chartCard(
-					title='睡眠(時間)',
-					canvasId='sleepChart',
-					hasData=${not #lists.isEmpty(logs)},
-					chartUrl=@{/profile/{profileId}/sleep/chart-data(profileId=${profileId})},
-					category='sleep',
-					iconSrc=@{/image/sleep.png})}">
+            <!-- Chart Card -->
+            <div
+                th:replace="~{commons/data-controls :: chartCard(
+                    title='睡眠(時間)',
+                    canvasId='sleepChart',
+                    hasData=${not #lists.isEmpty(logs)},
+                    chartUrl=@{/profile/{profileId}/sleep/chart-data(profileId=${profileId})},
+                    category='sleep',
+                    iconSrc=@{/image/sleep.png},
+                    seriesLabel='睡眠',
+                    targetText=${currentProfile?.sleepGoalHours != null ? #numbers.formatDecimal(currentProfile.sleepGoalHours, 1, 1) + ' 時間' : null})}">
             </div>
 
             <!-- Table / Empty state -->
@@ -173,45 +160,36 @@
                                 <td class="sleep-table__memo memo-cell"
                                     th:text="${record.memo != null ? record.memo : ''}"></td>
                                 <td class="sleep-table__actions">
-                                    <button type="button" class="icon-btn edit-btn" th:data-id="${record.id}"
-                                        th:data-date="${record.recordedDate}" th:data-start-time="${record.startTime}"
-                                        th:data-end-time="${record.endTime}"
+                                    <button type="button" class="icon-btn edit-btn" aria-label="編集"
+                                        th:data-id="${record.id}" th:data-date="${record.recordedDate}"
+                                        th:data-start-time="${record.startTime}" th:data-end-time="${record.endTime}"
                                         th:data-sleep-type="${record.sleepType != null ? record.sleepType.name() : 'NIGHT'}"
-                                        th:data-memo="${record.memo}" aria-label="編集">
+                                        th:data-memo="${record.memo}">
                                         <img th:src="@{/image/edit.png}" alt="編集" class="icon-btn-img" />
                                     </button>
-                                    <button type="submit" th:form="'deleteForm-' + ${record.id}"
-                                        class="icon-btn icon-btn--danger" aria-label="削除">
+                                    <button type="submit" class="icon-btn icon-btn--danger" aria-label="削除"
+                                        th:form="'deleteForm-' + ${record.id}">
                                         <img th:src="@{/image/delete.png}" alt="削除" class="icon-btn-img" />
                                     </button>
+                                    <form class="delete-form" method="post" th:id="'deleteForm-' + ${record.id}"
+                                        th:action="@{/profile/{profileId}/sleep/{id}/delete(profileId=${profileId}, id=${record.id})}"
+                                        th:attr="data-confirm-message='「' + ${record.recordedDate} + '」の睡眠記録を削除しますか？&#10;この操作は取り消せません。'">
+                                    </form>
                                 </td>
-                                <form th:id="'deleteForm-' + ${record.id}"
-                                    th:action="@{/profile/{profileId}/sleep/{id}/delete(profileId=${profileId},id=${record.id})}"
-                                    method="post" class="delete-form"
-                                    th:attr="data-confirm-message='「' + ${record.recordedDate} + '」の睡眠記録を削除しますか？&#10; この操作は取り消せません。'">
-                                </form>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <div class="pagination" th:if="${totalPages > 1}">
-                    <a th:if="${hasPrevious}"
-                        th:href="@{/profile/{profileId}/sleep(profileId=${profileId}, startDate=${filterStartDate}, endDate=${filterEndDate}, page=${currentPage - 1})}"
-                        class="pagination__nav">← 前へ</a>
-
-                    <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                        th:href="@{/profile/{profileId}/sleep(profileId=${profileId}, startDate=${filterStartDate}, endDate=${filterEndDate}, page=${i})}"
-                        th:text="${i + 1}" th:classappend="${i == currentPage} ? 'is-active'"
-                        class="pagination__page"></a>
-
-                    <a th:if="${hasNext}"
-                        th:href="@{/profile/{profileId}/sleep(profileId=${profileId}, startDate=${filterStartDate}, endDate=${filterEndDate}, page=${currentPage + 1})}"
-                        class="pagination__nav">次へ →</a>
+                <!-- Pagination -->
+                <div th:replace="~{commons/data-controls :: pagination(
+                        @{/profile/{profileId}/sleep(profileId=${profileId})},
+                        ${filterStartDate}, ${filterEndDate},
+                        ${currentPage}, ${totalPages}, ${hasPrevious}, ${hasNext})}">
                 </div>
 
-                <!-- Trường hợp 1: chưa từng có bản ghi nào (không phụ thuộc việc có đang lọc hay không) -->
-                <div class="empty-state" th:if="${#lists.isEmpty(logs)} and ${!hasAnyLog}">
+                <!-- Trường hợp 1: chưa từng có bản ghi nào -->
+                <div class="empty-state" th:if="${#lists.isEmpty(logs) and !hasAnyLog}">
                     <img th:src="@{/image/sleep.png}" alt="" class="sleep-page__icon-img" />
                     <p>まだ睡眠が記録されていません</p>
                     <button type="button" class="btn btn--primary" id="openAddModalBtnEmpty">
@@ -219,7 +197,7 @@
                     </button>
                 </div>
 
-                <!-- Trường hợp 2: đã từng có bản ghi, nhưng bộ lọc hiện tại không có kết quả -->
+                <!-- Trường hợp 2: có bản ghi nhưng bộ lọc không khớp -->
                 <div class="empty-state" th:if="${#lists.isEmpty(logs) and hasAnyLog}">
                     <i data-lucide="calendar-days"></i>
                     <p>選択した期間に記録がありません</p>
@@ -252,7 +230,7 @@
                     <input id="recordedDate" name="recordedDate" type="date" th:max="${T(java.time.LocalDate).now()}"
                         required />
                     <div id="recordedDateError" class="field-error"><span></span></div>
-                    <p id="wakeDateHint" class="hint" style="margin-top:4px; display:none;"></p>
+                    <p id="wakeDateHint" class="hint" style="margin-top: 4px; display: none"></p>
                 </div>
 
                 <div class="input-group">
@@ -302,7 +280,6 @@
         window.sleepChartData = { labels: /*[[${labels}]]*/[], values: /*[[${values}]]*/[], chartMode: /*[[${chartMode}]]*/ "DAY", from: /*[[${chartFrom}]]*/ null, to: /*[[${chartTo}]]*/ null };
     </script>
     <script th:src="@{/js/sleep.js}"></script>
-
 </body>
 
 </html>

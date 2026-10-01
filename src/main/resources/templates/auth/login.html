@@ -75,17 +75,16 @@
                     <span th:text="${message}"></span>
                 </div>
 
-                <!-- メール未認証時のみ表示：確認メール再送 -->
                 <!-- 未認証ユーザーのメールアドレスへ確認コードを再送するフォーム -->
                 <form th:if="${emailNotVerified}" th:action="@{/auth/resend-code}" method="post" class="resend-form">
                     <input type="hidden" name="email" th:value="${email}" />
+                    <input type="hidden" name="resetFlow" value="false" />
                     <button type="submit" class="submit-btn resend-btn">
                         <i data-lucide="mail"></i>
                         確認メールを再送する
                     </button>
                 </form>
 
-                <!-- ログインフォーム本体 -->
                 <!-- メールアドレス、パスワード、ログイン状態を送信するログインフォーム -->
                 <form id="loginForm" th:action="@{/auth/login}" method="post" class="form" novalidate>
                     <div class="input-group">

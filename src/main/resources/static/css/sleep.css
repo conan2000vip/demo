@@ -156,3 +156,7 @@
 		width: auto;
 	}
 }
+
+.chart-card--sleep {
+	--chart-primary: #4a3b8c;
+}

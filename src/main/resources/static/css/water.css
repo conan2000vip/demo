@@ -153,3 +153,18 @@
 		display: none;
 	}
 }
+
+.chart-card--water {
+	--chart-primary: #2196f3;
+}
+
+.chart-card--water .chart-legend__marker--series {
+	height: 10px;
+	border-top: none;
+	background: var(--chart-primary);
+	border-radius: 2px;
+}
+
+.chart-card--water .chart-legend__marker--series::after {
+	display: none;
+}

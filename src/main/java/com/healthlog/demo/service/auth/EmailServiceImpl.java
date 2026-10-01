@@ -20,8 +20,7 @@ public class EmailServiceImpl implements EmailService {
                 toEmail,
                 "【HealthLog】パスワード再設定の認証コード",
                 "パスワード再設定のため、以下の認証コードをご入力ください。",
-                otp
-        );
+                otp);
         mailSender.send(message);
         log.info("パスワード再設定用の認証コードを送信しました");
     }
@@ -32,8 +31,7 @@ public class EmailServiceImpl implements EmailService {
                 toEmail,
                 "【HealthLog】会員登録の確認コード",
                 "会員登録を完了するため、以下の認証コードをご入力ください。",
-                otp
-        );
+                otp);
         mailSender.send(message);
         log.info("会員登録用の認証コードを送信しました");
     }
@@ -45,10 +43,9 @@ public class EmailServiceImpl implements EmailService {
         message.setSubject(subject);
         message.setText(
                 intro + "\n\n" +
-                "確認コード: " + otp + "\n\n" +
-                "このコードの有効期限は30分間です。\n" +
-                "本メールに心当たりがない場合は、破棄していただいて問題ございません。"
-        );
+                        "確認コード: " + otp + "\n\n" +
+                        "このコードの有効期限は30分間です。\n" +
+                        "本メールに心当たりがない場合は、破棄していただいて問題ございません。");
         return message;
     }
 }

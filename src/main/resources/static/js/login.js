@@ -1,53 +1,95 @@
 // ログイン画面の処理（login.js）
-// ログイン画面固有の処理: 基本入力チェックと確認メール再送フォームのメール同期
-
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('loginForm');
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
     const emailError = document.getElementById('emailError');
     const passwordError = document.getElementById('passwordError');
+    const serverErrorBanner = document.querySelector('.banner--error, .auth-alert--error');
 
     // =========================================================
-    // 送信前に基本入力を確認（未入力や形式不正なら送信を止め、
-    // 明らかなエラーでサーバーを呼び出さない）
+    // ヘルパー関数（エラー表示・クリア）
+    // =========================================================
+    function showError(input, errorBox, message) {
+        if (input) input.classList.add('has-error');
+        if (errorBox) {
+            const span = errorBox.querySelector('span');
+            if (span) span.textContent = message;
+            errorBox.classList.add('is-visible');
+        }
+        if (serverErrorBanner) serverErrorBanner.style.display = 'none';
+    }
+
+    function clearError(input, errorBox) {
+        if (input) input.classList.remove('has-error');
+        if (errorBox) errorBox.classList.remove('is-visible');
+        if (serverErrorBanner) serverErrorBanner.style.display = 'none';
+    }
+
+    // =========================================================
+    // ★ 検証ロジック（Validate Email & Password）
+    // =========================================================
+    function validateEmail() {
+        if (!emailInput) return true;
+        const val = emailInput.value.trim();
+
+        if (!val) {
+            showError(emailInput, emailError, 'メールアドレスを入力してください');
+            return false;
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+            showError(emailInput, emailError, '正しいメールアドレスを入力してください');
+            return false;
+        }
+
+        clearError(emailInput, emailError);
+        return true;
+    }
+
+    function validatePassword() {
+        if (!passwordInput) return true;
+        const val = passwordInput.value;
+
+        if (!val) {
+            showError(passwordInput, passwordError, 'パスワードを入力してください');
+            return false;
+        }
+
+        clearError(passwordInput, passwordError);
+        return true;
+    }
+
+    // =========================================================
+    // ★ リアルタイムイベントの設定
+    // =========================================================
+    if (emailInput) {
+        // 当 gõ chữ: Ẩn lỗi đỏ cũ đi
+        emailInput.addEventListener('input', () => clearError(emailInput, emailError));
+        // Khi rời khỏi ô Email (click sang ô Password): Kiểm tra định dạng có @ hay chưa
+        emailInput.addEventListener('blur', validateEmail);
+    }
+
+    if (passwordInput) {
+        passwordInput.addEventListener('input', () => clearError(passwordInput, passwordError));
+        passwordInput.addEventListener('blur', validatePassword);
+    }
+
+    // =========================================================
+    // フォーム送信時の検証
     // =========================================================
     if (form) {
         form.addEventListener('submit', (e) => {
-            let hasError = false;
+            if (serverErrorBanner) serverErrorBanner.style.display = 'none';
+            const isEmailValid = validateEmail();
+            const isPasswordValid = validatePassword();
 
-            [emailError, passwordError].forEach(el => el?.classList.remove('is-visible'));
-            [emailInput, passwordInput].forEach(el => el?.classList.remove('has-error'));
-
-            if (!emailInput.value.trim()) {
-                showError(emailInput, emailError, 'メールアドレスを入力してください');
-                hasError = true;
-            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
-                showError(emailInput, emailError, '正しいメールアドレスを入力してください');
-                hasError = true;
+            if (!isEmailValid || !isPasswordValid) {
+                e.preventDefault(); // Có lỗi thì dừng không cho submit
             }
-
-            if (!passwordInput.value) {
-                showError(passwordInput, passwordError, 'パスワードを入力してください');
-                hasError = true;
-            }
-
-            if (hasError) e.preventDefault();
         });
     }
 
-    function showError(input, errorBox, message) {
-        input.classList.add('has-error');
-        if (errorBox) {
-            errorBox.querySelector('span').textContent = message;
-            errorBox.classList.add('is-visible');
-        }
-    }
-
-    // =========================================================
-    // 現在のメールアドレスを確認メール再送フォームのhidden inputへ同期
-    // ログイン失敗後に別のメールアドレスを入力しても、古いアドレスではなく現在の値を送信する
-    // =========================================================
+    // 同期処理
     const resendHidden = document.getElementById('resendEmailHidden');
     if (emailInput && resendHidden) {
         emailInput.addEventListener('input', () => {

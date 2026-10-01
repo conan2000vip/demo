@@ -4,8 +4,6 @@ import java.math.BigDecimal;
 
 import org.springframework.stereotype.Component;
 
-import com.healthlog.demo.service.weight.WeightFeedback.BmiStatus;
-
 import lombok.RequiredArgsConstructor;
 
 @Component

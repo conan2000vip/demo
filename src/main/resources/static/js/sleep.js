@@ -57,18 +57,18 @@ function initModal() {
         if (event.key === "Escape" && overlay.classList.contains("is-open")) closeModal();
     });
 
-    // 編集ボタン：行のデータ属性からモーダルへ値を渡す
-    document.querySelectorAll(".edit-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-            openModal({
-                mode: "edit",
-                id: btn.dataset.id || "",
-                date: btn.dataset.date || "",
-                sleepType: btn.dataset.sleepType || "NIGHT",
-                startTime: btn.dataset.startTime || "",
-                endTime: btn.dataset.endTime || "",
-                memo: btn.dataset.memo || "",
-            });
+    // 編集ボタン：行のデータ属性からモーダルへ値を渡す（AJAXページ送り後も動くよう委譲）
+    document.addEventListener("click", (event) => {
+        const btn = event.target.closest(".edit-btn");
+        if (!btn) return;
+        openModal({
+            mode: "edit",
+            id: btn.dataset.id || "",
+            date: btn.dataset.date || "",
+            sleepType: btn.dataset.sleepType || "NIGHT",
+            startTime: btn.dataset.startTime || "",
+            endTime: btn.dataset.endTime || "",
+            memo: btn.dataset.memo || "",
         });
     });
 
@@ -265,6 +265,7 @@ function initChart() {
         isSearching: isSearching,
         color: "#4a3b8c",
         targetValue: targetSleep,
+        showDataLabels: true,
     });
 
     const wrapper = document.getElementById("chartWrapper");

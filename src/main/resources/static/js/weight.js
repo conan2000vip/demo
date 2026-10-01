@@ -141,16 +141,16 @@ function initModal() {
     });
 
     // 編集ボタン：行のデータ属性からモーダルへ値を渡す
-    document.querySelectorAll(".edit-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-            openModal({
-                mode: "edit",
-                id: btn.dataset.id || "",
-                measuredAt: btn.dataset.measuredAt || "",
-                weight: btn.dataset.weight || "",
-                height: btn.dataset.height || "",
-                memo: btn.dataset.memo || "",
-            });
+        document.addEventListener("click", (event) => {
+        const btn = event.target.closest(".edit-btn");
+        if (!btn) return;
+        openModal({
+            mode: "edit",
+            id: btn.dataset.id || "",
+            measuredAt: btn.dataset.measuredAt || "",
+            weight: btn.dataset.weight || "",
+            height: btn.dataset.height || "",
+            memo: btn.dataset.memo || "",
         });
     });
 

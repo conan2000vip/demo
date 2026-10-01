@@ -1,7 +1,5 @@
 package com.healthlog.demo.dto.auth;
 
-import com.healthlog.demo.validation.ValidPassword;
-
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -16,6 +14,5 @@ public class LoginRequest {
     private String email;
 
     @NotBlank(message = "パスワードを入力してください")
-    @ValidPassword
     private String password;
 }

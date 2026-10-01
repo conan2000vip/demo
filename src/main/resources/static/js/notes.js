@@ -55,16 +55,16 @@ function initModal() {
 		if (event.key === "Escape" && overlay.classList.contains("is-open")) closeModal();
 	});
 
-	// 編集ボタン：行のデータ属性からモーダルへ値を渡す
-	document.querySelectorAll(".edit-btn").forEach((btn) => {
-		btn.addEventListener("click", () => {
-			openModal({
-				mode: "edit",
-				id: btn.dataset.id || "",
-				date: btn.dataset.date || "",
-				title: btn.dataset.title || "",
-				content: btn.dataset.content || ""
-			});
+	// 編集ボタン：行のデータ属性からモーダルへ値を渡す（AJAXページ送り後も動くよう委譲）
+	document.addEventListener("click", (event) => {
+		const btn = event.target.closest(".edit-btn");
+		if (!btn) return;
+		openModal({
+			mode: "edit",
+			id: btn.dataset.id || "",
+			date: btn.dataset.date || "",
+			title: btn.dataset.title || "",
+			content: btn.dataset.content || ""
 		});
 	});
 

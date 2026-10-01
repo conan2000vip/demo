@@ -108,21 +108,22 @@ function initModal() {
     });
 
     // Edit record / 記録編集
-    document.querySelectorAll(".edit-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-            openModal({
-                mode: "edit",
-                id: btn.dataset.id || "",
-                date: btn.dataset.date || "",
-                steps: btn.dataset.steps || "",
-                memo: btn.dataset.memo || ""
-            });
+    // Edit record / 記録編集（AJAXページ送り後も動くよう委譲）
+    document.addEventListener("click", (event) => {
+        const btn = event.target.closest(".edit-btn");
+        if (!btn) return;
+        openModal({
+            mode: "edit",
+            id: btn.dataset.id || "",
+            date: btn.dataset.date || "",
+            steps: btn.dataset.steps || "",
+            memo: btn.dataset.memo || ""
         });
     });
 
     // Clear errors while typing / 入力時にエラーをクリア
     recordedDateInput.addEventListener("input", () => clearError("recordedDate"));
-    
+
     // ★ THAY ĐỔI: Khi sửa số bước, reset lại trạng thái cảnh báo
     stepsInput.addEventListener("input", () => {
         isStepsWarned = false;

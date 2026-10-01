@@ -256,9 +256,12 @@ public class AuthController {
 
     // 12. 指定されたメールアドレスへ確認コードを再送し、結果メッセージを確認画面へ表示する。
     @PostMapping("/resend-code")
-    public String resendCode(@RequestParam String email, RedirectAttributes redirectAttributes) {
+    public String resendCode(@RequestParam String email, @RequestParam(defaultValue = "false") boolean resetFlow,
+            HttpSession session, RedirectAttributes redirectAttributes) {
+
         try {
             verifyCodeService.resendCode(email);
+            session.setAttribute(SessionConstants.IS_RESET_FLOW, resetFlow);
             redirectAttributes.addFlashAttribute("email", email);
             redirectAttributes.addFlashAttribute("message", "確認コードを再送信しました。");
         } catch (BusinessException e) {
