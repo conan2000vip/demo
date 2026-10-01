@@ -3,9 +3,9 @@
 
 document.addEventListener("DOMContentLoaded", () => {
     const boxes = Array.from(document.querySelectorAll(".otp-box"));
-    const combinedInput = document.getElementById('codeCombined') 
-                   || document.getElementById('code') 
-                   || document.querySelector('input[name="code"]');
+    const combinedInput = document.getElementById('codeCombined')
+        || document.getElementById('code')
+        || document.querySelector('input[name="code"]');
     const form = document.getElementById("verifyForm");
     const codeError = document.getElementById("codeError");
 
@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
         box.addEventListener("input", () => {
             box.value = box.value.replace(/[^0-9]/g, "").slice(0, 1);
             box.classList.remove("has-error");
+            codeError.classList.remove("is-visible");
             if (box.value && index < boxes.length - 1) {
                 boxes[index + 1].focus();
             }
@@ -42,6 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // ---- 任意の入力欄へ6桁の数字を貼り付け ----
         box.addEventListener("paste", (e) => {
             e.preventDefault();
+            codeError.classList.remove("is-visible");
             const pasted = (e.clipboardData || window.clipboardData)
                 .getData("text")
                 .replace(/[^0-9]/g, "")
@@ -101,35 +103,24 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // 確認コード再送APIを呼び出す。
-        fetch("/auth/resend-code", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: new URLSearchParams({ email }),
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.errorMessage) {
-                    alert(data.errorMessage);
-                } else {
-                    alert(data.message || "確認コードを再送信しました。");
-                    resendBtn.disabled = true;
-                    secondsLeft = 60;
-                    const retryTimer = setInterval(() => {
-                        secondsLeft -= 1;
-                        if (secondsLeft <= 0) {
-                            clearInterval(retryTimer);
-                            resendTimerText.textContent = "";
-                            resendBtn.disabled = false;
-                        } else {
-                            resendTimerText.textContent = `${secondsLeft}秒後に再送できます`;
-                        }
-                    }, 1000);
-                }
-            })
-            .catch((err) => {
-                console.error(err);
-                alert("送信に失敗しました。");
-            });
+        // リダイレクトとFlashメッセージを維持するため、通常のPOST送信を行う。
+        const resendForm = document.createElement("form");
+        resendForm.method = "post";
+        resendForm.action = "/auth/resend-code";
+
+        const emailField = document.createElement("input");
+        emailField.type = "hidden";
+        emailField.name = "email";
+        emailField.value = email;
+        resendForm.appendChild(emailField);
+
+        const resetFlowField = document.createElement("input");
+        resetFlowField.type = "hidden";
+        resetFlowField.name = "resetFlow";
+        resetFlowField.value = resendBtn.dataset.resetFlow === "true";
+        resendForm.appendChild(resetFlowField);
+
+        document.body.appendChild(resendForm);
+        resendForm.submit();
     });
 });

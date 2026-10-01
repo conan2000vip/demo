@@ -1,18 +1,15 @@
 package com.healthlog.demo.dto;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class StepSummary {
+public class MemoSummary {
     private Long id;
     private LocalDate recordedDate;
-    private int steps;
-    private Integer goalRate;
-    private LocalDateTime updatedAt;
-    private String memo;
+    private String title;
+    private String content;
 }

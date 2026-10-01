@@ -8,7 +8,7 @@ import java.time.Period;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
+import jakarta.persistence.Transient;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -94,5 +94,22 @@ public class Profile implements Serializable {
             return 0;
         }
         return Period.between(this.birthDate, LocalDate.now()).getYears();
+    }
+
+    @Transient
+    public int getDailySleepGoalMinutes() {
+        return dailySleepGoal == null ? 0
+                : dailySleepGoal.multiply(BigDecimal.valueOf(60)).intValue();
+    }
+
+    @Transient
+    public String getFormattedSleepGoal() {
+        if (dailySleepGoal == null || dailySleepGoal.signum() <= 0) {
+            return "-";
+        }
+        int total = getDailySleepGoalMinutes();
+        int h = total / 60;
+        int m = total % 60;
+        return m == 0 ? h + "時間" : h + "時間" + m + "分";
     }
 }

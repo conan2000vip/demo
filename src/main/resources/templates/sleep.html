@@ -99,13 +99,6 @@
                 </div>
             </div>
 
-            <!-- 期間指定時の注記 -->
-            <p class="stats-period-note" th:if="${stats?.isCustomRange == true}">
-                <i data-lucide="calendar"></i>
-                <span
-                    th:text="${'上記の統計は ' + (filterStartDate != null ? #temporals.format(filterStartDate, 'yyyy/M/d') : '〜') + ' 〜 ' + (filterEndDate != null ? #temporals.format(filterEndDate, 'yyyy/M/d') : '〜') + ' の期間で算出しています'}"></span>
-            </p>
-
             <!-- Filter Bar -->
             <div th:replace="~{commons/data-controls :: filterBar(
                     actionUrl=@{/profile/{profileId}/sleep(profileId=${profileId})},
@@ -124,7 +117,7 @@
                     category='sleep',
                     iconSrc=@{/image/sleep.png},
                     seriesLabel='睡眠',
-                    targetText=${currentProfile?.sleepGoalHours != null ? #numbers.formatDecimal(currentProfile.sleepGoalHours, 1, 1) + ' 時間' : null})}">
+                    targetText=${currentProfile?.dailySleepGoal != null ? ((currentProfile.dailySleepGoal * 60).intValue() / 60 + '時間' + (currentProfile.dailySleepGoal * 60).intValue() % 60 + '分') : null})}">
             </div>
 
             <!-- Table / Empty state -->
@@ -276,7 +269,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script th:src="@{/js/common.js}"></script>
     <script th:inline="javascript">
-        window.targetSleep = /*[[${currentProfile != null ? currentProfile.sleepGoalHours : null}]]*/ null;
+        window.targetSleep = /*[[${currentProfile != null ? currentProfile.dailySleepGoal : null}]]*/ null;
         window.sleepChartData = { labels: /*[[${labels}]]*/[], values: /*[[${values}]]*/[], chartMode: /*[[${chartMode}]]*/ "DAY", from: /*[[${chartFrom}]]*/ null, to: /*[[${chartTo}]]*/ null };
     </script>
     <script th:src="@{/js/sleep.js}"></script>

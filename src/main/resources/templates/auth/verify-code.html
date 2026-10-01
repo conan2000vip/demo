@@ -74,7 +74,8 @@
                 </form>
 
                 <div class="otp-meta" style="margin-top: 16px; justify-content: center; gap: 8px;">
-                    <button type="button" id="resendBtn" class="otp-resend" disabled>コードを再送する</button>
+                    <button type="button" id="resendBtn" class="otp-resend" disabled
+                        th:data-reset-flow="${isResetFlow}">コードを再送する</button>
                     <span id="resendTimerText"></span>
                 </div>
 

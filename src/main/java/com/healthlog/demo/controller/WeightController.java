@@ -25,7 +25,7 @@ import com.healthlog.demo.entity.User;
 import com.healthlog.demo.entity.Weight;
 import com.healthlog.demo.exception.BusinessException;
 import com.healthlog.demo.repository.UserRepository;
-import com.healthlog.demo.service.weight.WeightFeedbackRule;
+import com.healthlog.demo.service.feedbackservice.FeedbackService;
 import com.healthlog.demo.service.weight.WeightService;
 import com.healthlog.demo.util.SecurityContextUtil;
 
@@ -38,7 +38,7 @@ import lombok.RequiredArgsConstructor;
 public class WeightController {
 
 	private final WeightService weightService;
-	private final WeightFeedbackRule weightFeedbackRule;
+	private final FeedbackService feedbackService;
 	private final SecurityContextUtil securityContextUtil;
 	private final UserRepository userRepository;
 
@@ -51,7 +51,8 @@ public class WeightController {
 			HttpSession session,
 			Model model) {
 		User user = getCurrentUser(session);
-		if (user == null) return "redirect:/auth/login";
+		if (user == null)
+			return "redirect:/auth/login";
 
 		DateRangerFilter dateRange = new DateRangerFilter(startDate, endDate);
 		Map<String, Object> result = weightService.list(profileId, user.getId(), dateRange, page);
@@ -59,7 +60,7 @@ public class WeightController {
 		model.addAttribute("profileId", profileId);
 		model.addAttribute("filterStartDate", startDate);
 		model.addAttribute("filterEndDate", endDate);
-		List<FeedbackItem> feedbackList = weightFeedbackRule.evaluate(profileId);
+		List<FeedbackItem> feedbackList = feedbackService.getWeightFeedback(profileId);
 		model.addAttribute("feedbackList", feedbackList);
 		return "weight";
 	}
@@ -90,7 +91,8 @@ public class WeightController {
 			HttpSession session,
 			RedirectAttributes redirectAttributes) {
 		User user = getCurrentUser(session);
-		if (user == null) return "redirect:/auth/login";
+		if (user == null)
+			return "redirect:/auth/login";
 
 		Weight input = new Weight();
 		input.setRecordedDate(recordedDate);
@@ -120,7 +122,8 @@ public class WeightController {
 			HttpSession session,
 			RedirectAttributes redirectAttributes) {
 		User user = getCurrentUser(session);
-		if (user == null) return "redirect:/auth/login";
+		if (user == null)
+			return "redirect:/auth/login";
 
 		try {
 			weightService.delete(profileId, user.getId(), logId);
@@ -133,13 +136,16 @@ public class WeightController {
 
 	private User getCurrentUser(HttpSession session) {
 		User user = (User) session.getAttribute(SessionConstants.LOGIN_USER);
-		if (user != null) return user;
+		if (user != null)
+			return user;
 
 		String email = securityContextUtil.getCurrentUserEmail();
-		if (email == null) return null;
+		if (email == null)
+			return null;
 
 		user = userRepository.findByEmail(email).orElse(null);
-		if (user != null) session.setAttribute(SessionConstants.LOGIN_USER, user);
+		if (user != null)
+			session.setAttribute(SessionConstants.LOGIN_USER, user);
 		return user;
 	}
 }

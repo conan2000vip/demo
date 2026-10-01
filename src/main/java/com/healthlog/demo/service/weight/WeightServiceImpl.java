@@ -24,7 +24,7 @@ import com.healthlog.demo.repository.WeightRepository;
 import com.healthlog.demo.service.base.BaseLogService;
 import com.healthlog.demo.service.helper.ChartDataBuilder;
 import com.healthlog.demo.service.helper.ProfileAccessValidation;
-import com.healthlog.demo.service.weight.WeightFeedback.BmiStatus;
+import com.healthlog.demo.service.weight.BmiCalculator.BmiStatus;
 
 @Service
 @Transactional
@@ -34,19 +34,16 @@ public class WeightServiceImpl extends BaseLogService<Weight, Weight> implements
 
 	private final WeightRepository weightRepository;
 	private final BmiCalculator bmiCalculator;
-	private final WeightFeedback weightFeedback;
 	private final ChartDataBuilder chartDataBuilder;
 
 	public WeightServiceImpl(
 			WeightRepository weightRepository,
 			ProfileAccessValidation profileAccessValidation,
 			BmiCalculator bmiCalculator,
-			WeightFeedback weightFeedback,
 			ChartDataBuilder chartDataBuilder) {
 		super(weightRepository, profileAccessValidation);
 		this.weightRepository = weightRepository;
 		this.bmiCalculator = bmiCalculator;
-		this.weightFeedback = weightFeedback;
 		this.chartDataBuilder = chartDataBuilder;
 	}
 
@@ -61,7 +58,7 @@ public class WeightServiceImpl extends BaseLogService<Weight, Weight> implements
 		validateDateRange(dateRange);
 		List<Weight> logs = getLogs(profileId, currentUserId, dateRange);
 		@SuppressWarnings("null")
-        ChartDataResponse chartData = chartDataBuilder.build(logs, dateRange, Weight::getWeight);
+		ChartDataResponse chartData = chartDataBuilder.build(logs, dateRange, Weight::getWeight);
 
 		Map<String, Object> result = new HashMap<>();
 		result.put("labels", chartData.labels());
@@ -92,8 +89,9 @@ public class WeightServiceImpl extends BaseLogService<Weight, Weight> implements
 		BigDecimal latest = latestLog != null ? latestLog.getWeight() : null;
 		BigDecimal min = minLog != null ? minLog.getWeight() : null;
 		BigDecimal max = maxLog != null ? maxLog.getWeight() : null;
-		BigDecimal bmi = latestLog != null ? bmiCalculator.calculateBMI(latest, resolveHeight(profile, latestLog)) : null;
-		BmiStatus overallStatus = weightFeedback.statusOf(bmi);
+		BigDecimal bmi = latestLog != null ? bmiCalculator.calculateBMI(latest, resolveHeight(profile, latestLog))
+				: null;
+		BmiStatus overallStatus = bmiCalculator.statusOf(bmi);
 
 		ChartDataResponse chartData = chartDataBuilder.build(allLogs, dateRange, Weight::getWeight);
 		Page<Weight> logPage = getLogsPaged(profileId, currentUserId, dateRange, PageRequest.of(page, PAGE_SIZE));
@@ -162,7 +160,7 @@ public class WeightServiceImpl extends BaseLogService<Weight, Weight> implements
 
 	private WeightSummary toSummary(Profile profile, Weight log) {
 		BigDecimal bmi = bmiCalculator.calculateBMI(log.getWeight(), resolveHeight(profile, log));
-		return WeightSummary.from(log, bmi, weightFeedback.statusOf(bmi));
+		return WeightSummary.from(log, bmi, bmiCalculator.statusOf(bmi));
 	}
 
 	private BigDecimal resolveHeight(Profile profile, Weight weight) {
@@ -198,5 +196,4 @@ public class WeightServiceImpl extends BaseLogService<Weight, Weight> implements
 			throw new BusinessException(HttpStatus.BAD_REQUEST, "500文字以内で入力してください");
 		}
 	}
-
 }

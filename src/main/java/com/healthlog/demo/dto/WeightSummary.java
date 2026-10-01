@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.healthlog.demo.entity.Weight;
-import com.healthlog.demo.service.weight.WeightFeedback.BmiStatus;
+import com.healthlog.demo.service.weight.BmiCalculator.BmiStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

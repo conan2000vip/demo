@@ -1,11 +1,8 @@
 package com.healthlog.demo.service.weight;
 
-import java.math.BigDecimal;
+import java.util.List;
+import com.healthlog.demo.dto.feedback.FeedbackItem;
 
 public interface WeightFeedback {
-
-	BmiStatus statusOf(BigDecimal bmi);
-
-	record BmiStatus(String label, String code) {
-	}
+	List<FeedbackItem> evaluate(Long profileId);
 }

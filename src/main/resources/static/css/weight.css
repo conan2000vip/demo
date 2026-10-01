@@ -52,7 +52,6 @@
 /* =========================================================
    Weight Table Only
    ========================================================= */
-
 .weight-table {
 	width: 100%;
 	table-layout: fixed;
@@ -91,8 +90,8 @@
 }
 
 .weight-table__weight {
-	font-weight: 700;
-	text-align: center;
+    font-weight: 400;
+    text-align: center;
 }
 
 .weight-table__memo {
@@ -113,14 +112,6 @@
 	width: 90px;
 }
 
-.weight-page .filter-bar {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 14px;
-	box-sizing: border-box;
-}
-
 .weight-page .filter-bar__quick-area {
 	flex: 0 0 auto;
 	gap: 8px;
@@ -131,25 +122,7 @@
 	flex-wrap: nowrap;
 }
 
-.weight-page .filter-bar__date-area {
-	display: flex;
-	flex: 1 1 auto;
-	justify-content: flex-end;
-	align-items: center;
-	gap: 8px;
-	width: auto;
-}
-
-.weight-page .filter-bar input[type="date"] {
-	width: 145px;
-	min-width: 120px;
-}
-
 @media (max-width: 860px) {
-	.weight-page .filter-bar {
-		flex-direction: column;
-		align-items: stretch;
-	}
 
 	.weight-page .filter-bar__quick-area,
 	.weight-page .filter-bar__date-area {

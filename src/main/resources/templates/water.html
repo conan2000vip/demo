@@ -103,7 +103,7 @@
 
             <!-- Shared Chart Card / 共通グラフカード -->
             <div th:replace="~{commons/data-controls :: chartCard(
-                    title='水分摂取(ml)',
+                    title='水分(ml)',
                     canvasId='waterChart',
                     hasData=${not #lists.isEmpty(logs)},
                     chartUrl=@{/profile/{profileId}/water/chart-data(profileId=${profileId})},
@@ -136,10 +136,10 @@
                                 </td>
                                 <td>
                                     <span class="water-drink"
-                                        th:text="${record.drinkType != null ? record.drinkType.label : '--'}">水</span>
+                                        th:text="${record.drinkTypeLabel != null ? record.drinkTypeLabel : '--'}">水</span>
                                 </td>
                                 <td class="water-table__amount">
-                                    <strong><span th:text="${record.amountMl}">250</span> ml</strong>
+                                    <span th:text="${record.amountMl}">250</span>ml
                                 </td>
                                 <td class="water-table__memo memo-cell"
                                     th:text="${record.memo != null ? record.memo : ''}"

@@ -53,76 +53,78 @@
    Water Table Only
    ========================================================= */
 .water-table {
-	width: 100%;
-	table-layout: fixed;
+    width: 100%;
+    table-layout: fixed;
 }
 
 /* 日付 */
 .water-table th:nth-child(1),
 .water-table td:nth-child(1) {
-	width: 130px;
-	white-space: nowrap;
+    width: 130px;
+    white-space: nowrap;
 }
 
 /* 時間 */
 .water-table th:nth-child(2),
 .water-table td:nth-child(2) {
-	width: 100px;
-	text-align: center;
-	white-space: nowrap;
-	color: var(--wp-text-muted);
+    width: 100px;
+    text-align: center;
+    white-space: nowrap;
+    color: var(--wp-text-muted);
 }
 
-/* 飲み物 */
+/* 飲み物 - Đã sửa thành font chữ mảnh bình thường */
 .water-table th:nth-child(3),
 .water-table td:nth-child(3) {
-	width: 160px;
-	text-align: center;
-	white-space: nowrap;
+    width: 160px;
+    text-align: center;
+    white-space: nowrap;
+    font-weight: 400 !important;
 }
 
-/* 量 */
+/* 量 - Đã sửa thành font chữ mảnh bình thường */
 .water-table th:nth-child(4),
 .water-table td:nth-child(4) {
-	width: 140px;
-	text-align: center;
-	white-space: nowrap;
+    width: 140px;
+    text-align: center;
+    white-space: nowrap;
+    font-weight: 400 !important;
 }
 
 .water-table th:nth-child(5),
 .water-table td:nth-child(5) {
-	text-align: left;
+    text-align: left;
 }
 
 .water-drink {
-	font-weight: 600;
+    font-weight: 400 !important;
 }
 
 .water-table__amount {
-	font-weight: 700;
-	text-align: center;
+    font-weight: 400 !important;
+    text-align: center;
 }
 
 .water-table__time {
-	color: var(--wp-text-muted);
+    color: var(--wp-text-muted);
 }
 
 .water-table__memo {
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	color: var(--wp-text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--wp-text-muted);
 }
 
 .water-table__actions {
-	display: flex;
-	align-items: center;
-	justify-content: flex-end;
-	gap: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
 }
 
 .water-table__actions-col {
-	width: 90px;
+    width: 90px;
 }
 
 /* =========================================================

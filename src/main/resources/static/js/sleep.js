@@ -246,6 +246,12 @@ function initModal() {
    睡眠時間推移グラフ
    共通の HealthChart を使用する
    ========================================================= */
+function formatHours(value) {
+    const totalMin = Math.round(value * 60);
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+    return m === 0 ? `${h}h` : `${h}h${m}m`;
+}
 function initChart() {
     const isSearching = Boolean(
         document.getElementById("startDateInput")?.value ||
@@ -266,6 +272,7 @@ function initChart() {
         color: "#4a3b8c",
         targetValue: targetSleep,
         showDataLabels: true,
+        valueFormatter: formatHours,
     });
 
     const wrapper = document.getElementById("chartWrapper");

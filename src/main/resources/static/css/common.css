@@ -4,13 +4,16 @@
    ========================================================= */
 :root {
     --app-header-height: 81px;
+
     --wp-primary: #4caf50;
     --wp-primary-dark: rgb(11, 151, 95);
     --wp-primary-light: #ccfbf1;
+
     --wp-bg-gradient: linear-gradient(180deg,
             #c7d2dc 0%,
             #d7dfe7 45%,
             #e4e9ef 100%);
+
     --wp-text: #1f2937;
     --wp-text-muted: #6b7280;
     --wp-border: #e5e7eb;
@@ -18,13 +21,24 @@
     --wp-danger-bg: #fef2f2;
     --wp-success: #4caf50;
     --wp-warning: #f59e0b;
+
     --wp-radius-lg: 16px;
     --wp-radius-md: 12px;
     --wp-radius-sm: 8px;
+
     --wp-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
     --wp-shadow-lg: 0 20px 50px rgba(15, 23, 42, 0.18);
+
     --wp-font:
-        "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+        "Noto Sans JP",
+        "Yu Gothic",
+        "Hiragino Kaku Gothic ProN",
+        sans-serif;
+
+    --wp-font-weight-normal: 400;
+    --wp-font-weight-medium: 500;
+    --wp-font-weight-semibold: 600;
+    --wp-font-weight-bold: 700;
 }
 
 /* ===== ページ全体 ===== */
@@ -34,6 +48,13 @@ body {
     position: relative;
     font-family: var(--wp-font);
     background: var(--wp-bg-gradient);
+}
+
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
 }
 
 /* ===== 共通ヘッダー ===== */
@@ -499,10 +520,6 @@ body {
         display: inline;
     }
 
-    .app-header__user-wrap {
-        position: relative;
-    }
-
     .app-header__user {
         max-width: none;
     }
@@ -831,8 +848,7 @@ body {
 }
 
 /* BMI: 肥満(2度以上)  */
-.badge--obese,
-.badge--danger {
+.badge--obese {
     background: #fde8e8;
     color: #dc2626;
 }
@@ -841,12 +857,6 @@ body {
 .badge--danger {
     background: #fee2e2;
     color: #b91c1c;
-}
-
-/* 50% - 79% */
-.badge--warning {
-    background: #fef3c7;
-    color: #b45309;
 }
 
 /* 80% - 99% */
@@ -867,6 +877,7 @@ body {
 .filter-bar {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 18px;
     background: #ffffff;
     border-radius: var(--wp-radius-lg);
@@ -929,6 +940,8 @@ body {
 
 .filter-bar__date-area {
     display: flex;
+    flex: 1 1 auto;
+    justify-content: flex-end;
     align-items: center;
     gap: 8px;
     min-width: 0;
@@ -1025,6 +1038,7 @@ body {
     gap: 10px;
     padding: 12px 18px;
     background: linear-gradient(130deg, rgb(241, 241, 241), rgb(241, 241, 241));
+    position: relative;
 }
 
 .chart-card__icon {
@@ -1049,10 +1063,6 @@ body {
     font-weight: 800;
     margin: 0;
     white-space: nowrap;
-}
-
-.chart-card__header {
-    position: relative;
 }
 
 .chart-legend {
@@ -1660,6 +1670,7 @@ body {
     .filter-bar__date-area {
         width: 100%;
         flex-wrap: wrap;
+        justify-content: flex-start;
     }
 }
 

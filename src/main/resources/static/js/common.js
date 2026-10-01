@@ -261,7 +261,8 @@ window.HealthChart = (() => {
         targetValue = null,
         color = null,
         showDataLabels = false,
-        labelColor = '#1e293b'
+        labelColor = '#1e293b',
+        valueFormatter = (v) => String(v)
     }) {
         const canvas = document.getElementById(canvasId);
         if (!canvas || typeof Chart === 'undefined' || !data?.labels?.length) return null;
@@ -380,7 +381,7 @@ window.HealthChart = (() => {
                         ctx.font = 'bold 12px sans-serif';
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'bottom';
-                        ctx.fillText(String(value), element.x, element.y + (isLine ? -7 : -6));
+                        ctx.fillText(valueFormatter(value), element.x, element.y + (isLine ? -7 : -6));
                         ctx.restore();
                     });
                 }
