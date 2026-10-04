@@ -1,6 +1,7 @@
 package com.healthlog.demo.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,6 +43,9 @@ public interface BaseLogRepository<T extends BaseLog> extends JpaRepository<T, L
         boolean existsByProfile_Id(Long profileId);
 
         boolean existsByProfile_IdAndRecordedDate(Long profileId, LocalDate recordedDate);
+
+        boolean existsByProfile_IdAndCreatedAtGreaterThanEqualAndCreatedAtLessThan(
+                        Long profileId, LocalDateTime from, LocalDateTime to);
 
         long countByProfile_IdAndRecordedDate(Long profileId, LocalDate recordedDate);
 

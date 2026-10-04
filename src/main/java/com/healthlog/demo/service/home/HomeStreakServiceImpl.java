@@ -1,12 +1,17 @@
 package com.healthlog.demo.service.home;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.chrono.ChronoLocalDateTime;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
-import com.healthlog.demo.repository.SleepRepository;
-import com.healthlog.demo.repository.StepRepository;
-import com.healthlog.demo.repository.WaterRepository;
 import com.healthlog.demo.repository.WeightRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -15,31 +20,68 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class HomeStreakServiceImpl implements HomeStreakService {
 
-    private static final int MAX_DAYS = 366;
-
     private final WeightRepository weightRepository;
-    private final SleepRepository sleepRepository;
-    private final WaterRepository waterRepository;
-    private final StepRepository stepRepository;
 
     @Override
     public int getCurrentStreak(Long profileId, LocalDate today) {
-        LocalDate start = hasAll(profileId, today) ? today
-                : hasAll(profileId, today.minusDays(1)) ? today.minusDays(1) : null;
-        if (start == null) {
-            return 0;
-        }
-        int streak = 0;
-        for (LocalDate d = start; streak < MAX_DAYS && hasAll(profileId, d); d = d.minusDays(1)) {
-            streak++;
-        }
-        return streak;
+        Optional<StreakInfo> currentStreak = getCurrentStreakInfo(profileId, today);
+        return currentStreak.isPresent() ? currentStreak.get().days() : 0;
     }
 
-    private boolean hasAll(Long profileId, LocalDate date) {
-        return weightRepository.existsByProfile_IdAndRecordedDate(profileId, date)
-                && sleepRepository.existsByProfile_IdAndRecordedDate(profileId, date)
-                && waterRepository.existsByProfile_IdAndRecordedDate(profileId, date)
-                && stepRepository.existsByProfile_IdAndRecordedDate(profileId, date);
+    @Override
+    public Optional<StreakInfo> getCurrentStreakInfo(Long profileId, LocalDate today) {
+        List<LocalDate> completeDays = getCompleteDays(profileId, today.plusDays(1).atStartOfDay());
+        Set<LocalDate> daySet = new HashSet<>(completeDays);
+
+        LocalDate lastCompletedDate = null;
+        if (daySet.contains(today)) {
+            lastCompletedDate = today;
+        } else if (daySet.contains(today.minusDays(1))) {
+            lastCompletedDate = today.minusDays(1);
+        }
+        if (lastCompletedDate == null) return Optional.empty();
+
+        int days = countConsecutiveDays(daySet, lastCompletedDate);
+        return Optional.of(new StreakInfo(days, lastCompletedDate.minusDays((long) days - 1), lastCompletedDate));
+    }
+
+    @Override
+    public boolean hasPreviousStreak(Long profileId, LocalDate today) {
+        return getBrokenStreak(profileId, today).isPresent();
+    }
+
+    @Override
+    public Optional<StreakBreak> getBrokenStreak(Long profileId, LocalDate today) {
+        List<LocalDate> completeDays = getCompleteDays(profileId, today.plusDays(1).atStartOfDay());
+        if (completeDays.contains(today) || completeDays.contains(today.minusDays(1))) {
+            return Optional.empty();
+        }
+        LocalDate lastStreakDay = completeDays.stream()
+                .filter(date -> !date.isAfter(today.minusDays(2)))
+                .findFirst()
+                .orElse(null);
+        if (lastStreakDay == null) return Optional.empty();
+
+        int days = countConsecutiveDays(new HashSet<>(completeDays), lastStreakDay);
+        return Optional.of(new StreakBreak(days, lastStreakDay.minusDays((long) days - 1), lastStreakDay));
+    }
+
+    @SuppressWarnings("null")
+    private List<LocalDate> getCompleteDays(Long profileId, LocalDateTime beforeDate) {
+        List<LocalDateTime> completedAtValues = weightRepository.findCompleteStreakDays(profileId, beforeDate);
+        return completedAtValues.stream()
+                .filter(Objects::nonNull)
+                .map(ChronoLocalDateTime::toLocalDate)
+                .distinct()
+                .sorted(Comparator.reverseOrder())
+                .toList();
+    }
+
+    private int countConsecutiveDays(Set<LocalDate> completeDays, LocalDate startFrom) {
+        int count = 0;
+        for (LocalDate date = startFrom; completeDays.contains(date); date = date.minusDays(1)) {
+            count++;
+        }
+        return count;
     }
 }

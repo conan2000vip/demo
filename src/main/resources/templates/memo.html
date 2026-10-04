@@ -50,16 +50,16 @@
 				</button>
 			</div>
 
-			<!-- Filter Bar -->
-			<div th:replace="~{commons/data-controls :: filterBar(
-                    actionUrl=@{/profile/{profileId}/memo(profileId=${profileId})},
-                    clearUrl=@{/profile/{profileId}/memo(profileId=${profileId})},
-                    filterStartDate=${filterStartDate},
-                    filterEndDate=${filterEndDate})}">
-			</div>
+			<!-- Memo list and date filter -->
+			<section class="table-card memo-records-card">
+				<div class="memo-records-card__toolbar">
+					<div th:replace="~{commons/data-controls :: dateRangePicker(
+							@{/profile/{profileId}/memo(profileId=${profileId})},
+							@{/profile/{profileId}/memo(profileId=${profileId})},
+							${filterStartDate}, ${filterEndDate})}">
+					</div>
+				</div>
 
-			<!-- Table / Empty State -->
-			<section class="table-card">
 				<div class="data-table-scroll">
 					<table class="memo-table" th:if="${not #lists.isEmpty(logs)}">
 						<thead>

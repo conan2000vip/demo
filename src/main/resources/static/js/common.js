@@ -6,8 +6,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     initUserMenu();
+    initMobileNavigation();
+    initChartRangePicker();
     initAlertAutoDismiss();
     initFilterForm();
+    initMemoExpand();
 
     // パスワードの表示と非表示を切り替える。
     document.querySelectorAll('.toggle-password').forEach((btn) => {
@@ -65,6 +68,174 @@ function initUserMenu() {
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') closeMenu();
     });
+}
+
+function initMobileNavigation() {
+    const toggle = document.getElementById('menuToggle');
+    const navigation = document.getElementById('appNavigation');
+    if (!toggle || !navigation) return;
+
+    function closeNavigation() {
+        navigation.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+    }
+
+    toggle.addEventListener('click', () => {
+        const isOpen = navigation.classList.toggle('open');
+        toggle.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    navigation.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', closeNavigation);
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!toggle.contains(event.target) && !navigation.contains(event.target)) {
+            closeNavigation();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeNavigation();
+    });
+}
+
+function initChartRangePicker() {
+    const form = document.getElementById('chartRangePopover');
+    const toggle = document.getElementById('chartRangeToggle');
+    const label = document.getElementById('chartRangeLabel');
+    const startInput = document.getElementById('chartRangeStartDate');
+    const endInput = document.getElementById('chartRangeEndDate');
+    const quickRangeBar = document.getElementById('chartRangeQuickBar');
+    const error = document.getElementById('chartRangeError');
+    if (!form || !toggle || !label || !startInput || !endInput) return;
+
+    function toIsoDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function getRange(range) {
+        const end = new Date();
+        end.setHours(0, 0, 0, 0);
+        const start = new Date(end);
+        if (range === '1W') start.setDate(start.getDate() - 6);
+        if (range === '30D') start.setDate(start.getDate() - 29);
+        if (range === '6M' || range === '1Y') {
+            const months = range === '6M' ? 6 : 12;
+            const originalDay = start.getDate();
+            start.setDate(1);
+            start.setMonth(start.getMonth() - months);
+            start.setDate(Math.min(originalDay, new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate()));
+        }
+        return { start: toIsoDate(start), end: toIsoDate(end) };
+    }
+
+    function formatDate(value, includeYear = true) {
+        if (!value) return '';
+        const [year, month, day] = value.split('-');
+        return `${includeYear ? `${year}/` : ''}${month}/${day}`;
+    }
+
+    function updateLabel() {
+        if (!startInput.value || !endInput.value) {
+            const defaultRange = getRange('1W');
+            label.textContent = `${formatDate(defaultRange.start)} – ${formatDate(defaultRange.end)}`;
+        } else {
+            const shortDates = window.matchMedia('(max-width: 420px)').matches;
+            const sameYear = startInput.value.slice(0, 4) === endInput.value.slice(0, 4);
+            const includeYear = !shortDates || !sameYear;
+            label.textContent = `${formatDate(startInput.value, includeYear)} – ${formatDate(endInput.value, includeYear)}`;
+        }
+    }
+
+    function syncQuickRange() {
+        const selectedStart = startInput.value || getRange('1W').start;
+        const selectedEnd = endInput.value || getRange('1W').end;
+        quickRangeBar?.querySelectorAll('[data-range]').forEach((button) => {
+            const range = getRange(button.dataset.range);
+            button.classList.toggle('is-active', selectedStart === range.start && selectedEnd === range.end);
+        });
+    }
+
+    function closePopover() {
+        form.hidden = true;
+        toggle.setAttribute('aria-expanded', 'false');
+    }
+
+    function positionPopover() {
+        if (form.hidden) return;
+        const anchor = toggle.getBoundingClientRect();
+        const popover = form.getBoundingClientRect();
+        const margin = 16;
+        const left = Math.max(margin, Math.min(anchor.right - popover.width, window.innerWidth - popover.width - margin));
+        let top = anchor.bottom + 8;
+        if (top + popover.height > window.innerHeight - margin) {
+            top = anchor.top - popover.height - 8;
+        }
+        top = Math.max(margin, Math.min(top, window.innerHeight - popover.height - margin));
+        form.style.left = `${left}px`;
+        form.style.top = `${top}px`;
+    }
+
+    function updateRangeDisplay() {
+        updateLabel();
+        syncQuickRange();
+        if (error) error.hidden = true;
+    }
+
+    if (!startInput.value && !endInput.value) {
+        const defaultRange = getRange('1W');
+        startInput.value = defaultRange.start;
+        endInput.value = defaultRange.end;
+    }
+
+    toggle.addEventListener('click', () => {
+        const isOpen = form.hidden;
+        form.hidden = !isOpen;
+        toggle.setAttribute('aria-expanded', String(isOpen));
+        if (isOpen) requestAnimationFrame(positionPopover);
+    });
+
+    quickRangeBar?.querySelectorAll('[data-range]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const range = getRange(button.dataset.range);
+            startInput.value = range.start;
+            endInput.value = range.end;
+            form.requestSubmit();
+        });
+    });
+
+    [startInput, endInput].forEach((input) => {
+        input.addEventListener('input', updateRangeDisplay);
+        input.addEventListener('change', updateRangeDisplay);
+    });
+
+    form.addEventListener('submit', (event) => {
+        if (startInput.value && endInput.value && startInput.value > endInput.value) {
+            event.preventDefault();
+            error.textContent = '終了日は開始日以降の日付を指定してください。';
+            error.hidden = false;
+        }
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!form.hidden && !form.contains(event.target) && !toggle.contains(event.target)) closePopover();
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !form.hidden) {
+            closePopover();
+            toggle.focus();
+        }
+    });
+
+    updateRangeDisplay();
+    window.addEventListener('resize', updateLabel);
+    window.addEventListener('resize', positionPopover);
+    window.addEventListener('scroll', positionPopover, true);
 }
 
 function initFilterForm() {
@@ -338,7 +509,15 @@ window.HealthChart = (() => {
                         grid: { display: true, color: '#f1f5f9', drawTicks: false },
                         border: { display: true, color: '#94a3b8', width: 1.5 },
                         offset: true,
-                        ticks: { padding: 8, color: '#475569', font: { weight: 'bold' } }
+                        ticks: {
+                            padding: 8,
+                            color: '#475569',
+                            font: { weight: 'bold' },
+                            autoSkip: true,
+                            maxTicksLimit: data.chartMode === 'HOUR' ? 8 : undefined,
+                            minRotation: 0,
+                            maxRotation: 0
+                        }
                     },
                     y: {
                         grid: { display: true, color: '#f1f5f9', drawTicks: false },
@@ -498,19 +677,45 @@ function initChartSwipe({ chart, wrapperEl, chartUrl, initialFrom, initialTo, on
 
 // mở rộng ô memo
 function initMemoExpand() {
-    document.addEventListener('click', (e) => {
-        const cell = e.target.closest('.memo-cell');
+    function setExpanded(cell, expanded) {
+        cell.classList.toggle('is-expanded', expanded);
+        cell.setAttribute('aria-expanded', String(expanded));
+    }
+
+    function toggleCell(cell) {
+        const willExpand = !cell.classList.contains('is-expanded');
+        document.querySelectorAll('.memo-cell.is-expanded').forEach((expandedCell) => {
+            if (expandedCell !== cell) setExpanded(expandedCell, false);
+        });
+        setExpanded(cell, willExpand);
+    }
+
+    document.querySelectorAll('.memo-cell').forEach((cell) => {
+        if (!cell.textContent.trim()) return;
+        cell.tabIndex = 0;
+        cell.setAttribute('aria-expanded', 'false');
+    });
+
+    document.addEventListener('click', (event) => {
+        const target = event.target;
+        const cell = target instanceof Element ? target.closest('.memo-cell') : null;
         if (!cell) {
             document.querySelectorAll('.memo-cell.is-expanded').forEach((c) => {
-                c.classList.remove('is-expanded');
+                setExpanded(c, false);
             });
             return;
         }
 
         if (!cell.textContent.trim()) return;
-        document.querySelectorAll('.memo-cell.is-expanded').forEach((c) => {
-            if (c !== cell) c.classList.remove('is-expanded');
-        });
-        cell.classList.toggle('is-expanded');
+        toggleCell(cell);
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        const target = event.target;
+        const cell = target instanceof Element ? target.closest('.memo-cell') : null;
+        if (!cell || !cell.textContent.trim()) return;
+        event.preventDefault();
+        toggleCell(cell);
     });
 }

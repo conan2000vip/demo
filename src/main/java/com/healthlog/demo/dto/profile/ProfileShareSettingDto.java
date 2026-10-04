@@ -18,11 +18,11 @@ public class ProfileShareSettingDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class CategoryRole {
-        private ShareRole weightRole = ShareRole.VIEWER;
-        private ShareRole sleepRole = ShareRole.VIEWER;
-        private ShareRole waterRole = ShareRole.VIEWER;
-        private ShareRole stepRole = ShareRole.VIEWER;
-        private ShareRole memoRole = ShareRole.VIEWER;
+        private ShareRole weightRole = ShareRole.NONE;
+        private ShareRole sleepRole = ShareRole.NONE;
+        private ShareRole waterRole = ShareRole.NONE;
+        private ShareRole stepRole = ShareRole.NONE;
+        private ShareRole memoRole = ShareRole.NONE;
     }
 
     @Getter
@@ -33,8 +33,6 @@ public class ProfileShareSettingDto {
         private Long targetProfileId;
         private String targetProfileName;
         private String relationship;
-        private boolean isPrimary;
-        private boolean isSelf;
         private CategoryRole roles = new CategoryRole();
     }
 }

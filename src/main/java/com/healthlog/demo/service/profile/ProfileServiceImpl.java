@@ -146,7 +146,6 @@ public class ProfileServiceImpl implements ProfileService {
     @Transactional
     public void delete(Long userId, Long profileId, HttpSession session) {
         Profile profile = getProfile(userId, profileId);
-
         if (profile.isPrimary()) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "本人のプロファイルは削除できません");
         }

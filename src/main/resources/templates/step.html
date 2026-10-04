@@ -93,14 +93,6 @@
                 </div>
             </div>
 
-            <!-- Shared Filter Bar / 共通フィルターバー -->
-            <div th:replace="~{commons/data-controls :: filterBar(
-                    actionUrl=@{/profile/{profileId}/step(profileId=${profileId})},
-                    clearUrl=@{/profile/{profileId}/step(profileId=${profileId})},
-                    filterStartDate=${filterStartDate},
-                    filterEndDate=${filterEndDate})}">
-            </div>
-
             <!-- Shared Chart Card / 共通グラフカード -->
             <div th:replace="~{commons/data-controls :: chartCard(
                     title='歩数(歩)',
@@ -110,7 +102,11 @@
                     category='step',
                     iconSrc=@{/image/footstep.png},
                     seriesLabel='歩数',
-                    targetText=${currentProfile?.stepGoal != null ? currentProfile.stepGoal + ' 歩' : null})}">
+                    targetText=${currentProfile?.stepGoal != null ? currentProfile.stepGoal + ' 歩' : null},
+                    filterAction=@{/profile/{profileId}/step(profileId=${profileId})},
+                    clearUrl=@{/profile/{profileId}/step(profileId=${profileId})},
+                    filterStartDate=${filterStartDate},
+                    filterEndDate=${filterEndDate})}">
             </div>
 
             <!-- Data Table / データテーブル -->

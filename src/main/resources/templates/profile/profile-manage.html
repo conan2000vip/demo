@@ -71,6 +71,7 @@
                 <!-- Thao tác Actions -->
                 <div class="profile-manage__actions">
                     <button type="button" class="icon-btn icon-btn--share"
+                        th:if="${currentProfile != null and (currentProfile.isPrimary or currentProfile.id == p.id)}"
                         th:onclick="|openShareModal(${p.id}, ${currentProfile.id}, ${currentProfile.isPrimary})|"
                         data-tooltip="データ共有設定">
                         <img th:src="@{/image/shield.png}" alt="共有設定" class="icon-btn-img" />
@@ -83,7 +84,7 @@
                     </a>
 
                     <!-- Nút Xóa Profile (Thùng rác) -->
-                    <form th:if="${!p.isPrimary and currentProfile != null and (currentProfile.isPrimary or currentProfile.id == p.id)}"
+                    <form th:if="${!p.isPrimary and currentProfile != null and currentProfile.isPrimary}"
                         th:id="'deleteForm-' + ${p.id}" th:action="@{/profile/delete}"
                         method="post" class="delete-form"
                         th:attr="data-confirm-message='「' + ${p.name} + '」のプロファイルを削除しますか？&#10;この操作は取り消せません。'">

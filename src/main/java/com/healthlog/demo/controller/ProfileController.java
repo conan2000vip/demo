@@ -130,7 +130,6 @@ public class ProfileController {
         }
 
         boolean isFirstProfile = !profileService.hasAnyProfile(user.getId());
-
         if (bindingResult.hasErrors()) {
             model.addAttribute("isFirstProfile", isFirstProfile);
             model.addAttribute("isPrimary", false);

@@ -8,10 +8,8 @@ document.addEventListener("DOMContentLoaded", () => {
    Uses shared HealthChart / 共通のHealthChartを使用
 ========================================================= */
 function initChart() {
-    const isSearching = Boolean(
-        document.getElementById("startDateInput")?.value ||
-        document.getElementById("endDateInput")?.value
-    );
+    const searchParams = new URLSearchParams(window.location.search);
+    const isSearching = searchParams.has("startDate") || searchParams.has("endDate");
 
     const targetStep = window.targetStep !== null && window.targetStep !== undefined
         ? parseFloat(window.targetStep)

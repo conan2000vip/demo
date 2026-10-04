@@ -1,6 +1,7 @@
 package com.healthlog.demo.service.feedbackservice;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -10,10 +11,7 @@ import org.springframework.stereotype.Service;
 import com.healthlog.demo.dto.feedback.FeedbackItem;
 import com.healthlog.demo.dto.feedback.FeedbackLevel;
 import com.healthlog.demo.dto.feedback.FeedbackType;
-import com.healthlog.demo.repository.SleepRepository;
-import com.healthlog.demo.repository.StepRepository;
-import com.healthlog.demo.repository.WaterRepository;
-import com.healthlog.demo.repository.WeightRepository;
+import com.healthlog.demo.service.home.HomeStreakService;
 import com.healthlog.demo.service.sleep.SleepFeedback;
 import com.healthlog.demo.service.step.StepFeedback;
 import com.healthlog.demo.service.water.WaterFeedback;
@@ -24,15 +22,12 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class FeedbackService {
-    private static final int[] HEALTH_STREAK_MILESTONES = { 7, 14, 30, 60, 90, 180, 365 };
+    private static final int[] HEALTH_STREAK_MILESTONES = { 7, 14, 30, 60, 90, 180 };
     private final WeightFeedback weightFeedback;
     private final SleepFeedback sleepFeedback;
     private final WaterFeedback waterFeedback;
     private final StepFeedback stepFeedback;
-    private final WeightRepository weightRepository;
-    private final SleepRepository sleepRepository;
-    private final WaterRepository waterRepository;
-    private final StepRepository stepRepository;
+    private final HomeStreakService homeStreakService;
 
     // ===== Màn hình riêng: mỗi loại chỉ 1 thẻ có mức cao nhất =====
     public List<FeedbackItem> getWeightFeedback(Long profileId) {
@@ -71,31 +66,35 @@ public class FeedbackService {
                 .thenComparing(FeedbackItem::getOccurredAt)).map(List::of).orElse(List.of());
     }
 
-    private int calculateStreak(Long profileId, LocalDate today) {
-        int streak = 0;
-        for (LocalDate date = today;; date = date.minusDays(1)) {
-            boolean hasWeight = weightRepository.existsByProfile_IdAndRecordedDate(profileId, date);
-            boolean hasSleep = sleepRepository.existsByProfile_IdAndRecordedDate(profileId, date);
-            boolean hasWater = waterRepository.existsByProfile_IdAndRecordedDate(profileId, date);
-            boolean hasStep = stepRepository.existsByProfile_IdAndRecordedDate(profileId, date);
-            if (!hasWeight || !hasSleep || !hasWater || !hasStep)
-                break;
-            streak++;
-        }
-        return streak;
-    }
-
     private FeedbackItem checkHealthRecordStreak(Long profileId) {
-        LocalDate today = LocalDate.now();
-        int streak = calculateStreak(profileId, today);
+        LocalDate today = LocalDate.now(ZoneId.systemDefault());
+        HomeStreakService.StreakInfo streakInfo = homeStreakService.getCurrentStreakInfo(profileId, today)
+                .orElse(null);
+        if (streakInfo == null) return null;
+        int streak = streakInfo.days();
         for (int milestone : HEALTH_STREAK_MILESTONES) {
             if (streak == milestone)
-                return createStreakFeedback(streak, today);
+                return createStreakFeedback(streak, today, null);
+        }
+        long years = (long) streakInfo.lastCompletedDate().getYear() - streakInfo.startDate().getYear();
+        while (years > 0 && streakInfo.startDate().plusYears(years).isAfter(streakInfo.lastCompletedDate())) {
+            years--;
+        }
+        if (years > 0 && streakInfo.startDate().plusYears(years).equals(streakInfo.lastCompletedDate())) {
+            return createStreakFeedback(streak, today, years);
         }
         return null;
     }
 
-    private FeedbackItem createStreakFeedback(int streak, LocalDate today) {
+    private FeedbackItem createStreakFeedback(int streak, LocalDate today, Long years) {
+        if (years != null) {
+            String yearLabel = years == 1 ? "1年" : years + "年";
+            return new FeedbackItem(FeedbackType.HEALTH_STREAK, FeedbackLevel.LV1,
+                    streak + "日間連続で健康記録を続けています！",
+                    yearLabel + "間、健康記録を続けることができました！\n本当に素晴らしい継続です！",
+                    today.atStartOfDay(), "trophy");
+        }
+
         String title;
         String message;
         switch (streak) {
@@ -122,10 +121,6 @@ public class FeedbackService {
         case 180 -> {
             title = "180日間連続で健康記録を続けています！";
             message = "半年間、健康記録を続けています。\n毎日の積み重ねが大きな習慣になっています！";
-        }
-        case 365 -> {
-            title = "365日間連続で健康記録を続けています！";
-            message = "1年間、毎日健康記録を続けることができました！\n本当に素晴らしい継続です！";
         }
         default -> {
             return null;

@@ -64,6 +64,13 @@ function openShareModal(profileId, currentProfileId, isCurrentPrimary) {
 function renderShareMatrixTable(data) {
     const list = document.getElementById('shareMatrixBody');
     list.innerHTML = '';
+    const saveButton = document.getElementById('btnSaveShareSettings');
+    saveButton.disabled = data.length === 0;
+
+    if (data.length === 0) {
+        list.innerHTML = '<p class="share-settings__empty">設定できる他のプロファイルはありません。</p>';
+        return;
+    }
 
     const permissionFields = [
         ['weightRole', '体重'],
@@ -74,8 +81,6 @@ function renderShareMatrixTable(data) {
     ];
 
     data.forEach((item, index) => {
-        const isDisabled = item.self;
-
         const member = document.createElement('section');
         member.className = 'share-settings__member';
         member.innerHTML = `
@@ -84,11 +89,10 @@ function renderShareMatrixTable(data) {
                     <strong class="share-settings__member-name">${escapeHtml(item.targetProfileName)}</strong>
                     <span class="share-settings__relationship">${escapeHtml(item.relationship)}</span>
                 </div>
-                ${item.self ? '<span class="badge badge--selected share-settings__active-badge">操作中</span>' : ''}
             </div>
             <div class="share-settings__permissions">
                 ${permissionFields.map(([fieldName, label]) => createRoleSelectCell(
-                    index, fieldName, item.roles[fieldName], isDisabled, label
+                    index, fieldName, item.roles[fieldName], label
                 )).join('')}
             </div>
         `;
@@ -96,12 +100,12 @@ function renderShareMatrixTable(data) {
     });
 }
 
-function createRoleSelectCell(index, fieldName, currentRole, isDisabled, label) {
+function createRoleSelectCell(index, fieldName, currentRole, label) {
     const selectId = `share-role-${index}-${fieldName}`;
     return `
         <div class="share-settings__permission">
             <label for="${selectId}">${label}</label>
-            <select id="${selectId}" class="share-settings__select" ${isDisabled ? 'disabled' : ''}
+            <select id="${selectId}" class="share-settings__select"
                     onchange="onRoleChange(${index}, '${fieldName}', this.value)">
                 <option value="EDITOR" ${currentRole === 'EDITOR' ? 'selected' : ''}>編集者</option>
                 <option value="VIEWER" ${currentRole === 'VIEWER' ? 'selected' : ''}>閲覧者</option>
@@ -119,7 +123,7 @@ function onRoleChange(index, fieldName, value) {
 
 // Gọi API POST lưu cấu hình
 function saveShareSettings() {
-    if (!currentActiveProfileId) return;
+    if (!currentActiveProfileId || currentShareData.length === 0) return;
 
     const btnSave = document.getElementById('btnSaveShareSettings');
     btnSave.disabled = true;
@@ -127,14 +131,26 @@ function saveShareSettings() {
     fetch(`/profile/${currentActiveProfileId}/share-settings`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
         },
-        body: JSON.stringify(currentShareData)
+        body: JSON.stringify(currentShareData.map(({ targetProfileId, roles }) => ({ targetProfileId, roles })))
     })
         .then(response => {
             if (!response.ok) return response.json().then(error => { throw new Error(error.message); });
-            const activeProfileName = currentShareData.find(item => item.self)?.targetProfileName;
-            showShareAlert(`${activeProfileName} の共有設定を保存しました。`, 'success');
+            return response.json();
+        })
+        .then(savedSettings => {
+            const matchesSubmittedSettings = currentShareData.every(item => {
+                const savedItem = savedSettings.find(saved => saved.targetProfileId === item.targetProfileId);
+                return savedItem && Object.keys(item.roles).every(role => savedItem.roles[role] === item.roles[role]);
+            });
+            if (!matchesSubmittedSettings) {
+                throw new Error('共有設定を保存できませんでした。変更内容を確認して、もう一度お試しください。');
+            }
+            currentShareData = savedSettings;
+            renderShareMatrixTable(savedSettings);
+            showShareAlert('共有設定を保存しました。', 'success');
             closeShareModal();
         })
         .catch(err => showShareAlert(err.message))

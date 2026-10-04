@@ -5,35 +5,32 @@
 :root {
     --app-header-height: 81px;
 
-    --wp-primary: #4caf50;
-    --wp-primary-dark: rgb(11, 151, 95);
-    --wp-primary-light: #ccfbf1;
+    --wp-primary: #0f766e;
+    --wp-primary-dark: #115e59;
+    --wp-primary-light: #d9f3ed;
 
-    --wp-bg-gradient: linear-gradient(180deg,
-            #c7d2dc 0%,
-            #d7dfe7 45%,
-            #e4e9ef 100%);
+    --wp-bg-gradient:
+        radial-gradient(ellipse at 8% 0%, rgba(204, 236, 226, 0.46), transparent 34rem),
+        linear-gradient(180deg, #f4f8f6 0%, #f7f9f8 48%, #f1f6f4 100%);
 
-    --wp-text: #1f2937;
-    --wp-text-muted: #6b7280;
-    --wp-border: #e5e7eb;
+    --wp-surface: #ffffff;
+    --wp-surface-subtle: #f5f8f7;
+    --wp-text: #1c2b29;
+    --wp-text-muted: #64736f;
+    --wp-border: #e2ebe7;
     --wp-danger: #ef4444;
     --wp-danger-bg: #fef2f2;
-    --wp-success: #4caf50;
+    --wp-success: #15803d;
     --wp-warning: #f59e0b;
 
     --wp-radius-lg: 16px;
     --wp-radius-md: 12px;
     --wp-radius-sm: 8px;
 
-    --wp-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
-    --wp-shadow-lg: 0 20px 50px rgba(15, 23, 42, 0.18);
+    --wp-shadow: 0 4px 16px rgba(27, 55, 47, 0.055);
+    --wp-shadow-lg: 0 20px 50px rgba(27, 55, 47, 0.14);
 
-    --wp-font:
-        "Noto Sans JP",
-        "Yu Gothic",
-        "Hiragino Kaku Gothic ProN",
-        sans-serif;
+    --wp-font: "Noto Sans JP", "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif;
 
     --wp-font-weight-normal: 400;
     --wp-font-weight-medium: 500;
@@ -60,10 +57,10 @@ textarea {
 /* ===== 共通ヘッダー ===== */
 
 .app-header {
-    background: rgba(255, 255, 255, 0.82);
+    background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(12px);
-    border-bottom: 1px solid #e5e7eb;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    border-bottom: 1px solid var(--wp-border);
+    box-shadow: 0 2px 12px rgba(27, 55, 47, 0.035);
     position: sticky;
     top: 0;
     z-index: 300;
@@ -122,6 +119,7 @@ textarea {
 
 /* ===== メインナビゲーション ===== */
 
+/* The wrapper provides the white pill (background / border / radius). */
 .app-header__nav-wrapper {
     flex: 1;
     min-width: 0;
@@ -129,7 +127,6 @@ textarea {
     border: 1px solid #e5e7eb;
     border-radius: 18px;
     padding: 6px;
-    box-shadow: none;
     overflow: hidden;
 }
 
@@ -137,18 +134,12 @@ textarea {
     display: flex;
     align-items: center;
     gap: 4px;
-    flex: 1;
-    min-width: 0;
-    background: #ffffff;
-    border: none;
-    border-radius: 18px;
     padding: 4px;
     overflow-x: auto;
     overflow-y: hidden;
     white-space: nowrap;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
-    flex-wrap: nowrap;
 }
 
 .app-header__nav::-webkit-scrollbar {
@@ -174,8 +165,8 @@ textarea {
 }
 
 .app-header__nav-item.is-active {
-    background: #ecfdf5;
-    color: var(--wp-primary);
+    background: var(--wp-primary-light);
+    color: var(--wp-primary-dark);
     font-weight: 600;
 }
 
@@ -211,12 +202,30 @@ textarea {
 }
 
 .app-header__user[aria-expanded="true"] {
-    background: #ecfdf5;
-    border-color: #4caf50;
+    background: var(--wp-primary-light);
+    border-color: var(--wp-primary);
     box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.12);
 }
 
 /* ===== プロフィール切り替えドロップダウン ===== */
+
+.app-header__dropdown {
+    position: absolute;
+    top: calc(100% + 24px);
+    right: 0;
+    width: 280px;
+    background: #fff;
+    border: 1px solid #ececec;
+    border-radius: 18px;
+    padding: 10px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: 0.2s;
+    z-index: 200;
+    box-sizing: border-box;
+}
 
 .app-header__dropdown.is-open {
     opacity: 1;
@@ -241,15 +250,47 @@ textarea {
     gap: 1px;
 }
 
+.app-header__profile-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.app-header__profile-list li {
+    width: 100%;
+    list-style: none;
+}
+
 .app-header__profile-list form {
     margin: 0;
     width: 100%;
 }
 
+.app-header__profile-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    min-height: 48px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.88rem;
+    color: #333;
+    text-align: left;
+    transition: 0.15s;
+    box-sizing: border-box;
+}
+
 .app-header__profile-item .app-header__avatar {
     width: 36px;
     height: 36px;
-    font-size: 14px;
     flex-shrink: 0;
 }
 
@@ -281,57 +322,6 @@ textarea {
     display: block;
 }
 
-.app-header__dropdown {
-    position: absolute;
-    top: calc(100% + 24px);
-    right: 0;
-    width: 280px;
-    background: #fff;
-    border: 1px solid #ececec;
-    border-radius: 18px;
-    padding: 10px;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-6px);
-    transition: 0.2s;
-    z-index: 200;
-    box-sizing: border-box;
-}
-
-.app-header__profile-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    margin: 0;
-    padding: 0;
-    width: 100%;
-}
-
-.app-header__profile-list li {
-    width: 100%;
-    list-style: none;
-}
-
-.app-header__profile-item {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
-    border-radius: 12px;
-    min-height: 48px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 0.88rem;
-    color: #333;
-    text-align: left;
-    transition: 0.15s;
-    box-sizing: border-box;
-}
-
 .app-header__manage-link {
     width: 100%;
     padding: 10px 12px;
@@ -341,11 +331,15 @@ textarea {
     justify-content: flex-start;
     display: flex;
     align-items: center;
-    color: #4caf50;
+    color: var(--wp-primary);
     font-weight: 600;
     text-decoration: none;
     transition: 0.15s;
     box-sizing: border-box;
+}
+
+.app-header__manage-link:hover {
+    background: rgb(223, 255, 255);
 }
 
 .app-header__dropdown-divider {
@@ -354,17 +348,12 @@ textarea {
     margin: 8px 0;
 }
 
-.app-header__manage-link:hover {
-    background: rgb(223, 255, 255);
-}
-
 .app-header__avatar {
     width: 40px;
     height: 40px;
     border-radius: 50%;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
     object-fit: cover;
-    /* Đảm bảo ảnh avatar trên header tròn và nét */
     flex-shrink: 0;
 }
 
@@ -587,7 +576,9 @@ textarea {
     font-size: 28px;
     line-height: 1;
     opacity: 0.75;
-    transition: opacity 0.15s ease, background-color 0.15s ease;
+    transition:
+        opacity 0.15s ease,
+        background-color 0.15s ease;
 }
 
 .alert__close:hover {
@@ -609,6 +600,7 @@ textarea {
 
 /* =========================================================
    共通フィードバックカード
+   レベル別の色は変数 (--lv-title / --lv-badge) で切り替える
    ========================================================= */
 
 .feedback-list {
@@ -619,6 +611,9 @@ textarea {
 }
 
 .feedback-card {
+    --lv-title: #1f2937;
+    --lv-badge: #64748b;
+
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: start;
@@ -644,7 +639,7 @@ textarea {
     font-size: 14px;
     font-weight: 700;
     line-height: 1.45;
-    color: #1f2937;
+    color: var(--lv-title);
 }
 
 .feedback-card__message {
@@ -678,60 +673,32 @@ textarea {
     padding: 3px 10px;
     border-radius: 6px;
     color: #ffffff;
-    background: #64748b;
+    background: var(--lv-badge);
     white-space: nowrap;
 }
 
-/* Level 4 */
 .feedback-card--lv4 {
     background: #fee2e2;
+    --lv-title: #ef4444;
+    --lv-badge: #ef4444;
 }
 
-.feedback-card--lv4 .feedback-card__title {
-    color: #ef4444;
-}
-
-.feedback-card--lv4 .feedback-card__badge {
-    background: #ef4444;
-}
-
-/* Level 3 */
 .feedback-card--lv3 {
     background: #fef3c7;
+    --lv-title: #f59e0b;
+    --lv-badge: #f59e0b;
 }
 
-.feedback-card--lv3 .feedback-card__title {
-    color: #f59e0b;
-}
-
-.feedback-card--lv3 .feedback-card__badge {
-    background: #f59e0b;
-}
-
-/* Level 2 */
 .feedback-card--lv2 {
     background: #dbeafe;
+    --lv-title: #3b82f6;
+    --lv-badge: #3b82f6;
 }
 
-.feedback-card--lv2 .feedback-card__title {
-    color: #3b82f6;
-}
-
-.feedback-card--lv2 .feedback-card__badge {
-    background: #3b82f6;
-}
-
-/* Level 1 */
 .feedback-card--lv1 {
     background: #d1fae5;
-}
-
-.feedback-card--lv1 .feedback-card__title {
-    color: #10b981;
-}
-
-.feedback-card--lv1 .feedback-card__badge {
-    background: #10b981;
+    --lv-title: #10b981;
+    --lv-badge: #10b981;
 }
 
 .feedback-card.is-hidden {
@@ -769,12 +736,14 @@ textarea {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .summary-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.10);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.1);
 }
 
 .summary-card__label {
@@ -792,13 +761,9 @@ textarea {
     margin-top: 4px;
 }
 
+/* size / weight / height come from .badge */
 .summary-card__value .badge {
-    min-width: 58px;
-    height: 28px;
     padding: 0 10px;
-    font-size: 13px;
-    font-weight: 700;
-    line-height: 1;
     align-self: center;
     margin-top: 0;
 }
@@ -1012,16 +977,17 @@ textarea {
    体重・睡眠・水分・歩数などの推移グラフを表示
    ========================================================= */
 .chart-card {
-    background: #ffffff;
+    background: var(--wp-surface);
     border-radius: var(--wp-radius-lg);
     box-shadow: var(--wp-shadow);
+    border: 1px solid var(--wp-border);
     margin-bottom: 20px;
     overflow: hidden;
 }
 
 .chart-card__canvas {
     position: relative;
-    height: 300px;
+    height: 310px;
     width: 100%;
     min-width: 0;
 }
@@ -1037,8 +1003,155 @@ textarea {
     align-items: center;
     gap: 10px;
     padding: 12px 18px;
-    background: linear-gradient(130deg, rgb(241, 241, 241), rgb(241, 241, 241));
+    background: var(--wp-surface-subtle);
+    border-bottom: 1px solid var(--wp-border);
     position: relative;
+    z-index: 2;
+}
+
+.chart-range-picker {
+    position: relative;
+    flex: 0 0 auto;
+    margin-left: auto;
+}
+
+.chart-range-picker__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    max-width: min(360px, 45vw);
+    padding: 0 12px;
+    border: 1px solid #dbe3ed;
+    border-radius: 10px;
+    background: #fff;
+    color: #334155;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.chart-range-picker__toggle:hover,
+.chart-range-picker__toggle[aria-expanded="true"] {
+    border-color: #94a3b8;
+    background: #f8fafc;
+}
+
+.chart-range-picker__icon {
+    width: 17px;
+    height: 17px;
+    flex: 0 0 auto;
+}
+
+.chart-range-picker__chevron {
+    width: 15px;
+    height: 15px;
+    flex: 0 0 auto;
+    color: #64748b;
+}
+
+.chart-range-picker__popover {
+    position: fixed;
+    inset: auto;
+    z-index: 20;
+    width: min(340px, calc(100vw - 32px));
+    box-sizing: border-box;
+    padding: 16px;
+    border: 1px solid #dbe3ed;
+    border-radius: 14px;
+    background: #fff;
+    color: #1e293b;
+    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.18);
+}
+
+.chart-range-picker__popover[hidden] {
+    display: none;
+}
+
+.chart-range-picker__presets {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.chart-range-picker__presets .quick-btn {
+    min-width: 0;
+    padding: 0 5px;
+    font-size: 12px;
+}
+
+.chart-range-picker__dates {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.chart-range-picker__dates label {
+    display: grid;
+    min-width: 0;
+    gap: 6px;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.chart-range-picker__dates input {
+    width: 100%;
+    min-width: 0;
+    height: 36px;
+    box-sizing: border-box;
+    padding: 0 8px;
+    border: 1px solid #dbe3ed;
+    border-radius: 8px;
+    color: #334155;
+    font: inherit;
+    font-size: 12px;
+}
+
+.chart-range-picker__error {
+    margin: 10px 0 0;
+    color: #b91c1c;
+    font-size: 12px;
+}
+
+.chart-range-picker__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.chart-range-picker__clear {
+    margin-right: auto;
+    color: var(--wp-primary-dark);
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.chart-range-picker__search {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 0 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #f9fafb;
+    color: #374151;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.chart-range-picker__search [data-lucide] {
+    width: 16px;
+    height: 16px;
 }
 
 .chart-card__icon {
@@ -1144,10 +1257,16 @@ textarea {
     transition: all 0.15s ease;
 }
 
+.memo-cell:focus-visible {
+    outline: 2px solid var(--wp-primary);
+    outline-offset: 2px;
+}
+
 .memo-cell.is-expanded {
     max-width: none;
     white-space: normal;
     word-break: break-word;
+    overflow: visible;
     background: #f9fafb;
     border-radius: 6px;
     padding: 6px 8px;
@@ -1157,9 +1276,10 @@ textarea {
 }
 
 .table-card {
-    background: #ffffff;
+    background: var(--wp-surface);
     border-radius: var(--wp-radius-lg);
     box-shadow: var(--wp-shadow);
+    border: 1px solid var(--wp-border);
     overflow: hidden;
 }
 
@@ -1179,18 +1299,20 @@ textarea {
     top: 0;
     z-index: 1;
     text-align: left;
-    background: #f9fafb;
+    background: var(--wp-surface-subtle);
     color: var(--wp-text-muted);
     font-weight: 600;
     font-size: 13px;
     padding: 12px 20px;
     border-bottom: 1px solid var(--wp-border);
+    box-sizing: border-box;
 }
 
 .data-table-scroll tbody td {
     padding: 14px 20px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #edf2ef;
     vertical-align: middle;
+    box-sizing: border-box;
 }
 
 .data-table-scroll tbody tr:last-child td {
@@ -1198,7 +1320,7 @@ textarea {
 }
 
 .data-table-scroll tbody tr:hover {
-    background: #fafafa;
+    background: #f7faf9;
 }
 
 .data-table-scroll tbody tr.is-highlight {
@@ -1386,9 +1508,8 @@ textarea {
 }
 
 .btn--primary {
-    background: var(--wp-primary, #14b8a6);
+    background: var(--wp-primary);
     color: #fff;
-    border: none;
 }
 
 .btn--primary:hover {
@@ -1410,7 +1531,6 @@ textarea {
 .btn--danger {
     background: #ef4444;
     color: #fff;
-    border: none;
 }
 
 .btn--danger:hover {
@@ -1699,7 +1819,6 @@ textarea {
     .app-header__user .app-header__avatar {
         width: 26px;
         height: 26px;
-        font-size: 12px;
     }
 
     .app-header__chevron {
@@ -1710,7 +1829,6 @@ textarea {
     .app-header__profile-item .app-header__avatar {
         width: 26px;
         height: 26px;
-        font-size: 11px;
     }
 
     .app-header__profile-item {
@@ -1748,8 +1866,6 @@ textarea {
 
     .feedback-card__title {
         font-size: 14.5px;
-        font-weight: 700;
-        color: #1f2937;
     }
 
     .feedback-card__message {
@@ -1854,7 +1970,31 @@ textarea {
         flex-wrap: wrap;
     }
 
+    .chart-range-picker {
+        order: 2;
+        margin-left: auto;
+    }
+
+    .chart-range-picker__toggle {
+        min-height: 36px;
+        max-width: calc(100vw - 190px);
+        gap: 6px;
+        padding: 0 8px;
+        font-size: 11px;
+    }
+
+    .chart-range-picker__icon {
+        width: 15px;
+        height: 15px;
+    }
+
+    .chart-range-picker__chevron {
+        width: 13px;
+        height: 13px;
+    }
+
     .chart-legend {
+        order: 3;
         position: static;
         transform: none;
         width: 100%;
@@ -1870,7 +2010,6 @@ textarea {
 /* 560px以下 */
 @media (max-width: 560px) {
     .summary-grid {
-        grid-template-columns: 1fr 1fr;
         gap: 12px;
     }
 
@@ -1904,12 +2043,4 @@ textarea {
     .filter-bar__date-label {
         grid-column: 1;
     }
-}
-
-/* =========================================================
-   共通履歴テーブル
-   ========================================================= */
-.data-table-scroll th,
-.data-table-scroll td {
-    box-sizing: border-box;
 }

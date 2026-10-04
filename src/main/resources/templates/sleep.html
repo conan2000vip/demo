@@ -99,14 +99,6 @@
                 </div>
             </div>
 
-            <!-- Filter Bar -->
-            <div th:replace="~{commons/data-controls :: filterBar(
-                    actionUrl=@{/profile/{profileId}/sleep(profileId=${profileId})},
-                    clearUrl=@{/profile/{profileId}/sleep(profileId=${profileId})},
-                    filterStartDate=${filterStartDate},
-                    filterEndDate=${filterEndDate})}">
-            </div>
-
             <!-- Chart Card -->
             <div
                 th:replace="~{commons/data-controls :: chartCard(
@@ -117,7 +109,11 @@
                     category='sleep',
                     iconSrc=@{/image/sleep.png},
                     seriesLabel='睡眠',
-                    targetText=${currentProfile?.dailySleepGoal != null ? ((currentProfile.dailySleepGoal * 60).intValue() / 60 + '時間' + (currentProfile.dailySleepGoal * 60).intValue() % 60 + '分') : null})}">
+                    targetText=${currentProfile?.dailySleepGoal != null ? ((currentProfile.dailySleepGoal * 60).intValue() / 60 + '時間' + (currentProfile.dailySleepGoal * 60).intValue() % 60 + '分') : null},
+                    filterAction=@{/profile/{profileId}/sleep(profileId=${profileId})},
+                    clearUrl=@{/profile/{profileId}/sleep(profileId=${profileId})},
+                    filterStartDate=${filterStartDate},
+                    filterEndDate=${filterEndDate})}">
             </div>
 
             <!-- Table / Empty state -->

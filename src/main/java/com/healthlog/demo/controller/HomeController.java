@@ -18,7 +18,6 @@ import com.healthlog.demo.exception.BusinessException;
 import com.healthlog.demo.service.helper.CurrentUserResolver;
 import com.healthlog.demo.service.home.HomeService;
 import com.healthlog.demo.service.home.HomeSummaryChartService;
-
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 
@@ -30,7 +29,6 @@ public class HomeController {
     private final CurrentUserResolver currentUserResolver;
     private final HomeService homeService;
     private final HomeSummaryChartService homeSummaryChartService;
-
     @GetMapping
     public String showHomePage(@PathVariable Long profileId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -41,7 +39,8 @@ public class HomeController {
         if (user == null)
             return "redirect:/auth/login";
 
-        homeService.getHomeData(profileId, user.getId()).forEach(model::addAttribute);
+        Map<String, Object> homeData = homeService.getHomeData(profileId, user.getId());
+        homeData.forEach(model::addAttribute);
         model.addAttribute("profileId", profileId);
         model.addAttribute("filterStartDate", startDate);
         model.addAttribute("filterEndDate", endDate);

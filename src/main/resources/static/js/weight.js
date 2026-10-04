@@ -4,10 +4,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function initChart() {
-    const isSearching = Boolean(
-        document.getElementById("startDateInput")?.value ||
-        document.getElementById("endDateInput")?.value
-    );
+    const searchParams = new URLSearchParams(window.location.search);
+    const isSearching = searchParams.has("startDate") || searchParams.has("endDate");
     const targetWeight = window.targetWeight !== null && window.targetWeight !== undefined
         ? parseFloat(window.targetWeight)
         : null;

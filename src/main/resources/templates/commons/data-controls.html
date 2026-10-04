@@ -31,6 +31,53 @@
 		</div>
 	</form>
 
+	<div th:fragment="dateRangePicker(actionUrl, clearUrl, filterStartDate, filterEndDate)"
+		class="chart-range-picker">
+		<button type="button" class="chart-range-picker__toggle" id="chartRangeToggle" aria-expanded="false"
+			aria-controls="chartRangePopover">
+			<svg class="chart-range-picker__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+				<rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.8" />
+				<path d="M16 3v4M8 3v4M3 10h18" stroke="currentColor" stroke-width="1.8"
+					stroke-linecap="round" />
+			</svg>
+			<span id="chartRangeLabel">期間を選択</span>
+			<svg class="chart-range-picker__chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+				<path d="m7 10 5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+					stroke-linejoin="round" />
+			</svg>
+		</button>
+		<form class="chart-range-picker__popover" id="chartRangePopover" th:action="${actionUrl}" method="get"
+			hidden>
+			<div class="chart-range-picker__presets" id="chartRangeQuickBar">
+				<button type="button" class="quick-btn" data-range="1D">1日</button>
+				<button type="button" class="quick-btn" data-range="1W">7日</button>
+				<button type="button" class="quick-btn" data-range="30D">30日</button>
+				<button type="button" class="quick-btn" data-range="6M">6ヶ月</button>
+				<button type="button" class="quick-btn" data-range="1Y">1年</button>
+			</div>
+			<div class="chart-range-picker__dates">
+				<label>
+					<span>開始日</span>
+					<input type="date" name="startDate" id="chartRangeStartDate" th:value="${filterStartDate}"
+						th:max="${T(java.time.LocalDate).now()}" />
+				</label>
+				<label>
+					<span>終了日</span>
+					<input type="date" name="endDate" id="chartRangeEndDate" th:value="${filterEndDate}"
+						th:max="${T(java.time.LocalDate).now()}" />
+				</label>
+			</div>
+			<p class="chart-range-picker__error" id="chartRangeError" role="alert" hidden></p>
+			<div class="chart-range-picker__actions">
+				<a class="chart-range-picker__clear" th:href="${clearUrl}"
+					th:if="${filterStartDate != null or filterEndDate != null}">リセット</a>
+				<button type="submit" class="chart-range-picker__search">
+					<i data-lucide="search"></i><span>検索</span>
+				</button>
+			</div>
+		</form>
+	</div>
+
 	<!-- フィードバック一覧を表示するセクション -->
 	<section th:fragment="feedbackList(feedbackList)" class="feedback-list" id="feedbackSection"
 		th:if="${feedbackList != null and not #lists.isEmpty(feedbackList)}">
@@ -52,7 +99,7 @@
 	</section>
 
 	<!-- データグラフを表示するカード -->
-	<section th:fragment="chartCard(title, canvasId, hasData, chartUrl, category, iconSrc, seriesLabel, targetText)"
+	<section th:fragment="chartCard(title, canvasId, hasData, chartUrl, category, iconSrc, seriesLabel, targetText, filterAction, clearUrl, filterStartDate, filterEndDate)"
 		class="chart-card" th:classappend="'chart-card--' + ${category}" th:if="${hasData}"
 		th:attr="data-chart-url=${chartUrl}">
 		<div class="chart-card__header">
@@ -60,6 +107,9 @@
 				<img th:src="${iconSrc}" alt="" class="chart-card__icon-img" />
 			</span>
 			<h2 th:text="${title}">グラフ</h2>
+
+			<div th:replace="~{commons/data-controls :: dateRangePicker(
+				${filterAction}, ${clearUrl}, ${filterStartDate}, ${filterEndDate})}"></div>
 
 			<div class="chart-legend" th:if="${seriesLabel != null}">
 				<div class="chart-legend__item">

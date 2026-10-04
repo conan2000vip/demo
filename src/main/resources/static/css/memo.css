@@ -47,6 +47,21 @@
 	color: var(--wp-text-muted);
 }
 
+.memo-records-card__toolbar {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	min-height: 64px;
+	padding: 10px 20px;
+	border-bottom: 1px solid var(--wp-border);
+	background: #f9fafb;
+	box-sizing: border-box;
+}
+
+.memo-records-card__toolbar .chart-range-picker {
+	margin-left: 0;
+}
+
 /* =========================================================
    Memo Table Only
    ========================================================= */
@@ -120,6 +135,19 @@
 	.memo-page__header {
 		flex-direction: column;
 		align-items: flex-start;
+	}
+
+	.memo-records-card__toolbar {
+		min-height: 58px;
+		padding: 9px 12px;
+	}
+
+	.memo-records-card__toolbar .chart-range-picker {
+		order: initial;
+	}
+
+	.memo-records-card__toolbar .chart-range-picker__toggle {
+		max-width: calc(100vw - 60px);
 	}
 
 	.memo-table th,

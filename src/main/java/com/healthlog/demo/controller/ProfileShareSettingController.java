@@ -3,6 +3,7 @@ package com.healthlog.demo.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +26,7 @@ public class ProfileShareSettingController {
 
     // 共有設定の一覧を取得し、ログインユーザーが所有するプロファイルの設定を返す。
     @GetMapping
-    public ResponseEntity<?> getShareSettings(
+    public ResponseEntity<Object> getShareSettings(
             @PathVariable("id") Long activeProfileId,
             HttpSession session) {
 
@@ -34,17 +35,19 @@ public class ProfileShareSettingController {
             return ResponseEntity.status(401).build();
         }
 
-        ResponseEntity<Map<String, String>> permissionError = validateShareSettingsPermission(
+        ResponseEntity<Object> permissionError = validateShareSettingsPermission(
             currentUser.getId(), activeProfileId, session);
         if (permissionError != null) return permissionError;
 
         List<ProfileShareSettingDto.Item> settings = profileShareService.getShareSettings(currentUser.getId(), activeProfileId);
-        return ResponseEntity.ok(settings);
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noStore())
+                .body(settings);
     }
 
     // 共有設定の一覧を受け取り、対象プロファイルの設定を一括登録または更新する。
     @PostMapping
-    public ResponseEntity<?> updateShareSettings(
+    public ResponseEntity<Object> updateShareSettings(
             @PathVariable("id") Long activeProfileId,
             @RequestBody List<ProfileShareSettingDto.Item> items,
             HttpSession session) {
@@ -54,15 +57,19 @@ public class ProfileShareSettingController {
             return ResponseEntity.status(401).build();
         }
 
-        ResponseEntity<Map<String, String>> permissionError = validateShareSettingsPermission(
+        ResponseEntity<Object> permissionError = validateShareSettingsPermission(
                 currentUser.getId(), activeProfileId, session);
         if (permissionError != null) return permissionError;
 
         profileShareService.updateShareSettings(currentUser.getId(), activeProfileId, items);
-        return ResponseEntity.ok().build();
+        List<ProfileShareSettingDto.Item> savedSettings = profileShareService
+                .getShareSettings(currentUser.getId(), activeProfileId);
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noStore())
+                .body(savedSettings);
     }
 
-    private ResponseEntity<Map<String, String>> validateShareSettingsPermission(
+    private ResponseEntity<Object> validateShareSettingsPermission(
             Long userId, Long requestedProfileId, HttpSession session) {
         Profile selectedProfile = profileService.resolveCurrentProfile(session, userId);
         if (selectedProfile == null

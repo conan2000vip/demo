@@ -3,14 +3,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap');
 
 :root {
-    --color-primary: #4657E9;
-    --color-primary-dark: #3646D6;
-    --color-primary-soft: #EEF0FE;
-    --color-bg-page: #EEEEEE;
+    --color-primary: #0f766e;
+    --color-primary-dark: #115e59;
+    --color-primary-soft: #d9f3ed;
+    --color-bg-page: #f4f8f6;
     --color-bg: #FFFFFF;
-    --color-text: #1A1A2E;
-    --color-text-muted: #8A8FA3;
-    --color-border: #E3E5EC;
+    --color-text: #1c2b29;
+    --color-text-muted: #64736f;
+    --color-border: #e2ebe7;
     --color-error: #DC2626;
     --color-error-bg: #FEF2F2;
     --color-success: #16A34A;
@@ -29,7 +29,9 @@ body {
     margin: 0;
     font-family: var(--font-body);
     color: var(--color-text);
-    background: var(--color-bg-page);
+    background:
+        radial-gradient(ellipse at 8% 0%, rgba(204, 236, 226, 0.46), transparent 34rem),
+        var(--color-bg-page);
     font-size: 14px;
     line-height: 1.5;
 }

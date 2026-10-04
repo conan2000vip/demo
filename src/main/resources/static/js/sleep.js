@@ -253,10 +253,8 @@ function formatHours(value) {
     return m === 0 ? `${h}h` : `${h}h${m}m`;
 }
 function initChart() {
-    const isSearching = Boolean(
-        document.getElementById("startDateInput")?.value ||
-        document.getElementById("endDateInput")?.value
-    );
+    const searchParams = new URLSearchParams(window.location.search);
+    const isSearching = searchParams.has("startDate") || searchParams.has("endDate");
 
     const targetSleep = window.targetSleep !== null && window.targetSleep !== undefined
         ? parseFloat(window.targetSleep)

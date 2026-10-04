@@ -105,21 +105,16 @@
                 </div>
             </div>
 
-            <!-- Filter Bar  -->
-            <div th:replace="~{commons/data-controls :: filterBar(
-					actionUrl=@{/profile/{profileId}/weight(profileId=${profileId})},
-					clearUrl=@{/profile/{profileId}/weight(profileId=${profileId})},
-					filterStartDate=${filterStartDate},
-					filterEndDate=${filterEndDate})}">
-            </div>
-
             <div
                 th:replace="~{commons/data-controls :: chartCard(
                     '体重(Kg)', 'weightChart', ${not #lists.isEmpty(logs)},
                     @{/profile/{profileId}/weight/chart-data(profileId=${profileId})},
                     'weight', @{/image/scales.png},
                     '体重',
-                    ${currentProfile?.targetWeight != null ? #numbers.formatDecimal(currentProfile.targetWeight, 1, 1) + ' kg' : null})}">
+                    ${currentProfile?.targetWeight != null ? #numbers.formatDecimal(currentProfile.targetWeight, 1, 1) + ' kg' : null},
+                    @{/profile/{profileId}/weight(profileId=${profileId})},
+                    @{/profile/{profileId}/weight(profileId=${profileId})},
+                    ${filterStartDate}, ${filterEndDate})}">
             </div>
 
             <!-- Table / Empty state -->

@@ -33,13 +33,14 @@ public class ProfileShareServiceImpl implements ProfileShareService {
         List<Profile> familyProfiles = profileRepository.findByUser_Id(currentUserId);
         List<ProfileShareSetting> existingSettings = profileShareSettingRepository.findByOwnerProfile_Id(activeProfile.getId());
 
-        return familyProfiles.stream().map(target -> {
+        return familyProfiles.stream()
+                .filter(target -> !target.isPrimary())
+                .filter(target -> !Objects.equals(target.getId(), activeProfileId))
+                .map(target -> {
             ProfileShareSettingDto.Item item = new ProfileShareSettingDto.Item();
             item.setTargetProfileId(target.getId());
             item.setTargetProfileName(target.getName());
             item.setRelationship(target.getRelationship());
-            item.setPrimary(target.isPrimary());
-            item.setSelf(Objects.equals(target.getId(), activeProfileId));
 
             // データ5項目の共有権限をDBからDTOへ設定し、未設定の場合はVIEWERを使用する。
             ProfileShareSettingDto.CategoryRole roles = new ProfileShareSettingDto.CategoryRole();
@@ -55,12 +56,11 @@ public class ProfileShareServiceImpl implements ProfileShareService {
 
     @Override
     @Transactional
-    @SuppressWarnings("rawtypes")
-    public void updateShareSettings(Long currentUserId, Long activeProfileId, List items) {
+    public void updateShareSettings(Long currentUserId, Long activeProfileId,
+            List<ProfileShareSettingDto.Item> items) {
         Profile activeProfile = validateProfileOwnership(currentUserId, activeProfileId);
 
-        for (Object value : items) {
-            ProfileShareSettingDto.Item item = (ProfileShareSettingDto.Item) value;
+        for (ProfileShareSettingDto.Item item : items) {
             // 2. 自分自身への共有を禁止する（制約に対応）。
             if (Objects.equals(activeProfile.getId(), item.getTargetProfileId())) {
                 continue;
@@ -68,6 +68,9 @@ public class ProfileShareServiceImpl implements ProfileShareService {
 
             Profile viewerProfile = profileRepository.findByIdAndUser_Id(item.getTargetProfileId(), currentUserId)
                     .orElseThrow(() -> new BusinessException(HttpStatus.FORBIDDEN, "アクセス権限がありません"));
+            if (viewerProfile.isPrimary()) {
+                throw new BusinessException(HttpStatus.FORBIDDEN, "本人プロファイルの共有権限は変更できません");
+            }
             ProfileShareSettingDto.CategoryRole roles = item.getRoles();
 
             // 5つのデータ項目について共有設定を一括登録または更新する。
@@ -90,7 +93,7 @@ public class ProfileShareServiceImpl implements ProfileShareService {
                 .filter(s -> Objects.equals(s.getViewerProfile().getId(), viewerProfileId) && s.getCategory() == category)
                 .findFirst()
                 .map(s -> mapToDtoRole(s.getRole()))
-                .orElse(ShareRole.VIEWER); // 未設定の場合はVIEWERを使用する。
+                .orElse(ShareRole.NONE);
     }
 
     private void saveOrUpdateCategory(Profile owner, Profile viewer, Category category, ShareRole dtoRole) {
@@ -101,11 +104,11 @@ public class ProfileShareServiceImpl implements ProfileShareService {
                 .orElseGet(() -> new ProfileShareSetting(owner, viewer, category, entityRole));
 
         setting.setRole(entityRole);
-        profileShareSettingRepository.save(setting);
+        profileShareSettingRepository.saveAndFlush(setting);
     }
 
     private ShareRole mapToDtoRole(Role entityRole) {
-        if (entityRole == null) return ShareRole.VIEWER;
+        if (entityRole == null) return ShareRole.NONE;
         return switch (entityRole) {
             case editor -> ShareRole.EDITOR;
             case none -> ShareRole.NONE;
@@ -114,7 +117,7 @@ public class ProfileShareServiceImpl implements ProfileShareService {
     }
 
     private Role mapToEntityRole(ShareRole dtoRole) {
-        if (dtoRole == null) return Role.viewer;
+        if (dtoRole == null) return Role.none;
         return switch (dtoRole) {
             case EDITOR -> Role.editor;
             case NONE -> Role.none;

@@ -1,9 +1,11 @@
 package com.healthlog.demo.service.home;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -24,7 +26,7 @@ public class HomeServiceImpl implements HomeService {
 
     @Override
     public Map<String, Object> getHomeData(Long profileId, Long currentUserId) {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(ZoneId.systemDefault());
         Profile currentProfile = profileService.getProfile(currentUserId, profileId);
         List<Profile> profileList = profileService.getProfiles(currentUserId);
 
@@ -39,7 +41,27 @@ public class HomeServiceImpl implements HomeService {
         data.put("familyMembers", familyMembers);
         data.put("familySummary", homeFamilyService.buildFamilySummary(familyMembers));
         data.put("feedbackList", homeFeedbackService.getHomeFeedback(profileId));
-        data.put("currentStreak", homeStreakService.getCurrentStreak(profileId, today));
+        Optional<HomeStreakService.StreakInfo> currentStreak = homeStreakService.getCurrentStreakInfo(profileId, today);
+        if (currentStreak.isPresent()) {
+            HomeStreakService.StreakInfo streak = currentStreak.get();
+            data.put("currentStreak", streak.days());
+            data.put("currentStreakStartDate", streak.startDate().toString());
+        } else {
+            data.put("currentStreak", 0);
+            data.put("currentStreakStartDate", "");
+        }
+        Optional<HomeStreakService.StreakBreak> brokenStreak = homeStreakService.getBrokenStreak(profileId, today);
+        data.put("hasPreviousStreak", brokenStreak.isPresent());
+        if (brokenStreak.isPresent()) {
+            HomeStreakService.StreakBreak streak = brokenStreak.get();
+            data.put("brokenStreakDays", streak.days());
+            data.put("brokenStreakStartDate", streak.startDate().toString());
+            data.put("brokenStreakDate", streak.lastCompletedDate().toString());
+        } else {
+            data.put("brokenStreakDays", 0);
+            data.put("brokenStreakStartDate", "");
+            data.put("brokenStreakDate", "");
+        }
         return data;
     }
 }

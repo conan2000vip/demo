@@ -8,10 +8,8 @@ document.addEventListener("DOMContentLoaded", () => {
    共通の HealthChart を使用する
    ========================================================= */
 function initChart() {
-    const isSearching = Boolean(
-        document.getElementById("startDateInput")?.value ||
-        document.getElementById("endDateInput")?.value
-    );
+    const searchParams = new URLSearchParams(window.location.search);
+    const isSearching = searchParams.has("startDate") || searchParams.has("endDate");
 
     const targetWater = window.targetWater !== null && window.targetWater !== undefined
         ? parseFloat(window.targetWater)
