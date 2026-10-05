@@ -1,5 +1,5 @@
 /* =========================================================
-   Health Streak Achievement
+   Health Streak Achievement - ストリーク
    ========================================================= */
 (() => {
     "use strict";
@@ -44,11 +44,7 @@
         while (years > 0 && addYears(start, years) > end) years--;
         const anniversary = addYears(start, years);
         const remainingDays = daysBetween(anniversary, end);
-        const label = years === 0
-            ? `${days}日`
-            : remainingDays === 0
-                ? `${years}年`
-                : `${years}年${remainingDays}日`;
+        const label = years === 0 ? `${days}日` : remainingDays === 0 ? `${years}年` : `${years}年${remainingDays}日`;
         return { label, years, remainingDays };
     }
 
@@ -99,8 +95,7 @@
     }
 
     function nextMilestone(days) {
-        return getMilestones(days).find((milestone) => milestone.days > days)
-            ?? { days: days + 1, label: `${days + 1}日` };
+        return getMilestones(days).find((milestone) => milestone.days > days) ?? { days: days + 1, label: `${days + 1}日` };
     }
 
     /* ---------- "Already shown" memory (localStorage) ---------- */
@@ -162,13 +157,13 @@
         container.style.display = "flex";
 
         const milestones = getMilestones(streak);
-        const targetIndex = Math.max(0, milestones.findIndex((milestone) => milestone.days > streak));
+        const targetIndex = Math.max(
+            0,
+            milestones.findIndex((milestone) => milestone.days > streak),
+        );
 
         // Show 4 nodes around the target
-        const startIdx = Math.min(
-            Math.max(0, targetIndex - 1),
-            Math.max(0, milestones.length - ROADMAP_NODE_COUNT),
-        );
+        const startIdx = Math.min(Math.max(0, targetIndex - 1), Math.max(0, milestones.length - ROADMAP_NODE_COUNT));
         const nodes = milestones.slice(startIdx, startIdx + ROADMAP_NODE_COUNT);
 
         const steps = nodes.map((milestone, index) => {
@@ -293,12 +288,11 @@
         if (brokenStreakDays > 0 || (days <= 0 && hasPreviousStreak)) {
             // Streak was reset
             modal.classList.add("is-reset");
-            title.textContent = brokenStreakDays > 0
-                ? `${brokenStreakDays}日連続の記録が途切れました`
-                : "連続記録が途切れました";
-            message.innerHTML = brokenStreakDays > 0
-                ? "これまで積み重ねた習慣は消えません。<br>無理のないペースで、また記録を続けていきましょう！"
-                : "これまで積み重ねた習慣は消えません。<br>無理のないペースで、また記録を続けていきましょう！";
+            title.textContent = brokenStreakDays > 0 ? `${brokenStreakDays}日連続の記録が途切れました` : "連続記録が途切れました";
+            message.innerHTML =
+                brokenStreakDays > 0
+                    ? "これまで積み重ねた習慣は消えません。<br>無理のないペースで、また記録を続けていきましょう！"
+                    : "これまで積み重ねた習慣は消えません。<br>無理のないペースで、また記録を続けていきましょう！";
             icon.textContent = "🔄";
         } else if (days <= 0) {
             modal.classList.remove("is-reset");
@@ -308,9 +302,7 @@
         } else {
             modal.classList.remove("is-reset");
             const age = getStreakAge(days);
-            title.textContent = age.years > 0 && age.remainingDays === 0
-                ? `${age.years}年達成！`
-                : `${age.label}連続達成！`;
+            title.textContent = age.years > 0 && age.remainingDays === 0 ? `${age.years}年達成！` : `${age.label}連続達成！`;
 
             if (days < 7) {
                 message.textContent = "毎日の記録を続けて、7日連続達成を目指しましょう！";
@@ -342,11 +334,12 @@
 
         const note = $("streakNote");
         if (note) {
-            note.textContent = days <= 0
-                ? hasPreviousStreak
-                    ? "途切れても大丈夫です。無理のないペースで、また始めましょう。"
-                    : "毎日の記録を少しずつ続けていきましょう！"
-                : "この調子で無理なく続けていきましょう！";
+            note.textContent =
+                days <= 0
+                    ? hasPreviousStreak
+                        ? "途切れても大丈夫です。無理のないペースで、また始めましょう。"
+                        : "毎日の記録を少しずつ続けていきましょう！"
+                    : "この調子で無理なく続けていきましょう！";
         }
         applyIconEffect(icon, days);
         modal.classList.add("is-visible");
@@ -379,9 +372,7 @@
         const value = $("streakViewButton")?.querySelector("strong");
         if (!value) return;
         const age = getStreakAge(readCurrentStreak());
-        value.textContent = age.years > 0 && age.remainingDays === 0
-            ? `${age.years}年達成`
-            : age.label;
+        value.textContent = age.years > 0 && age.remainingDays === 0 ? `${age.years}年達成` : age.label;
     }
 
     function init() {
@@ -391,11 +382,7 @@
         $("streakModalButton")?.addEventListener("click", closeAchievement);
         $("streakViewButton")?.addEventListener("click", (event) => {
             const hasPreviousStreak = event.currentTarget.dataset.hasPreviousStreak === "true";
-            showAchievement(
-                readCurrentStreak(),
-                hasPreviousStreak,
-                Number(window.brokenStreakDays) || 0,
-            );
+            showAchievement(readCurrentStreak(), hasPreviousStreak, Number(window.brokenStreakDays) || 0);
         });
         modal.querySelector(".streak-modal__overlay")?.addEventListener("click", closeAchievement);
 

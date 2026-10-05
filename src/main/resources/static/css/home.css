@@ -572,7 +572,6 @@
     width: 100%;
     max-width: 440px;
     max-height: calc(100dvh - 40px);
-    overflow-y: auto; /* was overridden by a later "overflow: hidden" */
     background: #ffffff;
     border-radius: 24px;
     box-shadow:
@@ -1076,129 +1075,6 @@
     gap: 16px;
 }
 
-.home-chart-date-picker {
-    position: relative;
-    flex: 0 0 auto;
-}
-
-.home-chart-date-picker__toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: 9px;
-    min-height: 42px;
-    padding: 0 14px;
-    border: 1px solid #dbe3ed;
-    border-radius: 10px;
-    background: #ffffff;
-    color: #334155;
-    font: inherit;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(23, 59, 115, 0.05);
-}
-
-.home-chart-date-picker__toggle:hover,
-.home-chart-date-picker__toggle[aria-expanded="true"] {
-    border-color: #94a3b8;
-    background: #f8fafc;
-}
-
-.home-chart-date-picker__icon {
-    width: 17px;
-    height: 17px;
-    flex: 0 0 auto;
-}
-
-.home-chart-date-picker__chevron {
-    width: 15px;
-    height: 15px;
-    flex: 0 0 auto;
-    color: #64748b;
-}
-
-.home-chart-date-popover {
-    position: fixed;
-    inset: auto;
-    width: min(340px, calc(100vw - 32px));
-    max-height: calc(100vh - 32px);
-    overflow-y: auto;
-    margin: 8px 0 0;
-    padding: 16px;
-    border: 1px solid #dbe3ed;
-    border-radius: 14px;
-    background: #ffffff;
-    color: #1e293b;
-    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.18);
-}
-
-.home-chart-date-popover:popover-open {
-    display: block;
-}
-
-.home-chart-date-popover.is-open {
-    display: block;
-}
-
-.home-chart-date-popover__presets {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 6px;
-}
-
-.home-chart-date-popover__presets .quick-btn {
-    height: 32px;
-    padding: 0 6px;
-    font-size: 12px;
-}
-
-.home-chart-date-popover__custom {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 16px;
-}
-
-.home-chart-date-popover__custom label {
-    display: grid;
-    gap: 6px;
-    color: #64748b;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.home-chart-date-popover__custom input {
-    width: 100%;
-    min-width: 0;
-    height: 36px;
-    box-sizing: border-box;
-    padding: 0 8px;
-    border: 1px solid #dbe3ed;
-    border-radius: 8px;
-    color: #334155;
-    font: inherit;
-    font-size: 12px;
-}
-
-.home-chart-date-popover__actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: 14px;
-}
-
-.home-chart-date-popover__cancel {
-    min-height: 36px;
-    padding: 0 12px;
-    border: 1px solid #dbe3ed;
-    border-radius: 8px;
-    background: #ffffff;
-    color: #475569;
-    font: inherit;
-    font-size: 13px;
-    cursor: pointer;
-}
-
 .home-integrated-chart-title-group {
     display: flex;
     flex-direction: column;
@@ -1222,24 +1098,10 @@
     margin: 0;
 }
 
-.home-chart-filter__error {
-    margin: 10px 0 0;
-    color: #b91c1c;
-    font-size: 13px;
-}
-
 .home-integrated-chart-divider {
     border: 0;
     border-top: 1px solid #f1f5f9;
     margin: 20px 0 16px 0;
-}
-
-.home-integrated-chart-date {
-    flex-shrink: 0;
-}
-
-.home-integrated-chart-date .filter-bar {
-    margin-bottom: 0;
 }
 
 .home-integrated-chart-card {
@@ -1523,10 +1385,6 @@
         text-align: left;
     }
 
-    .home-chart-date-picker {
-        flex: 0 0 auto;
-    }
-
     .home-integrated-chart-summary {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -1551,14 +1409,6 @@
 
 /* ---------- <= 700px ---------- */
 @media (max-width: 700px) {
-    .home-integrated-chart-title {
-        font-size: 22px;
-    }
-
-    .home-integrated-chart-description {
-        font-size: 14px;
-    }
-
     .home-integrated-chart-card {
         height: 460px;
         padding: 16px 16px 4px;
@@ -1814,8 +1664,8 @@
     }
 }
 
-/* ---------- <= 420px ---------- */
-@media (max-width: 420px) {
+/* ---------- <= 600px ---------- */
+@media (max-width: 600px) {
     .home {
         padding: 12px 10px 36px;
     }
@@ -1893,23 +1743,6 @@
     .home-integrated-chart-description {
         font-size: 11px;
         text-align: left;
-    }
-
-    .home-chart-date-picker__toggle {
-        min-height: 38px;
-        gap: 5px;
-        padding: 0 8px;
-        font-size: 11px;
-    }
-
-    .home-chart-date-picker__icon {
-        width: 15px;
-        height: 15px;
-    }
-
-    .home-chart-date-picker__chevron {
-        width: 13px;
-        height: 13px;
     }
 
     .feedback-panel__header h2 {

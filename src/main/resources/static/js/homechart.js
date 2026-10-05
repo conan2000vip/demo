@@ -238,9 +238,7 @@
         const items = SERIES.map((series) => {
             const item = template.content.firstElementChild.cloneNode(true);
             const symbol = item.querySelector(".home-chart-legend-symbol");
-            symbol.classList.add(
-                series.key === primaryKey ? "home-chart-legend-symbol--bar" : "home-chart-legend-symbol--line",
-            );
+            symbol.classList.add(series.key === primaryKey ? "home-chart-legend-symbol--bar" : "home-chart-legend-symbol--line");
             symbol.style.setProperty("--series-color", series.color);
             item.querySelector(".home-chart-legend-label").textContent = series.legendLabel;
             return item;
@@ -371,9 +369,7 @@
         if (window.matchMedia("(max-width: 420px)").matches) {
             const [fromYear] = from.split("-");
             const [toYear] = to.split("-");
-            return fromYear === toYear
-                ? `${format(from, false)} – ${format(to, false)}`
-                : `${format(from)} – ${format(to)}`;
+            return fromYear === toYear ? `${format(from, false)} – ${format(to, false)}` : `${format(from)} – ${format(to)}`;
         }
         return `${format(from)} – ${format(to)}`;
     }
@@ -432,6 +428,9 @@
         };
 
         toggle.addEventListener("click", () => {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
             if (!popoverApiAvailable) {
                 form.classList.toggle("is-open");
                 toggle.setAttribute("aria-expanded", String(form.classList.contains("is-open")));
@@ -450,6 +449,9 @@
         });
 
         cancel?.addEventListener("click", () => {
+            const defaultRange = getQuickRange("1W");
+            search(defaultRange.from, defaultRange.to);
+
             if (popoverApiAvailable) form.hidePopover();
             else {
                 form.classList.remove("is-open");
@@ -483,9 +485,7 @@
 
     async function loadChart(canvas, from, to) {
         const profileId = canvas.dataset.profileId;
-        const url =
-            `/profile/${encodeURIComponent(profileId)}/home/summary-chart` +
-            `?startDate=${encodeURIComponent(from)}&endDate=${encodeURIComponent(to)}`;
+        const url = `/profile/${encodeURIComponent(profileId)}/home/summary-chart` + `?startDate=${encodeURIComponent(from)}&endDate=${encodeURIComponent(to)}`;
 
         try {
             const response = await fetch(url, { headers: { Accept: "application/json" } });
