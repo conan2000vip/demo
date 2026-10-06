@@ -8,33 +8,17 @@ document.addEventListener("DOMContentLoaded", () => {
    共通の HealthChart を使用する
    ========================================================= */
 function initChart() {
-    const searchParams = new URLSearchParams(window.location.search);
-    const isSearching = searchParams.has("startDate") || searchParams.has("endDate");
-
     const targetWater = window.targetWater !== null && window.targetWater !== undefined
         ? parseFloat(window.targetWater)
         : null;
-
-    const chart = HealthChart.create({
+    initMetricChart({
         canvasId: "waterChart",
         data: window.waterChartData,
         unit: "ml",
         type: "bar",
-        days: 7,
-        isSearching: isSearching,
         color: "#2196f3",
-        showDataLabels: true,
         targetValue: targetWater,
     });
-
-    const wrapper = document.getElementById("chartWrapper");
-    const chartUrl = wrapper?.closest(".chart-card")?.dataset.chartUrl;
-    const from = window.waterChartData?.from;
-    const to = window.waterChartData?.to;
-
-    if (chart && wrapper && chartUrl && from && to) {
-        initChartSwipe({ chart, wrapperEl: wrapper, chartUrl, initialFrom: from, initialTo: to });
-    }
 }
 
 /* =========================================================

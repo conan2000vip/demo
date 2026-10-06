@@ -29,7 +29,7 @@ public class FeedbackService {
     private final StepFeedback stepFeedback;
     private final HomeStreakService homeStreakService;
 
-    // ===== Màn hình riêng: mỗi loại chỉ 1 thẻ có mức cao nhất =====
+    // 各画面では種類ごとに重要度が最も高いカードを1件だけ表示する。
     public List<FeedbackItem> getWeightFeedback(Long profileId) {
         return pickTop(weightFeedback.evaluate(profileId));
     }
@@ -46,7 +46,7 @@ public class FeedbackService {
         return pickTop(stepFeedback.evaluate(profileId));
     }
 
-    // ===== Home: gộp thẻ của 4 màn hình + streak, sắp xếp giảm dần =====
+    // Homeでは4画面のカードと連続記録をまとめ、重要度の降順で並べる。
     public List<FeedbackItem> getHomeFeedback(Long profileId) {
         List<FeedbackItem> items = new ArrayList<>();
         items.addAll(getWeightFeedback(profileId));
@@ -59,7 +59,7 @@ public class FeedbackService {
         return sortByPriority(items);
     }
 
-    /** Giữ 1 thẻ: mức cao nhất, cùng mức thì mới nhất */
+    /** 重要度が高いカードを1件残し、同じ場合は新しいカードを優先する。 */
     @SuppressWarnings("null")
     private List<FeedbackItem> pickTop(List<FeedbackItem> items) {
         return items.stream().max(Comparator.comparingInt((FeedbackItem i) -> i.getLevel().getPriority())

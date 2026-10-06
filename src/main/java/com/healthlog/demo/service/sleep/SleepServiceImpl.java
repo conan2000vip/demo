@@ -22,6 +22,7 @@ import com.healthlog.demo.dto.common.DateRangerFilter;
 import com.healthlog.demo.entity.Profile;
 import com.healthlog.demo.entity.Sleep;
 import com.healthlog.demo.entity.Sleep.SleepType;
+import com.healthlog.demo.entity.ProfileShareSetting.Category;
 import com.healthlog.demo.exception.BusinessException;
 import com.healthlog.demo.repository.SleepRepository;
 import com.healthlog.demo.service.base.BaseLogService;
@@ -45,6 +46,11 @@ public class SleepServiceImpl extends BaseLogService<Sleep, Sleep> implements Sl
     @Override
     protected Sleep mapToDto(Sleep entity) {
         return entity;
+    }
+
+    @Override
+    protected Category category() {
+        return Category.sleep;
     }
 
     @SuppressWarnings("null")
@@ -181,7 +187,7 @@ public class SleepServiceImpl extends BaseLogService<Sleep, Sleep> implements Sl
 
     @Override
     public Sleep create(Long profileId, Long currentUserId, Sleep input) {
-        Profile profile = validateAndGetProfile(profileId, currentUserId);
+        Profile profile = validateAndGetEditableProfile(profileId, currentUserId);
         prepareAndValidate(input);
         Optional<Sleep> duplicate = sleepRepository.findFirstByProfile_IdAndRecordedDateAndSleepType(
                 profileId, input.getRecordedDate(), input.getSleepType());
@@ -194,7 +200,7 @@ public class SleepServiceImpl extends BaseLogService<Sleep, Sleep> implements Sl
 
     @Override
     public Sleep update(Long profileId, Long currentUserId, Long logId, Sleep input) {
-        validateAndGetProfile(profileId, currentUserId);
+        validateAndGetEditableProfile(profileId, currentUserId);
         Sleep existing = findEntityByIdAndProfile(logId, profileId);
         prepareAndValidate(input);
         Optional<Sleep> duplicate = sleepRepository.findFirstByProfile_IdAndRecordedDateAndSleepType(

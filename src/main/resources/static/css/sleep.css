@@ -1,7 +1,3 @@
-/* =========================================================
-   Sleep Page
-   ========================================================= */
-
 .sleep-page {
 	min-height: calc(100vh - 72px);
 }
@@ -11,8 +7,6 @@
 	margin: 0 auto;
 	padding: 32px 24px 64px;
 }
-
-/* ---------- Page Header ---------- */
 
 .sleep-page__header {
 	display: flex;
@@ -49,23 +43,16 @@
 	color: var(--wp-text-muted);
 }
 
-/* =========================================================
-   Sleep Table Only
-   ========================================================= */
-
 .sleep-table {
 	width: 100%;
 	table-layout: fixed;
 }
-
-/* 日付 */
 .sleep-table th:nth-child(1),
 .sleep-table td:nth-child(1) {
 	width: 120px;
 	white-space: nowrap;
 }
 
-/* 種別 */
 .sleep-table th:nth-child(2),
 .sleep-table td:nth-child(2) {
 	width: 90px;
@@ -73,7 +60,6 @@
 	white-space: nowrap;
 }
 
-/* 就寝 */
 .sleep-table th:nth-child(3),
 .sleep-table td:nth-child(3) {
 	width: 100px;
@@ -81,7 +67,6 @@
 	white-space: nowrap;
 }
 
-/* 起床 */
 .sleep-table th:nth-child(4),
 .sleep-table td:nth-child(4) {
 	width: 100px;
@@ -89,7 +74,6 @@
 	white-space: nowrap;
 }
 
-/* 睡眠時間 */
 .sleep-table th:nth-child(5),
 .sleep-table td:nth-child(5) {
 	width: 140px;
@@ -114,10 +98,6 @@
 .sleep-table__actions-col {
 	width: 90px;
 }
-
-/* =========================================================
-   Responsive
-   ========================================================= */
 
 @media (max-width: 768px) {
 	.sleep-page__inner {

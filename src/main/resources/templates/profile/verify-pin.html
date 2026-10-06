@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>暗証番号認証</title>
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/profile.css}">
+</head>
+<body>
+    <main class="pin-verify-page">
+        <div class="pin-verify-card">
+            <h1>暗証番号認証</h1>
+            <p><strong th:text="${profile.name}">TA THI HAI YEN</strong> さんの暗証番号(PIN)を入力してください。</p>
+            <div th:if="${errorMessage}" class="alert alert--error" th:text="${errorMessage}"></div>
+            <form th:action="@{/profile/{id}/verify-pin(id=${profile.id})}" method="post">
+                <label for="pin">PIN</label>
+                <input id="pin" name="pin" type="password" inputmode="numeric" pattern="[0-9]{4}"
+                    maxlength="4" minlength="4" autocomplete="one-time-code" required autofocus>
+                <button type="submit" class="btn btn--primary btn--block">確認する</button>
+            </form>
+            <a th:href="@{/profile/select}" class="btn btn--ghost btn--block">戻る</a>
+        </div>
+    </main>
+</body>
+</html>

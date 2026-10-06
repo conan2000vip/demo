@@ -5,8 +5,6 @@
     "use strict";
     let chartInstance = null;
     let lastChartData = null;
-
-    // Metric shown as bars (the other three are drawn as lines)
     let primaryKey = "weight";
     const BAR_AREA_RATIO = 0.45;
     const LINE_AREA_START = 0.55;

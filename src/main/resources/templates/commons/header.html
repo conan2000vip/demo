@@ -8,7 +8,6 @@
 <body>
     <header th:fragment="header(activePage)" class="app-header">
         <div class="app-header__inner">
-            <!-- Logo: Khi chưa có Profile thì nhấp vào Logo không bị nhảy trang -->
             <a th:href="${currentProfile != null} ? @{/profile/{id}/home(id=${currentProfile.id})} : 'javascript:void(0)'"
                 class="app-header__brand" th:style="${currentProfile == null} ? 'cursor: default;' : ''">
                 <span class="app-header__logo-icon">
@@ -25,37 +24,34 @@
                     <line x1="3" y1="18" x2="21" y2="18"></line>
                 </svg>
             </button>
-
-            <!-- Navigation Bar -->
             <nav class="app-header__nav" id="appNavigation">
-                <!-- Khi ĐÃ CÓ Profile: Các menu bấm bình thường -->
                 <th:block th:if="${currentProfile != null}">
                     <a th:href="@{/profile/{id}/home(id=${currentProfile.id})}" class="app-header__nav-item"
                         th:classappend="${activePage == 'home'} ? ' is-active' : ''">
                         <img th:src="@{/image/home.png}" alt="" class="app-header__nav-icon" />
                         <span>Home</span>
                     </a>
-                    <a th:href="@{/profile/{id}/weight(id=${currentProfile.id})}" class="app-header__nav-item"
+                    <a th:if="${canViewWeight == true}" th:href="@{/profile/{id}/weight(id=${currentProfile.id})}" class="app-header__nav-item"
                         th:classappend="${activePage == 'weight'} ? ' is-active' : ''">
                         <img th:src="@{/image/scales.png}" alt="" class="app-header__nav-icon" />
                         <span>体重</span>
                     </a>
-                    <a th:href="@{/profile/{id}/sleep(id=${currentProfile.id})}" class="app-header__nav-item"
+                    <a th:if="${canViewSleep == true}" th:href="@{/profile/{id}/sleep(id=${currentProfile.id})}" class="app-header__nav-item"
                         th:classappend="${activePage == 'sleep'} ? ' is-active' : ''">
                         <img th:src="@{/image/sleep.png}" alt="" class="app-header__nav-icon" />
                         <span>睡眠</span>
                     </a>
-                    <a th:href="@{/profile/{id}/water(id=${currentProfile.id})}" class="app-header__nav-item"
+                    <a th:if="${canViewWater == true}" th:href="@{/profile/{id}/water(id=${currentProfile.id})}" class="app-header__nav-item"
                         th:classappend="${activePage == 'water'} ? ' is-active' : ''">
                         <img th:src="@{/image/water.png}" alt="" class="app-header__nav-icon" />
                         <span>水分</span>
                     </a>
-                    <a th:href="@{/profile/{id}/step(id=${currentProfile.id})}" class="app-header__nav-item"
+                    <a th:if="${canViewStep == true}" th:href="@{/profile/{id}/step(id=${currentProfile.id})}" class="app-header__nav-item"
                         th:classappend="${activePage == 'step'} ? ' is-active' : ''">
                         <img th:src="@{/image/footstep.png}" alt="" class="app-header__nav-icon" />
                         <span>歩数</span>
                     </a>
-                    <a th:href="@{/profile/{id}/memo(id=${currentProfile.id})}" class="app-header__nav-item"
+                    <a th:if="${canViewMemo == true}" th:href="@{/profile/{id}/memo(id=${currentProfile.id})}" class="app-header__nav-item"
                         th:classappend="${activePage == 'memo'} ? ' is-active' : ''">
                         <img th:src="@{/image/notes.png}" alt="" class="app-header__nav-icon" />
                         <span>健康メモ</span>
@@ -66,8 +62,6 @@
                         <span>プロファイル</span>
                     </a>
                 </th:block>
-
-                <!-- Khi CHƯA CÓ Profile (Tạo Profile đầu tiên): Vô hiệu hóa toàn bộ Menu -->
                 <th:block th:if="${currentProfile == null}">
                     <span class="app-header__nav-item" style="opacity: 0.5; cursor: not-allowed;">
                         <img th:src="@{/image/home.png}" alt="" class="app-header__nav-icon" />
@@ -93,15 +87,12 @@
                         <img th:src="@{/image/notes.png}" alt="" class="app-header__nav-icon" />
                         <span>健康メモ</span>
                     </span>
-                    <!-- Nút Profile khóa không cho click chuyển trang -->
                     <span class="app-header__nav-item is-active" style="cursor: not-allowed;">
                         <img th:src="@{/image/profile.png}" alt="" class="app-header__nav-icon" />
                         <span>プロファイル</span>
                     </span>
                 </th:block>
             </nav>
-
-            <!-- User Menu Right -->
             <div class="app-header__right">
                 <div class="app-header__user-wrap">
                     <button type="button" class="app-header__user" id="userMenuToggle" aria-haspopup="true"

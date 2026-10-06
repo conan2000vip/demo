@@ -11,12 +11,10 @@ document.addEventListener("DOMContentLoaded", () => {
     initClickableCards();
 });
 
-/* ---------- "Show all feedback" toggle ---------- */
+/* フィードバック全件表示の切り替え */
 function initFeedbackToggle() {
     const button = document.getElementById("feedbackToggleBtn");
     if (!button) return;
-
-    // e.g. "今日のフィードバックをすべて見る（N件）"
     const collapsedText = button.textContent;
     const VISIBLE_COUNT = 3; // must match the threshold in the Thymeleaf fragment
     let expanded = false;

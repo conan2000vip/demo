@@ -73,6 +73,7 @@ public class AuthController {
             }
 
             profileService.resolveCurrentProfile(session, user.getId());
+            session.removeAttribute(SessionConstants.AUTHENTICATED_PROFILE_ID);
             return "redirect:/profile/select";
 
         } catch (BusinessException e) {
@@ -115,8 +116,20 @@ public class AuthController {
 
     // 5. パスワード再設定依頼画面を表示し、確認コード送信用のメールアドレス入力フォームを準備する。
     @GetMapping("/forgot-password")
-    public String showForgotPasswordForm(Model model) {
+    public String showForgotPasswordForm(
+            @RequestParam(value = "returnTo", required = false) String returnTo,
+            HttpSession session, Model model) {
+        String safeReturnTo = normalizeReturnTo(returnTo);
+        if (safeReturnTo != null) {
+            session.setAttribute("PASSWORD_RESET_RETURN_TO", safeReturnTo);
+            storePinProfileId(session, safeReturnTo);
+        } else {
+            session.removeAttribute("PASSWORD_RESET_RETURN_TO");
+            session.removeAttribute("PASSWORD_RESET_PROFILE_ID");
+        }
         model.addAttribute("passwordResetRequest", new PasswordResetRequest());
+        model.addAttribute("returnTo", safeReturnTo != null
+                ? safeReturnTo : session.getAttribute("PASSWORD_RESET_RETURN_TO"));
         return "auth/forgot-password";
     }
 
@@ -125,6 +138,13 @@ public class AuthController {
     public String handleForgotPassword(
             @Valid @ModelAttribute("passwordResetRequest") PasswordResetRequest request,
             BindingResult bindingResult, HttpSession session, Model model, RedirectAttributes redirectAttributes) {
+        String returnTo = normalizeReturnTo(request.getReturnTo());
+        if (returnTo != null) {
+            session.setAttribute("PASSWORD_RESET_RETURN_TO", returnTo);
+            storePinProfileId(session, returnTo);
+        }
+        model.addAttribute("returnTo", returnTo != null
+                ? returnTo : session.getAttribute("PASSWORD_RESET_RETURN_TO"));
         if (bindingResult.hasErrors()) {
             return "auth/forgot-password";
         }
@@ -138,6 +158,26 @@ public class AuthController {
         } catch (BusinessException e) {
             model.addAttribute("errorMessage", e.getMessage());
             return "auth/forgot-password";
+        }
+    }
+
+    private String normalizeReturnTo(String returnTo) {
+        if (returnTo == null || returnTo.isBlank()
+                || !returnTo.startsWith("/") || returnTo.startsWith("//")
+                || returnTo.contains("\r") || returnTo.contains("\n")) {
+            return null;
+        }
+        return returnTo;
+    }
+
+    private void storePinProfileId(HttpSession session, String returnTo) {
+        java.util.regex.Matcher matcher = java.util.regex.Pattern
+                .compile("^/profile/(\\d+)/edit$")
+                .matcher(returnTo);
+        if (matcher.matches()) {
+            session.setAttribute("PASSWORD_RESET_PROFILE_ID", Long.valueOf(matcher.group(1)));
+        } else {
+            session.removeAttribute("PASSWORD_RESET_PROFILE_ID");
         }
     }
 
@@ -233,8 +273,14 @@ public class AuthController {
         }
 
         try {
-            passwordResetService.resetPassword(resetEmail, request);
+            Long pinProfileId = (Long) session.getAttribute("PASSWORD_RESET_PROFILE_ID");
+            passwordResetService.resetPassword(resetEmail, request, pinProfileId);
             session.removeAttribute(SessionConstants.RESET_EMAIL);
+            session.removeAttribute(SessionConstants.IS_RESET_FLOW);
+            session.removeAttribute("PASSWORD_RESET_RETURN_TO");
+            session.removeAttribute("PASSWORD_RESET_PROFILE_ID");
+            SecurityContextHolder.clearContext();
+            session.invalidate();
             redirectAttributes.addFlashAttribute("message", "パスワードの再設定が完了しました。新しいパスワードでログインしてください。");
             return "redirect:/auth/login";
         } catch (BusinessException e) {

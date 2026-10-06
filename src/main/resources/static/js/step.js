@@ -8,33 +8,17 @@ document.addEventListener("DOMContentLoaded", () => {
    Uses shared HealthChart / 共通のHealthChartを使用
 ========================================================= */
 function initChart() {
-    const searchParams = new URLSearchParams(window.location.search);
-    const isSearching = searchParams.has("startDate") || searchParams.has("endDate");
-
     const targetStep = window.targetStep !== null && window.targetStep !== undefined
         ? parseFloat(window.targetStep)
         : null;
-
-    const chart = HealthChart.create({
+    initMetricChart({
         canvasId: "stepChart",
         data: window.stepChartData,
         unit: "歩",
         type: "bar",
-        days: 7,
-        isSearching: isSearching,
         color: "#e67e22",
-        showDataLabels: true,
         targetValue: targetStep,
     });
-
-    const wrapper = document.getElementById("chartWrapper");
-    const chartUrl = wrapper?.closest(".chart-card")?.dataset.chartUrl;
-    const from = window.stepChartData?.from;
-    const to = window.stepChartData?.to;
-
-    if (chart && wrapper && chartUrl && from && to) {
-        initChartSwipe({ chart, wrapperEl: wrapper, chartUrl, initialFrom: from, initialTo: to });
-    }
 }
 /* =========================================================
 2. Add / Edit Modal / 新規登録・編集モーダル
@@ -68,7 +52,7 @@ function initModal() {
         return;
     }
 
-    // ★ THÊM MỚI: Biến ghi nhớ trạng thái đã cảnh báo hay chưa
+    // 警告を表示済みかどうかを保持する。
     let isStepsWarned = false;
 
     function openModal({ mode = "create", id = "", date = "", steps = "", memo = "" } = {}) {
@@ -78,7 +62,7 @@ function initModal() {
         recordedDateInput.max = currentDate();
         stepsInput.value = steps;
         memoInput.value = memo;
-        isStepsWarned = false; // Reset biến cảnh báo khi mở Modal
+        isStepsWarned = false; // モーダルを開くときに警告状態をリセットする。
         clearAllErrors();
         overlay.classList.add("is-open");
         recordedDateInput.focus();
@@ -105,8 +89,7 @@ function initModal() {
         if (event.key === "Escape" && overlay.classList.contains("is-open")) closeModal();
     });
 
-    // Edit record / 記録編集
-    // Edit record / 記録編集（AJAXページ送り後も動くよう委譲）
+    // 記録編集（AJAXページ送り後も動くようイベントを委譲する）。
     document.addEventListener("click", (event) => {
         const btn = event.target.closest(".edit-btn");
         if (!btn) return;
@@ -119,16 +102,16 @@ function initModal() {
         });
     });
 
-    // Clear errors while typing / 入力時にエラーをクリア
+    // 入力中にエラーをクリアする。
     recordedDateInput.addEventListener("input", () => clearError("recordedDate"));
 
-    // ★ THAY ĐỔI: Khi sửa số bước, reset lại trạng thái cảnh báo
+    // 歩数を修正したら警告状態をリセットする。
     stepsInput.addEventListener("input", () => {
         isStepsWarned = false;
         clearError("steps");
     });
 
-    // Date validation / 日付チェック
+    // 日付を検証する。
     function validateRecordedDate() {
         if (!recordedDateInput.value) {
             showError("recordedDate", "日付を入力してください");
@@ -148,7 +131,7 @@ function initModal() {
         return true;
     }
 
-    // Step validation / 歩数チェック (Nâng cấp logic Cảnh báo)
+    // 歩数を検証する。
     function validateSteps() {
         const value = stepsInput.value;
 
@@ -168,11 +151,11 @@ function initModal() {
 
         if (steps > 50000 && !isStepsWarned) {
             showError("steps", "歩数が非常に大きいです。入力内容に間違いはありませんか？（※もう一度「保存」を押すと登録されます）");
-            isStepsWarned = true; // Ghi nhớ đã phát cảnh báo
-            return false; // Lần 1: Chặn tạm thời để người dùng xác nhận lại
+            isStepsWarned = true; // 警告を表示済みにする。
+            return false; // 初回は一時停止し、ユーザーの確認を求める。
         }
 
-        // Lần 2 (hoặc số bước bình thường <= 50,000): Cho phép đi tiếp để lưu
+        // 2回目、または50,000以下の通常値なら保存を続行する。
         clearError("steps");
         return true;
     }
@@ -212,7 +195,7 @@ function initModal() {
         ["recordedDate", "steps"].forEach(clearError);
     }
 
-    // Current date in YYYY-MM-DD format / 現在日付をYYYY-MM-DD形式で返す
+    // 現在日付をYYYY-MM-DD形式で返す。
     function currentDate() {
         const date = new Date();
         const yyyy = date.getFullYear();

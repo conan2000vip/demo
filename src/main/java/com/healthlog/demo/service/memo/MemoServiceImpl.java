@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.healthlog.demo.dto.common.DateRangerFilter;
 import com.healthlog.demo.entity.Memo;
+import com.healthlog.demo.entity.ProfileShareSetting.Category;
 import com.healthlog.demo.entity.Profile;
 import com.healthlog.demo.exception.BusinessException;
 import com.healthlog.demo.repository.MemoRepository;
@@ -38,6 +39,11 @@ public class MemoServiceImpl extends BaseLogService<Memo, Memo> implements MemoS
     }
 
     @Override
+    protected Category category() {
+        return Category.memo;
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public Map<String, Object> list(Long profileId, Long currentUserId, DateRangerFilter range, int page) {
         validatePageAndRange(range, page);
@@ -58,7 +64,7 @@ public class MemoServiceImpl extends BaseLogService<Memo, Memo> implements MemoS
 
     @Override
     public Memo create(Long profileId, Long currentUserId, Memo input) {
-        Profile profile = validateAndGetProfile(profileId, currentUserId);
+        Profile profile = validateAndGetEditableProfile(profileId, currentUserId);
         normalizeInput(input);
         validateMemo(input);
         long countOnDate = memoRepository.countByProfile_IdAndRecordedDate(profileId, input.getRecordedDate());

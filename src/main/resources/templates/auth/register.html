@@ -11,8 +11,6 @@
 <body>
     <div class="auth-page">
         <div class="auth-card">
-
-            <!-- 左パネル — 他の画面と共通 -->
             <aside class="auth-brand">
                 <div class="auth-brand__logo">
                     <img th:src="@{/image/logo.png}" alt="HealthLog" />
@@ -23,7 +21,6 @@
                     <svg viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <circle cx="150" cy="150" r="120" fill="#FFFFFF" opacity="0.12" />
                         <circle cx="150" cy="150" r="90" fill="#FFFFFF" opacity="0.10" />
-                        <!-- ログイン画面と共通する3人の家族 -->
                         <g fill="#FFFFFF">
                             <circle cx="105" cy="95" r="16" />
                             <rect x="85" y="115" width="40" height="46" rx="14" />
@@ -36,7 +33,6 @@
                             <circle cx="196" cy="98" r="14" />
                             <rect x="179" y="115" width="34" height="40" rx="12" />
                         </g>
-                        <!-- 小さなプラス記号: 新規追加・登録の象徴 -->
                         <circle cx="215" cy="175" r="18" fill="#22C55E" />
                         <path d="M215 167 V183 M207 175 H223" stroke="#FFFFFF" stroke-width="4"
                             stroke-linecap="round" />
@@ -51,28 +47,21 @@
                     </div>
                 </div>
             </aside>
-
-            <!-- 右パネル — 登録フォーム -->
             <section class="auth-form-panel">
                 <div class="auth-form-panel__header">
                     <h1>新規登録</h1>
                     <p>必要な情報を入力してアカウントを作成してください。</p>
                 </div>
-
-                <!-- サーバーエラー表示: メール重複・パスワード不一致など -->
                 <div class="banner banner--error" th:if="${errorMessage}">
                     <i data-lucide="alert-circle"></i>
                     <span th:text="${errorMessage}"></span>
                 </div>
-                <!-- 成功メッセージ -->
                 <div class="banner banner--success" th:if="${message}">
                     <span th:text="${message}"></span>
                 </div>
 
                 <form id="registerForm" th:action="@{/auth/register}" th:object="${registerRequest}" method="post"
                     class="form" novalidate>
-
-                    <!-- メールアドレスの入力欄 -->
                     <div class="input-group">
                         <label for="email">メールアドレス</label>
                         <div class="input-box">
@@ -86,8 +75,6 @@
                             <span th:text="${#fields.hasErrors('email')} ? ${#fields.errors('email')[0]} : ''"></span>
                         </div>
                     </div>
-
-                    <!-- パスワードの入力欄 -->
                     <div class="input-group">
                         <label for="password">パスワード</label>
                         <div class="input-box">
@@ -105,8 +92,6 @@
                                 th:text="${#fields.hasErrors('password')} ? ${#fields.errors('password')[0]} : ''"></span>
                         </div>
                     </div>
-
-                    <!-- パスワード確認の入力欄 -->
                     <div class="input-group">
                         <label for="confirmPassword">パスワード（確認）</label>
                         <div class="input-box">

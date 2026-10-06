@@ -253,32 +253,16 @@ function formatHours(value) {
     return m === 0 ? `${h}h` : `${h}h${m}m`;
 }
 function initChart() {
-    const searchParams = new URLSearchParams(window.location.search);
-    const isSearching = searchParams.has("startDate") || searchParams.has("endDate");
-
     const targetSleep = window.targetSleep !== null && window.targetSleep !== undefined
         ? parseFloat(window.targetSleep)
         : null;
-
-    const chart = HealthChart.create({
+    initMetricChart({
         canvasId: "sleepChart",
         data: window.sleepChartData,
         unit: "時間",
         type: "line",
-        days: 7,
-        isSearching: isSearching,
         color: "#4a3b8c",
         targetValue: targetSleep,
-        showDataLabels: true,
         valueFormatter: formatHours,
     });
-
-    const wrapper = document.getElementById("chartWrapper");
-    const chartUrl = wrapper?.closest(".chart-card")?.dataset.chartUrl;
-    const from = window.sleepChartData?.from;
-    const to = window.sleepChartData?.to;
-
-    if (chart && wrapper && chartUrl && from && to) {
-        initChartSwipe({ chart, wrapperEl: wrapper, chartUrl, initialFrom: from, initialTo: to });
-    }
 }

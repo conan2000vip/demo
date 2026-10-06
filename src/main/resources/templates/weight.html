@@ -13,13 +13,9 @@
 </head>
 
 <body>
-
-    <!-- ===== Header ===== -->
     <div th:replace="~{commons/header :: header('weight')}"></div>
     <main class="weight-page">
         <div class="weight-page__inner">
-
-            <!-- Page Header -->
             <div class="weight-page__header">
                 <div class="weight-page__heading">
                     <span class="weight-page__icon">
@@ -34,8 +30,6 @@
                     <i data-lucide="plus"></i>記録する
                 </button>
             </div>
-
-            <!-- Business Error / Success -->
             <div class="alert alert--error" th:if="${error}" id="errorAlert" data-auto-hide="true">
                 <i data-lucide="alert-circle"></i><span th:text="${error}"></span>
                 <button type="button" class="alert__close" onclick="this.closest('.alert').remove()">
@@ -48,13 +42,8 @@
                     <i data-lucide="x"></i>
                 </button>
             </div>
-
-            <!-- Feedback -->
             <div th:replace="~{commons/data-controls :: feedbackList(${feedbackList})}"></div>
-
-            <!-- Summary Cards -->
             <div class="summary-grid">
-                <!-- 最新体重 -->
                 <div class="summary-card">
                     <span class="summary-card__label">最新体重</span>
                     <span class="summary-card__value">
@@ -64,8 +53,6 @@
                         th:text="'最終記録：' + ${#temporals.format(stats.latestDate,'yyyy/MM/dd')}">
                     </span>
                 </div>
-
-                <!-- BMI -->
                 <div class="summary-card">
                     <span class="summary-card__label">現在のBMI</span>
                     <span class="summary-card__value">
@@ -79,8 +66,6 @@
                     </span>
                     <span class="summary-card__sub">（最新体重から算出）</span>
                 </div>
-
-                <!-- 期間内最小 -->
                 <div class="summary-card">
                     <span class="summary-card__label">最小体重</span>
                     <span class="summary-card__value">
@@ -91,8 +76,6 @@
                         <span th:text="${#temporals.format(stats.minDate,'yyyy/MM/dd')}"></span>
                     </span>
                 </div>
-
-                <!-- 期間内最大 -->
                 <div class="summary-card">
                     <span class="summary-card__label">最大体重</span>
                     <span class="summary-card__value">
@@ -116,8 +99,6 @@
                     @{/profile/{profileId}/weight(profileId=${profileId})},
                     ${filterStartDate}, ${filterEndDate})}">
             </div>
-
-            <!-- Table / Empty state -->
             <section class="table-card">
                 <div class="data-table-scroll">
                     <table class="weight-table" data-history-table th:if="${not #lists.isEmpty(logs)}">
@@ -178,8 +159,6 @@
                 <div
                     th:replace="~{commons/data-controls :: pagination(@{/profile/{profileId}/weight(profileId=${profileId})},${filterStartDate}, ${filterEndDate},${currentPage}, ${totalPages}, ${hasPrevious}, ${hasNext})}">
                 </div>
-
-                <!-- Trường hợp 1: chưa từng có bản ghi nào (không liên quan đến việc có đang lọc hay không) -->
                 <div class="empty-state" th:if="${#lists.isEmpty(logs) and !hasAnyLog}">
                     <img th:src="@{/image/scales.png}" alt="" class="weight-page__icon-img" />
                     <p>まだ体重が記録されていません</p>
@@ -187,8 +166,6 @@
                         <i data-lucide="plus"></i>最初の記録をつける
                     </button>
                 </div>
-
-                <!-- Trường hợp 2: đã từng có bản ghi, nhưng bộ lọc hiện tại không khớp gì -->
                 <div class="empty-state" th:if="${#lists.isEmpty(logs)} and ${hasAnyLog}">
                     <i data-lucide="calendar-days"></i>
                     <p>選択した期間に記録がありません</p>
@@ -200,8 +177,6 @@
             </section>
         </div>
     </main>
-
-    <!-- ===== Modal: 体重を記録する / 編集する ===== -->
     <div class="modal-overlay" id="weightModalOverlay">
         <div class="modal" role="dialog" aria-modal="true" aria-labelledby="weightModalTitle">
             <div class="modal__header">
@@ -252,8 +227,6 @@
             </form>
         </div>
     </div>
-
-    <!-- ===== Confirm Modal (削除確認) ===== -->
     <div th:replace="~{commons/confirm-modal :: deleteModal}"></div>
 
     <script src="https://unpkg.com/lucide@latest"></script>

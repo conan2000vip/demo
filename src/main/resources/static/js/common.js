@@ -334,7 +334,7 @@ function initFilterForm() {
     syncActiveRange();
 }
 
-// Chống load lại trang 
+// ページ全体を再読み込みせずにページングする。
 function initAjaxPagination() {
     const card = document.querySelector('.table-card');
     if (!card) return;
@@ -418,6 +418,39 @@ function initDeleteConfirm() {
         }
     });
 }
+
+window.initMetricChart = function ({
+    canvasId,
+    data,
+    unit,
+    type,
+    targetValue = null,
+    color = null,
+    valueFormatter
+}) {
+    const params = new URLSearchParams(window.location.search);
+    const chart = HealthChart.create({
+        canvasId,
+        data,
+        unit,
+        type,
+        days: 7,
+        isSearching: params.has("startDate") || params.has("endDate"),
+        targetValue,
+        color,
+        showDataLabels: true,
+        ...(valueFormatter ? { valueFormatter } : {})
+    });
+
+    const wrapper = document.getElementById("chartWrapper");
+    const chartUrl = wrapper?.closest(".chart-card")?.dataset.chartUrl;
+    const from = data?.from;
+    const to = data?.to;
+    if (chart && wrapper && chartUrl && from && to) {
+        initChartSwipe({ chart, wrapperEl: wrapper, chartUrl, initialFrom: from, initialTo: to });
+    }
+    return chart;
+};
 
 window.HealthChart = (() => {
     const defaultDays = 7;
@@ -675,7 +708,7 @@ function initChartSwipe({ chart, wrapperEl, chartUrl, initialFrom, initialTo, on
     }, { passive: true });
 }
 
-// mở rộng ô memo
+// メモ欄の表示を展開・折りたたみする。
 function initMemoExpand() {
     function setExpanded(cell, expanded) {
         cell.classList.toggle('is-expanded', expanded);

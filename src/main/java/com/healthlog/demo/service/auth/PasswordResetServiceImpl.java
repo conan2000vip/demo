@@ -16,6 +16,7 @@ import com.healthlog.demo.entity.AuthToken;
 import com.healthlog.demo.entity.User;
 import com.healthlog.demo.exception.BusinessException;
 import com.healthlog.demo.repository.AuthTokenRepository;
+import com.healthlog.demo.repository.ProfileRepository;
 import com.healthlog.demo.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
     private final UserRepository userRepository;
     private final AuthTokenRepository authTokenRepository;
+    private final ProfileRepository profileRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final SecureRandom secureRandom = new SecureRandom();
@@ -68,7 +70,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     @Override
     @Transactional
     // 再設定トークンの代わりにメールアドレスを使用してパスワードを更新する。
-    public void resetPassword(String email, PasswordResetConfirmRequest request) {
+    public void resetPassword(String email, PasswordResetConfirmRequest request, Long pinProfileId) {
         if (!StringUtils.hasText(email)) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "有効なリクエストではありません。最初からやり直してください。");
         }
@@ -86,6 +88,13 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         // 3. 新しいパスワードを暗号化して更新
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
+        if (pinProfileId != null) {
+            var profile = profileRepository.findByIdAndUser_Id(pinProfileId, user.getId())
+                    .orElseThrow(() -> new BusinessException(HttpStatus.BAD_REQUEST,
+                            "対象のプロファイルが見つかりません。"));
+            profile.setPinHash(null);
+            profileRepository.save(profile);
+        }
 
         // 4. このユーザーの未使用OTPトークンをすべて無効化 (クリーンアップ)
         List<AuthToken> activeTokens = authTokenRepository

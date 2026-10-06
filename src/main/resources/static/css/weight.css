@@ -1,7 +1,3 @@
-/* =========================================================
-   Weight Page
-   ========================================================= */
-
 .weight-page {
 	min-height: calc(100vh - 72px);
 }
@@ -11,8 +7,6 @@
 	margin: 0 auto;
 	padding: 32px 24px 64px;
 }
-
-/* ---------- Page Header ---------- */
 
 .weight-page__header {
 	display: flex;
@@ -49,22 +43,15 @@
 	color: var(--wp-text-muted);
 }
 
-/* =========================================================
-   Weight Table Only
-   ========================================================= */
 .weight-table {
 	width: 100%;
 	table-layout: fixed;
 }
-
-/* 日付 */
 .weight-table th:nth-child(1),
 .weight-table td:nth-child(1) {
 	width: 120px;
 	white-space: nowrap;
 }
-
-/* 時間 */
 .weight-table th:nth-child(2),
 .weight-table td:nth-child(2) {
 	width: 90px;
@@ -72,16 +59,12 @@
 	white-space: nowrap;
 	color: var(--wp-text-muted);
 }
-
-/* 体重 */
 .weight-table th:nth-child(3),
 .weight-table td:nth-child(3) {
 	width: 160px;
 	text-align: center;
 	white-space: nowrap;
 }
-
-/* BMI */
 .weight-table th:nth-child(4),
 .weight-table td:nth-child(4) {
 	width: 120px;
@@ -112,9 +95,6 @@
 	width: 90px;
 }
 
-/* =========================================================
-   Responsive
-   ========================================================= */
 @media (max-width: 768px) {
 
 	.weight-table {

@@ -72,6 +72,16 @@ public class Profile implements Serializable {
     @Column(name = "is_primary", nullable = false)
     private boolean isPrimary = false;
 
+    /**
+     * Managed profiles are operated by the primary profile and do not require
+     * their own PIN. Existing secondary profiles remain managed by default.
+     */
+    @Column(name = "managed_by_primary", nullable = false, columnDefinition = "boolean default true")
+    private boolean managedByPrimary = true;
+
+    @Column(name = "pin_hash", length = 100)
+    private String pinHash;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

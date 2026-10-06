@@ -8,6 +8,9 @@ import com.healthlog.demo.constant.SessionConstants;
 import com.healthlog.demo.entity.User;
 import com.healthlog.demo.repository.UserRepository;
 import com.healthlog.demo.service.profile.ProfileService;
+import com.healthlog.demo.entity.Profile;
+import com.healthlog.demo.entity.ProfileShareSetting.Category;
+import com.healthlog.demo.service.helper.ProfileAccessValidation;
 import com.healthlog.demo.util.SecurityContextUtil;
 
 import jakarta.servlet.http.HttpSession;
@@ -19,6 +22,7 @@ public class ProfileModelAdvice {
     private final ProfileService profileService;
     private final SecurityContextUtil securityContextUtil;
     private final UserRepository userRepository;
+    private final ProfileAccessValidation profileAccessValidation;
 
     @ModelAttribute
     public void addProfileMenuAttributes(HttpSession session, Model model) {
@@ -36,6 +40,22 @@ public class ProfileModelAdvice {
         if (user == null) return;
 
         model.addAttribute("profileList", profileService.getProfiles(user.getId()));
-        model.addAttribute("currentProfile", profileService.resolveCurrentProfile(session, user.getId()));
+        Profile currentProfile = profileService.resolveCurrentProfile(session, user.getId());
+        model.addAttribute("currentProfile", currentProfile);
+        model.addAttribute("canViewWeight",
+                currentProfile != null && profileAccessValidation.hasReadAccess(
+                        currentProfile.getId(), user.getId(), Category.weight));
+        model.addAttribute("canViewSleep",
+                currentProfile != null && profileAccessValidation.hasReadAccess(
+                        currentProfile.getId(), user.getId(), Category.sleep));
+        model.addAttribute("canViewWater",
+                currentProfile != null && profileAccessValidation.hasReadAccess(
+                        currentProfile.getId(), user.getId(), Category.water));
+        model.addAttribute("canViewStep",
+                currentProfile != null && profileAccessValidation.hasReadAccess(
+                        currentProfile.getId(), user.getId(), Category.step));
+        model.addAttribute("canViewMemo",
+                currentProfile != null && profileAccessValidation.hasReadAccess(
+                        currentProfile.getId(), user.getId(), Category.memo));
     }
 }

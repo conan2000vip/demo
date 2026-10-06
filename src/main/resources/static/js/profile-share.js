@@ -1,13 +1,8 @@
 let currentActiveProfileId = null;
 let currentShareData = [];
 
-// Mở Modal và tải dữ liệu từ RestController
+// モーダルを開き、コントローラーから設定を取得する。
 function openShareModal(profileId, currentProfileId, isCurrentPrimary) {
-    if (!isCurrentPrimary && profileId !== currentProfileId) {
-        showShareAlert('このプロファイルの共有設定を変更する権限がありません。自分のプロファイルを選択してください。');
-        return;
-    }
-
     currentActiveProfileId = profileId;
     const modal = document.getElementById('shareSettingsModal');
 
@@ -60,7 +55,7 @@ function openShareModal(profileId, currentProfileId, isCurrentPrimary) {
         window.setTimeout(() => alert.remove(), 10000);
     }
 
-// Render ma trận phân quyền 5 hạng mục
+// 5カテゴリの共有権限マトリクスを描画する。
 function renderShareMatrixTable(data) {
     const list = document.getElementById('shareMatrixBody');
     list.innerHTML = '';
@@ -107,7 +102,7 @@ function createRoleSelectCell(index, fieldName, currentRole, label) {
             <label for="${selectId}">${label}</label>
             <select id="${selectId}" class="share-settings__select"
                     onchange="onRoleChange(${index}, '${fieldName}', this.value)">
-                <option value="EDITOR" ${currentRole === 'EDITOR' ? 'selected' : ''}>編集者</option>
+                <option value="EDITOR" ${currentRole === 'EDITOR' ? 'selected' : ''}>閲覧と入力</option>
                 <option value="VIEWER" ${currentRole === 'VIEWER' ? 'selected' : ''}>閲覧者</option>
                 <option value="NONE" ${currentRole === 'NONE' ? 'selected' : ''}>閲覧不可</option>
             </select>
@@ -121,7 +116,7 @@ function onRoleChange(index, fieldName, value) {
     }
 }
 
-// Gọi API POST lưu cấu hình
+// APIへPOSTして設定を保存する。
 function saveShareSettings() {
     if (!currentActiveProfileId || currentShareData.length === 0) return;
 

@@ -22,6 +22,7 @@ import com.healthlog.demo.dto.common.DateRangerFilter;
 import com.healthlog.demo.entity.BaseLog;
 import com.healthlog.demo.entity.Profile;
 import com.healthlog.demo.entity.Water;
+import com.healthlog.demo.entity.ProfileShareSetting.Category;
 import com.healthlog.demo.entity.Water.DrinkType;
 import com.healthlog.demo.exception.BusinessException;
 import com.healthlog.demo.repository.WaterRepository;
@@ -46,6 +47,11 @@ public class WaterServiceImpl extends BaseLogService<Water, Water> implements Wa
     @Override
     protected Water mapToDto(Water entity) {
         return entity;
+    }
+
+    @Override
+    protected Category category() {
+        return Category.water;
     }
 
     @SuppressWarnings("null")
@@ -120,7 +126,7 @@ public class WaterServiceImpl extends BaseLogService<Water, Water> implements Wa
 
     @Override
     public Water create(Long profileId, Long currentUserId, Water input) {
-        Profile profile = validateAndGetProfile(profileId, currentUserId);
+        Profile profile = validateAndGetEditableProfile(profileId, currentUserId);
         validateWater(input);
         input.setProfile(profile);
         if (input.getRecordedTime() == null)
@@ -131,7 +137,7 @@ public class WaterServiceImpl extends BaseLogService<Water, Water> implements Wa
 
     @Override
     public Water update(Long profileId, Long currentUserId, Long logId, Water input) {
-        validateAndGetProfile(profileId, currentUserId);
+        validateAndGetEditableProfile(profileId, currentUserId);
         Water existing = findEntityByIdAndProfile(logId, profileId);
         validateWater(input);
         existing.setRecordedDate(input.getRecordedDate());

@@ -1,6 +1,3 @@
-/* =========================================================
-   Step Page
-========================================================= */
 .step-page {
 	min-height: calc(100vh - 72px);
 }
@@ -11,7 +8,6 @@
 	padding: 32px 24px 64px;
 }
 
-/* ---------- Page Header ---------- */
 .step-page__header {
 	display: flex;
 	align-items: center;
@@ -47,22 +43,16 @@
 	color: var(--wp-text-muted);
 }
 
-/* =========================================================
-   Step Table Only
-   ========================================================= */
 .step-table {
     width: 100%;
     table-layout: fixed;
 }
-
-/* 日付 */
 .step-table th:nth-child(1),
 .step-table td:nth-child(1) {
     width: 120px;
     white-space: nowrap;
 }
 
-/* 歩数 - Đã sửa thành font chữ mảnh bình thường */
 .step-table th:nth-child(2),
 .step-table td:nth-child(2) {
     width: 140px;
@@ -70,16 +60,12 @@
     white-space: nowrap;
     font-weight: 400 !important;
 }
-
-/* 目標比 */
 .step-table th:nth-child(3),
 .step-table td:nth-child(3) {
     width: 100px;
     text-align: center;
     white-space: nowrap;
 }
-
-/* 最終更新 */
 .step-table th:nth-child(4),
 .step-table td:nth-child(4) {
     width: 100px;
@@ -87,14 +73,11 @@
     white-space: nowrap;
     color: var(--wp-text-muted);
 }
-
-/* メモ */
 .step-table th:nth-child(5),
 .step-table td:nth-child(5) {
     text-align: left;
 }
 
-/* Ép font-weight của cột số bước về normal */
 .step-table__steps {
     font-weight: 400 !important;
     text-align: center;
@@ -119,9 +102,6 @@
     width: 90px;
 }
 
-/* =========================================================
-   Responsive
-========================================================= */
 @media (max-width: 768px) {
 	.step-table {
 		table-layout: auto;

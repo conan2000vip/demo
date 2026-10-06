@@ -19,6 +19,7 @@ import com.healthlog.demo.dto.common.DateRangerFilter;
 import com.healthlog.demo.dto.common.PageResponse;
 import com.healthlog.demo.entity.Profile;
 import com.healthlog.demo.entity.Weight;
+import com.healthlog.demo.entity.ProfileShareSetting.Category;
 import com.healthlog.demo.exception.BusinessException;
 import com.healthlog.demo.repository.WeightRepository;
 import com.healthlog.demo.service.base.BaseLogService;
@@ -50,6 +51,11 @@ public class WeightServiceImpl extends BaseLogService<Weight, Weight> implements
 	@Override
 	protected Weight mapToDto(Weight entity) {
 		return entity;
+	}
+
+	@Override
+	protected Category category() {
+		return Category.weight;
 	}
 
 	@Override
@@ -127,7 +133,7 @@ public class WeightServiceImpl extends BaseLogService<Weight, Weight> implements
 
 	@Override
 	public Weight create(Long profileId, Long currentUserId, Weight weight) {
-		Profile profile = validateAndGetProfile(profileId, currentUserId);
+		Profile profile = validateAndGetEditableProfile(profileId, currentUserId);
 		validateWeightInput(weight);
 		if (weight.getHeight() == null) {
 			weight.setHeight(profile.getHeight());
@@ -138,7 +144,7 @@ public class WeightServiceImpl extends BaseLogService<Weight, Weight> implements
 
 	@Override
 	public Weight update(Long profileId, Long currentUserId, Long logId, Weight input) {
-		validateAndGetProfile(profileId, currentUserId);
+		validateAndGetEditableProfile(profileId, currentUserId);
 		Weight log = findEntityByIdAndProfile(logId, profileId);
 		validateWeightInput(input);
 

@@ -18,11 +18,11 @@ public class ProfileShareSettingDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class CategoryRole {
-        private ShareRole weightRole = ShareRole.NONE;
-        private ShareRole sleepRole = ShareRole.NONE;
-        private ShareRole waterRole = ShareRole.NONE;
-        private ShareRole stepRole = ShareRole.NONE;
-        private ShareRole memoRole = ShareRole.NONE;
+        private ShareRole weightRole = ShareRole.VIEWER;
+        private ShareRole sleepRole = ShareRole.VIEWER;
+        private ShareRole waterRole = ShareRole.VIEWER;
+        private ShareRole stepRole = ShareRole.VIEWER;
+        private ShareRole memoRole = ShareRole.VIEWER;
     }
 
     @Getter

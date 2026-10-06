@@ -63,9 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // ★ リアルタイムイベントの設定
     // =========================================================
     if (emailInput) {
-        // 当 gõ chữ: Ẩn lỗi đỏ cũ đi
+        // 入力中は以前のエラー表示を隠す。
         emailInput.addEventListener('input', () => clearError(emailInput, emailError));
-        // Khi rời khỏi ô Email (click sang ô Password): Kiểm tra định dạng có @ hay chưa
+        // メール欄から移動したときに形式を検証する。
         emailInput.addEventListener('blur', validateEmail);
     }
 
@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const isPasswordValid = validatePassword();
 
             if (!isEmailValid || !isPasswordValid) {
-                e.preventDefault(); // Có lỗi thì dừng không cho submit
+                e.preventDefault(); // エラーがある場合は送信を停止する。
             }
         });
     }

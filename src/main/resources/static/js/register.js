@@ -10,10 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const passwordError = document.getElementById('passwordError');
     const confirmPasswordError = document.getElementById('confirmPasswordError');
 
-    // ★ 1. Lấy element banner lỗi từ Server (dải màu hồng)
+    // サーバーエラーバナーを取得する。
     const serverErrorBanner = document.querySelector('.banner--error, .auth-alert--error');
 
-    // ★ Hàm hỗ trợ ẩn banner Server
+    // サーバーエラーバナーを非表示にする。
     function hideServerError() {
         if (serverErrorBanner) serverErrorBanner.style.display = 'none';
     }

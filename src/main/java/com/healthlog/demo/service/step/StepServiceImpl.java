@@ -17,6 +17,7 @@ import com.healthlog.demo.dto.chartdata.ChartDataResponse;
 import com.healthlog.demo.dto.common.DateRangerFilter;
 import com.healthlog.demo.entity.Profile;
 import com.healthlog.demo.entity.Step;
+import com.healthlog.demo.entity.ProfileShareSetting.Category;
 import com.healthlog.demo.exception.BusinessException;
 import com.healthlog.demo.repository.StepRepository;
 import com.healthlog.demo.service.base.BaseLogService;
@@ -40,6 +41,11 @@ public class StepServiceImpl extends BaseLogService<Step, Step> implements StepS
     @Override
     protected Step mapToDto(Step entity) {
         return entity;
+    }
+
+    @Override
+    protected Category category() {
+        return Category.step;
     }
 
     @SuppressWarnings("null")
@@ -102,7 +108,7 @@ public class StepServiceImpl extends BaseLogService<Step, Step> implements StepS
 
     @Override
     public Step create(Long profileId, Long currentUserId, Step input) {
-        Profile profile = validateAndGetProfile(profileId, currentUserId);
+        Profile profile = validateAndGetEditableProfile(profileId, currentUserId);
         validateStep(input);
         Step existing = stepRepository.findFirstByProfile_IdAndRecordedDate(profileId, input.getRecordedDate())
                 .orElse(null);
@@ -119,7 +125,7 @@ public class StepServiceImpl extends BaseLogService<Step, Step> implements StepS
 
     @Override
     public Step update(Long profileId, Long currentUserId, Long logId, Step input) {
-        validateAndGetProfile(profileId, currentUserId);
+        validateAndGetEditableProfile(profileId, currentUserId);
         Step existing = findEntityByIdAndProfile(logId, profileId);
         validateStep(input);
         Step duplicate = stepRepository.findFirstByProfile_IdAndRecordedDate(profileId, input.getRecordedDate())

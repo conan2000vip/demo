@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.healthlog.demo.dto.common.DateRangerFilter;
 import com.healthlog.demo.entity.BaseLog;
 import com.healthlog.demo.entity.Profile;
+import com.healthlog.demo.entity.ProfileShareSetting.Category;
 import com.healthlog.demo.exception.BusinessException;
 import com.healthlog.demo.repository.BaseLogRepository;
 import com.healthlog.demo.service.helper.ProfileAccessValidation;
@@ -28,10 +29,15 @@ public abstract class BaseLogService<T extends BaseLog, DTO> {
 
     // 抽象メソッド：各サービスでエンティティからDTOへの変換を実装する。
     protected abstract DTO mapToDto(T entity);
+    protected abstract Category category();
 
     // === 1. プロファイルの認証・認可（IDOR対策） ===
     protected Profile validateAndGetProfile(Long profileId, Long currentUserId) {
-        return profileAccessValidation.validateAndGetProfile(profileId, currentUserId);
+        return profileAccessValidation.validateAndGetProfile(profileId, currentUserId, category());
+    }
+
+    protected Profile validateAndGetEditableProfile(Long profileId, Long currentUserId) {
+        return profileAccessValidation.validateAndGetEditableProfile(profileId, currentUserId, category());
     }
 
     // === 2. 安全に1件のレコード詳細を取得 ===

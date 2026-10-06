@@ -1,7 +1,6 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <body>
-    <!-- 期間フィルターを表示するバー -->
     <div th:fragment="dateRangePicker(actionUrl, clearUrl, filterStartDate, filterEndDate)" class="chart-range-picker">
         <button type="button" class="chart-range-picker__toggle" id="chartRangeToggle" aria-expanded="false"
             aria-controls="chartRangePopover">
@@ -44,8 +43,6 @@
             </div>
         </form>
     </div>
-
-    <!-- フィードバック一覧を表示するセクション -->
     <section th:fragment="feedbackList(feedbackList)" class="feedback-list" id="feedbackSection"
         th:if="${feedbackList != null and not #lists.isEmpty(feedbackList)}">
         <div class="feedback-card" th:each="fb, iterStat : ${feedbackList}"
@@ -66,8 +63,6 @@
             今日のフィードバックをすべて見る
         </button>
     </section>
-
-    <!-- データグラフを表示するカード -->
     <section
         th:fragment="chartCard(title, canvasId, hasData, chartUrl, category, iconSrc, seriesLabel, targetText, filterAction, clearUrl, filterStartDate, filterEndDate)"
         class="chart-card" th:classappend="'chart-card--' + ${category}" th:if="${hasData}"
@@ -99,8 +94,6 @@
             </div>
         </div>
     </section>
-
-    <!-- ページネーション -->
     <nav th:fragment="pagination(baseUrl, startDate, endDate, currentPage, totalPages, hasPrevious, hasNext)"
         class="pagination" th:if="${totalPages > 1}">
         <a th:if="${hasPrevious}"

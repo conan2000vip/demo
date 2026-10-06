@@ -11,12 +11,10 @@
     </head>
 
     <body>
-        <!-- ===== Header ===== -->
         <div th:replace="~{commons/header :: header(activePage='notes')}"></div>
 
         <main class="memo-page">
             <div class="memo-page__inner">
-                <!-- Page Header -->
                 <div class="memo-page__header">
                     <div class="memo-page__heading">
                         <span class="memo-page__icon">
@@ -29,8 +27,6 @@
                     </div>
                     <button type="button" class="btn btn--primary" id="openAddModalBtn"><i data-lucide="plus"></i>記録する</button>
                 </div>
-
-                <!-- Business Error / Success -->
                 <div class="alert alert--error" th:if="${error}" id="errorAlert" data-auto-hide="true">
                     <i data-lucide="alert-circle"></i><span th:text="${error}"></span>
                     <button type="button" class="alert__close" onclick="this.closest('.alert').remove()">
@@ -43,8 +39,6 @@
                         <i data-lucide="x"></i>
                     </button>
                 </div>
-
-                <!-- Memo list and date filter -->
                 <div class="memo-records-wrapper">
                     <div class="memo-records-card__toolbar">
                         <div
@@ -125,8 +119,6 @@
                 </div>
             </div>
         </main>
-
-        <!-- ===== Modal: Add / Edit Memo ===== -->
         <div class="modal-overlay" id="memoModalOverlay">
             <div class="modal" role="dialog" aria-modal="true" aria-labelledby="memoModalTitle">
                 <div class="modal__header">
@@ -164,8 +156,6 @@
                 </form>
             </div>
         </div>
-
-        <!-- ===== Confirm Modal ===== -->
         <div th:replace="~{commons/confirm-modal :: deleteModal}"></div>
 
         <script src="https://unpkg.com/lucide@latest"></script>

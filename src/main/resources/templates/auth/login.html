@@ -11,7 +11,6 @@
 <body>
     <div class="auth-page">
         <div class="auth-card">
-            <!-- 左パネル：ブランドとイラストを表示する（表示専用）。 -->
             <aside class="auth-brand">
                 <div class="auth-brand__logo">
                     <img th:src="@{/image/logo.png}" alt="HealthLog" />
@@ -19,16 +18,11 @@
                 </div>
 
                 <div class="auth-brand__art">
-                    <!-- 健康的な家族のイラスト（画像ファイルに依存しないSVG） -->
                     <svg viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <circle cx="150" cy="150" r="120" fill="#2F7A67" opacity="0.35" />
                         <circle cx="150" cy="150" r="90" fill="#2F7A67" opacity="0.25" />
-
-                        <!-- 心拍 -->
                         <path d="M55 155 H105 L120 120 L140 190 L160 130 L175 155 H245" stroke="#E8886A"
                             stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-
-                        <!-- 3人の家族 -->
                         <g fill="#FFFFFF">
                             <circle cx="105" cy="95" r="16" />
                             <rect x="85" y="115" width="40" height="46" rx="14" />
@@ -54,8 +48,6 @@
                     </div>
                 </div>
             </aside>
-
-            <!-- 右パネル：ログインフォームとバックエンド連携部分。 -->
             <section class="auth-form-panel">
                 <div class="auth-form-panel__header">
                     <h1>ログイン</h1>
@@ -63,19 +55,13 @@
                         アカウントにログインして、家族の健康ダッシュボードを確認しましょう。
                     </p>
                 </div>
-
-                <!-- Controllerがmodelへ設定したサーバーエラーメッセージを表示する -->
                 <div class="banner banner--error" th:if="${errorMessage}">
                     <i data-lucide="alert-circle"></i>
                     <span th:text="${errorMessage}"></span>
                 </div>
-
-                <!-- 成功メッセージ: 例）パスワード再設定完了、登録完了など -->
                 <div class="banner banner--success" th:if="${message}">
                     <span th:text="${message}"></span>
                 </div>
-
-                <!-- 未認証ユーザーのメールアドレスへ確認コードを再送するフォーム -->
                 <form th:if="${emailNotVerified}" th:action="@{/auth/resend-code}" method="post" class="resend-form">
                     <input type="hidden" name="email" th:value="${email}" />
                     <input type="hidden" name="resetFlow" value="false" />
@@ -84,8 +70,6 @@
                         確認メールを再送する
                     </button>
                 </form>
-
-                <!-- メールアドレス、パスワード、ログイン状態を送信するログインフォーム -->
                 <form id="loginForm" th:action="@{/auth/login}" method="post" class="form" novalidate>
                     <div class="input-group">
                         <label for="email">メールアドレス</label>
@@ -131,8 +115,6 @@
                 </form>
 
                 <div class="divider">または</div>
-
-                <!-- ソーシャルログイン（OAuth連携先のURLに置き換えてください） -->
                 <div class="social-row">
                     <a th:href="@{/oauth2/authorization/google}" class="social-btn">Google</a>
                     <a th:href="@{/oauth2/authorization/facebook}" class="social-btn">Facebook</a>

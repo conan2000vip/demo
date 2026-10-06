@@ -57,4 +57,14 @@ public class ProfileFormDto {
     private String avatar = "avatar_01";
 
     private boolean isPrimary = false;
+
+    private boolean managedByPrimary = true;
+
+    private boolean pinEnabled;
+
+    private String pin;
+
+    private String pinConfirmation;
+
+    private String currentPin;
 }

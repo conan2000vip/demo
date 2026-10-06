@@ -13,14 +13,10 @@
 </head>
 
 <body>
-
-    <!-- ===== Header / ヘッダー ===== -->
     <div th:replace="~{commons/header :: header(activePage='water')}"></div>
 
     <main class="water-page">
         <div class="water-page__inner">
-
-            <!-- Page Header / ページヘッダー -->
             <div class="water-page__header">
                 <div class="water-page__heading">
                     <span class="water-page__icon">
@@ -35,8 +31,6 @@
                     <i data-lucide="plus"></i>記録する
                 </button>
             </div>
-
-            <!-- Business Error / Success / エラー・成功メッセージ -->
             <div class="alert alert--error" th:if="${error}" id="errorAlert" data-auto-hide="true">
                 <i data-lucide="alert-circle"></i><span th:text="${error}"></span>
                 <button type="button" class="alert__close" onclick="this.closest('.alert').remove()">
@@ -49,11 +43,7 @@
                     <i data-lucide="x"></i>
                 </button>
             </div>
-
-            <!-- Feedback / フィードバック -->
             <div th:replace="~{commons/data-controls :: feedbackList(feedbackList=${feedbackList})}"></div>
-
-            <!-- Summary Cards / サマリーカード -->
             <div class="summary-grid">
                 <div class="summary-card">
                     <span class="summary-card__label">最新</span>
@@ -92,8 +82,6 @@
                     <span class="summary-card__sub" th:if="${stats?.goalRate != null}">本日の目標に対する割合</span>
                 </div>
             </div>
-
-            <!-- Shared Chart Card / 共通グラフカード -->
             <div th:replace="~{commons/data-controls :: chartCard(
                     title='水分(ml)',
                     canvasId='waterChart',
@@ -108,8 +96,6 @@
                     filterStartDate=${filterStartDate},
                     filterEndDate=${filterEndDate})}">
             </div>
-
-            <!-- Table / Empty State / テーブル・空状態 -->
             <section class="table-card">
                 <div class="data-table-scroll">
                     <table class="water-table" data-history-table th:if="${not #lists.isEmpty(logs)}">
@@ -160,15 +146,11 @@
                         </tbody>
                     </table>
                 </div>
-
-                <!-- Pagination / ページネーション -->
                 <div th:replace="~{commons/data-controls :: pagination(
                         @{/profile/{profileId}/water(profileId=${profileId})},
                         ${filterStartDate}, ${filterEndDate},
                         ${currentPage}, ${totalPages}, ${hasPrevious}, ${hasNext})}">
                 </div>
-
-                <!-- Empty State: No Records / 空状態：記録なし -->
                 <div class="empty-state" th:if="${#lists.isEmpty(logs) and !hasAnyLog}">
                     <i data-lucide="droplets"></i>
                     <p>まだ水分が記録されていません</p>
@@ -176,8 +158,6 @@
                         <i data-lucide="plus"></i>最初の記録をつける
                     </button>
                 </div>
-
-                <!-- Empty State for Filtered Results / 絞り込み結果なし -->
                 <div class="empty-state" th:if="${#lists.isEmpty(logs) and hasAnyLog}">
                     <i data-lucide="calendar-days"></i>
                     <p>選択した期間に記録がありません</p>
@@ -189,8 +169,6 @@
             </section>
         </div>
     </main>
-
-    <!-- ===== Modal: Add / Edit Water Record / 水分記録の追加・編集 ===== -->
     <div class="modal-overlay" id="waterModalOverlay">
         <div class="modal" role="dialog" aria-modal="true" aria-labelledby="waterModalTitle">
             <div class="modal__header">
@@ -248,8 +226,6 @@
             </form>
         </div>
     </div>
-
-    <!-- ===== Confirmation Modal / 削除確認モーダル ===== -->
     <div th:replace="~{commons/confirm-modal :: deleteModal}"></div>
 
     <script src="https://unpkg.com/lucide@latest"></script>

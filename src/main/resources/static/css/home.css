@@ -1,8 +1,3 @@
-/* =========================================================
-   Home page
-   Design tokens (--wp-*) come from common.css.
-   Only tokens used exclusively by Home are declared here.
-   ========================================================= */
 :root {
     --c-weight: #7c3aed;
 }
@@ -23,7 +18,6 @@
     object-fit: contain;
 }
 
-/* ---------- Profile card ---------- */
 .profile-card {
     background: var(--wp-surface);
     border: 1px solid var(--wp-border);
@@ -137,7 +131,6 @@
     margin: 0;
 }
 
-/* ---------- Stat grid ---------- */
 .stat-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -283,7 +276,6 @@
     background: linear-gradient(90deg, #22c55e, #4ade80);
 }
 
-/* transition is inherited from .stat-card */
 .stat-card--clickable {
     cursor: pointer;
 }
@@ -298,7 +290,6 @@
     outline-offset: 3px;
 }
 
-/* ---------- Memo / Family / Feedback panels ---------- */
 .memo-card,
 .family-card,
 .feedback-panel {
@@ -360,7 +351,6 @@
     margin: 0;
 }
 
-/* ---------- Memo list ---------- */
 .memo-card__list {
     list-style: none;
     margin: 0;
@@ -393,7 +383,6 @@
     word-break: break-word;
 }
 
-/* ---------- Family card ---------- */
 .family-card__note {
     font-size: 13px;
     color: var(--wp-text-muted);
@@ -425,8 +414,6 @@
     box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
 }
 
-/* All three states currently share the same card color;
-   only the status text color differs. */
 .family-member.is-ok,
 .family-member.is-warn,
 .family-member.is-danger {
@@ -543,9 +530,6 @@
     flex-shrink: 0;
 }
 
-/* =========================================================
-   Health Streak Achievement Modal
-   ========================================================= */
 .streak-modal {
     position: fixed;
     inset: 0;
@@ -594,7 +578,6 @@
     }
 }
 
-/* Close button keeps position:absolute (it is NOT in the z-index group below) */
 .streak-modal__close {
     position: absolute;
     top: 18px;
@@ -620,7 +603,6 @@
     color: #1f2937;
 }
 
-/* ---------- Trophy icon with glow ---------- */
 .streak-modal__icon {
     position: relative;
     width: 120px;
@@ -727,7 +709,6 @@
     }
 }
 
-/* ---------- Badge: CONTINUOUS RECORD ---------- */
 .streak-modal__badge {
     display: inline-block;
     margin-bottom: 12px;
@@ -741,7 +722,6 @@
     letter-spacing: 0.08em;
 }
 
-/* ---------- Title with laurel ornaments ---------- */
 .streak-modal__title-row {
     display: flex;
     align-items: center;
@@ -768,7 +748,6 @@
     display: none;
 }
 
-/* ---------- Paragraphs ---------- */
 .streak-modal__paragraph {
     margin: 0 0 16px;
     font-size: 15px;
@@ -776,12 +755,10 @@
     color: #4b5563;
 }
 
-/* Divider is intentionally hidden (kept in case the markup still contains it) */
 .streak-modal__divider {
     display: none;
 }
 
-/* ---------- Note box ---------- */
 .streak-modal__note {
     display: flex;
     align-items: center;
@@ -836,7 +813,6 @@
     z-index: 2;
 }
 
-/* ---------- Button ---------- */
 .streak-modal__button {
     width: 100%;
     display: inline-flex;
@@ -869,7 +845,6 @@
     font-size: 18px;
 }
 
-/* ---------- Confetti ---------- */
 .streak-modal__confetti {
     position: absolute;
     inset: 0;
@@ -900,8 +875,6 @@
     }
 }
 
-/* Content sits above the confetti layer.
-   (.streak-modal__close is excluded on purpose: it must stay absolute.) */
 .streak-modal__icon,
 .streak-modal__badge,
 .streak-modal__title-row,
@@ -912,9 +885,6 @@
     z-index: 2;
 }
 
-/* =========================================================
-   Health Streak View Button
-   ========================================================= */
 .streak-view-btn {
     display: inline-flex;
     align-items: center;
@@ -961,7 +931,6 @@
     line-height: 1;
 }
 
-/* ==================== Streak Roadmap (Duolingo Style) ==================== */
 .streak-roadmap {
     position: relative;
     display: flex;
@@ -1056,9 +1025,6 @@
     }
 }
 
-/* =========================================================
-   Home - 4 Data Integrated Chart
-   ========================================================= */
 .home-integrated-chart-section {
     background-color: #ffffff;
     border-radius: 16px;
@@ -1132,7 +1098,6 @@
     height: 100% !important;
 }
 
-/* ---------- Display controls ---------- */
 .home-integrated-chart-display-row {
     display: flex;
     align-items: center;
@@ -1186,7 +1151,6 @@
     box-shadow: 0 2px 5px rgba(30, 58, 138, 0.12);
 }
 
-/* ---------- Custom legend ---------- */
 .home-integrated-chart-legend {
     display: flex;
     align-items: center;
@@ -1248,8 +1212,6 @@
     transform: translate(-50%, -50%);
 }
 
-/* ---------- Summary cards (weight / sleep / water / step) ----------
-   One shared pattern; each metric only supplies its color variables. */
 .home-integrated-chart-summary {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1347,13 +1309,6 @@
     --tone-msg: #16805a;
 }
 
-/* =========================================================
-   Responsive
-   All breakpoints are kept at the end of the file, from the
-   widest to the narrowest, so narrower rules always win.
-   ========================================================= */
-
-/* ---------- <= 1100px ---------- */
 @media (max-width: 1100px) {
     .stat-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1364,7 +1319,6 @@
     }
 }
 
-/* ---------- <= 1000px ---------- */
 @media (max-width: 1000px) {
     .home-integrated-chart-header {
         flex-direction: row;
@@ -1390,7 +1344,6 @@
     }
 }
 
-/* ---------- <= 900px ---------- */
 @media (max-width: 900px) {
     .home-integrated-chart-display-row {
         align-items: flex-start;
@@ -1407,7 +1360,6 @@
     }
 }
 
-/* ---------- <= 700px ---------- */
 @media (max-width: 700px) {
     .home-integrated-chart-card {
         height: 460px;
@@ -1424,7 +1376,6 @@
     }
 }
 
-/* ---------- <= 600px ---------- */
 @media (max-width: 600px) {
     .home {
         padding: 16px 12px 40px;
@@ -1462,7 +1413,6 @@
         white-space: nowrap;
     }
 
-    /* Profile */
     .profile-card {
         padding: 16px;
         gap: 14px;
@@ -1522,7 +1472,6 @@
         white-space: nowrap;
     }
 
-    /* Health cards */
     .stat-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 10px;
@@ -1574,7 +1523,6 @@
         height: 5px;
     }
 
-    /* Home sections */
     .memo-card,
     .family-card,
     .feedback-panel {
@@ -1594,7 +1542,6 @@
         line-height: 1.45;
     }
 
-    /* Family: one column so text does not wrap character by character */
     .family-card__grid {
         grid-template-columns: 1fr;
         gap: 10px;
@@ -1617,7 +1564,6 @@
         overflow-wrap: break-word;
     }
 
-    /* Integrated chart */
     .home-integrated-chart-main-selector {
         width: 100%;
     }
@@ -1639,7 +1585,6 @@
     }
 }
 
-/* ---------- <= 560px (streak modal) ---------- */
 @media (max-width: 560px) {
     .streak-modal__content {
         max-width: 520px;
@@ -1664,7 +1609,6 @@
     }
 }
 
-/* ---------- <= 600px ---------- */
 @media (max-width: 600px) {
     .home {
         padding: 12px 10px 36px;

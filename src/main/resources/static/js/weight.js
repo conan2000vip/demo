@@ -4,37 +4,17 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function initChart() {
-    const searchParams = new URLSearchParams(window.location.search);
-    const isSearching = searchParams.has("startDate") || searchParams.has("endDate");
     const targetWeight = window.targetWeight !== null && window.targetWeight !== undefined
         ? parseFloat(window.targetWeight)
         : null;
-
-    const chart = HealthChart.create({
+    initMetricChart({
         canvasId: "weightChart",
         data: window.weightChartData,
         unit: "kg",
         type: "line",
-        days: 7,
-        isSearching,
         targetValue: targetWeight,
-        showDataLabels: true
-        
+        valueFormatter: (value) => String(value)
     });
-
-    const wrapper = document.getElementById("chartWrapper");
-    const chartUrl = wrapper?.closest(".chart-card")?.dataset.chartUrl;
-    const from = window.weightChartData?.from;
-    const to = window.weightChartData?.to;
-    if (chart && wrapper && chartUrl && from && to) {
-        initChartSwipe({
-            chart,
-            wrapperEl: wrapper,
-            chartUrl,
-            initialFrom: from,
-            initialTo: to,
-        });
-    }
 }
 
 /* =========================================================
@@ -200,7 +180,7 @@ function initModal() {
         return true;
     }
 
-    // Biến ghi nhớ trạng thái đã cảnh báo hay chưa
+    // 警告を表示済みかどうかを保持する。
     let isWeightWarned = false;
     function validateWeight() {
         const value = weightInput.value;
@@ -216,16 +196,16 @@ function initModal() {
             return false;
         }
 
-        // Nếu > 200kg và CHƯA từng cảnh báo -> Báo dòng chữ đỏ nhưng ghi nhớ trạng thái
+        // 200kgを超え、まだ警告していない場合は赤字で警告して状態を保持する。
         if (num > 200.0 && !isWeightWarned) {
             showError("weight", "数値が大きすぎます。小数点の押し忘れはありませんか？（※もう一度「保存」を押すとこのまま登録されます）");
-            isWeightWarned = true; // Đã cảnh báo rồi!
-            return false; // Lần 1: Chặn lại để người dùng đọc cảnh báo
+            isWeightWarned = true; // 警告を表示済みにする。
+            return false; // 初回は保存を止め、警告を確認できるようにする。
         }
         clearError("weight");
         return true; // Lần 2 (hoặc số bình thường <= 200kg): Cho phép đi tiếp để LƯU!
     }
-    // Khi người dùng tự tay sửa lại số trong ô nhập -> Reset lại trạng thái cảnh báo
+    // ユーザーが入力値を修正したら警告状態をリセットする。
     weightInput.addEventListener("input", () => {
         isWeightWarned = false;
         clearError("weight");

@@ -34,7 +34,6 @@ public class ProfileShareServiceImpl implements ProfileShareService {
         List<ProfileShareSetting> existingSettings = profileShareSettingRepository.findByOwnerProfile_Id(activeProfile.getId());
 
         return familyProfiles.stream()
-                .filter(target -> !target.isPrimary())
                 .filter(target -> !Objects.equals(target.getId(), activeProfileId))
                 .map(target -> {
             ProfileShareSettingDto.Item item = new ProfileShareSettingDto.Item();
@@ -42,7 +41,7 @@ public class ProfileShareServiceImpl implements ProfileShareService {
             item.setTargetProfileName(target.getName());
             item.setRelationship(target.getRelationship());
 
-            // データ5項目の共有権限をDBからDTOへ設定し、未設定の場合はVIEWERを使用する。
+            // 未設定のカテゴリは初期状態として閲覧可能にする。
             ProfileShareSettingDto.CategoryRole roles = new ProfileShareSettingDto.CategoryRole();
             roles.setWeightRole(getRoleForCategory(existingSettings, target.getId(), Category.weight));
             roles.setSleepRole(getRoleForCategory(existingSettings, target.getId(), Category.sleep));
@@ -68,9 +67,6 @@ public class ProfileShareServiceImpl implements ProfileShareService {
 
             Profile viewerProfile = profileRepository.findByIdAndUser_Id(item.getTargetProfileId(), currentUserId)
                     .orElseThrow(() -> new BusinessException(HttpStatus.FORBIDDEN, "アクセス権限がありません"));
-            if (viewerProfile.isPrimary()) {
-                throw new BusinessException(HttpStatus.FORBIDDEN, "本人プロファイルの共有権限は変更できません");
-            }
             ProfileShareSettingDto.CategoryRole roles = item.getRoles();
 
             // 5つのデータ項目について共有設定を一括登録または更新する。
@@ -93,7 +89,7 @@ public class ProfileShareServiceImpl implements ProfileShareService {
                 .filter(s -> Objects.equals(s.getViewerProfile().getId(), viewerProfileId) && s.getCategory() == category)
                 .findFirst()
                 .map(s -> mapToDtoRole(s.getRole()))
-                .orElse(ShareRole.NONE);
+                .orElse(ShareRole.VIEWER);
     }
 
     private void saveOrUpdateCategory(Profile owner, Profile viewer, Category category, ShareRole dtoRole) {

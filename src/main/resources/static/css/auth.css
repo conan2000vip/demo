@@ -1,5 +1,3 @@
-/* HealthLog認証画面のスタイル：左側にイラスト、右側にフォームを配置する。 */
-
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap');
 
 :root {
@@ -36,7 +34,6 @@ body {
     line-height: 1.5;
 }
 
-/* --- ページ全体のラッパー --- */
 .auth-page {
     min-height: 100vh;
     display: flex;
@@ -45,7 +42,6 @@ body {
     padding: 40px 20px;
 }
 
-/* --- 2列レイアウトのカード --- */
 .auth-card {
     width: 100%;
     max-width: 940px;
@@ -57,7 +53,6 @@ body {
     overflow: hidden;
 }
 
-/* 左パネル：ブランドとイラスト。 */
 .auth-brand {
     position: relative;
     background: var(--color-primary);
@@ -129,7 +124,6 @@ body {
     background: #fff;
 }
 
-/* 右パネル：フォーム。 */
 .auth-form-panel {
     padding: 44px 48px;
     display: flex;
@@ -150,7 +144,6 @@ body {
     margin: 0 0 22px;
 }
 
-/* --- フィードバックバナー --- */
 .banner {
     display: flex;
     align-items: flex-start;
@@ -175,12 +168,32 @@ body {
     color: var(--color-error);
 }
 
+.banner--error svg,
+.banner--error i {
+    display: grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    margin-top: 0;
+    border-radius: 50%;
+    background: currentColor;
+    color: var(--color-error-bg);
+    padding: 1px;
+    box-sizing: border-box;
+}
+
+.banner--error i::before {
+    content: "!";
+    font-style: normal;
+    font-weight: 800;
+    line-height: 16px;
+}
+
 .banner--success {
     background: var(--color-success-bg);
     color: var(--color-success);
 }
 
-/* --- 確認メールの再送 --- */
 .resend-form {
     margin-bottom: 14px;
 }
@@ -196,7 +209,6 @@ body {
     background: #E3E6FD;
 }
 
-/* --- フォーム項目 --- */
 .form {
     display: flex;
     flex-direction: column;
@@ -205,7 +217,7 @@ body {
 
 .input-group label {
     display: block;
-    font-size: 12.5px;
+    font-size: 14px;
     font-weight: 600;
     margin-bottom: 5px;
 }
@@ -228,7 +240,7 @@ body {
 .input-box input {
     width: 100%;
     padding: 10px 40px 10px 36px;
-    font-size: 13.5px;
+    font-size: 15px;
     font-family: var(--font-body);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
@@ -289,7 +301,6 @@ body {
     display: flex;
 }
 
-/* --- ログイン状態保持とパスワード忘れの行 --- */
 .form-row {
     display: flex;
     align-items: center;
@@ -319,7 +330,6 @@ body {
     text-decoration: underline;
 }
 
-/* --- 送信ボタン --- */
 .submit-btn {
     width: 100%;
     padding: 11px 16px;
@@ -358,7 +368,6 @@ body {
     cursor: not-allowed;
 }
 
-/* --- 区切り線 --- */
 .divider {
     display: flex;
     align-items: center;
@@ -376,7 +385,6 @@ body {
     background: var(--color-border);
 }
 
-/* --- ソーシャルログインボタン --- */
 .social-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -410,7 +418,6 @@ body {
     height: 15px;
 }
 
-/* --- フッターリンクとセキュリティメッセージ --- */
 .auth-footer {
     text-align: center;
     font-size: 12.5px;
@@ -434,7 +441,6 @@ body {
     color: var(--color-text-muted);
 }
 
-/* レスポンシブ表示の設定。 */
 @media (max-width: 780px) {
     .auth-card {
         grid-template-columns: 1fr;
@@ -454,7 +460,6 @@ body {
     }
 }
 
-/* OTP確認コード画面のスタイル（パスワード再設定と登録で共通）。 */
 .otp-row {
     display: flex;
     gap: 10px;

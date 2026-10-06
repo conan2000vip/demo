@@ -1,7 +1,3 @@
-/* =========================================================
-   Water Page
-   ========================================================= */
-
 .water-page {
 	min-height: calc(100vh - 72px);
 }
@@ -11,8 +7,6 @@
 	margin: 0 auto;
 	padding: 32px 24px 64px;
 }
-
-/* ---------- Page Header ---------- */
 
 .water-page__header {
 	display: flex;
@@ -49,22 +43,15 @@
 	color: var(--wp-text-muted);
 }
 
-/* =========================================================
-   Water Table Only
-   ========================================================= */
 .water-table {
     width: 100%;
     table-layout: fixed;
 }
-
-/* 日付 */
 .water-table th:nth-child(1),
 .water-table td:nth-child(1) {
     width: 130px;
     white-space: nowrap;
 }
-
-/* 時間 */
 .water-table th:nth-child(2),
 .water-table td:nth-child(2) {
     width: 100px;
@@ -73,7 +60,6 @@
     color: var(--wp-text-muted);
 }
 
-/* 飲み物 - Đã sửa thành font chữ mảnh bình thường */
 .water-table th:nth-child(3),
 .water-table td:nth-child(3) {
     width: 160px;
@@ -82,7 +68,6 @@
     font-weight: 400 !important;
 }
 
-/* 量 - Đã sửa thành font chữ mảnh bình thường */
 .water-table th:nth-child(4),
 .water-table td:nth-child(4) {
     width: 140px;
@@ -127,9 +112,6 @@
     width: 90px;
 }
 
-/* =========================================================
-   Responsive
-   ========================================================= */
 @media (max-width: 768px) {
 	.water-table {
 		table-layout: auto;

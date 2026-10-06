@@ -1,7 +1,3 @@
-/* =========================================================
-   共通デザイントークン
-   色・余白・角丸・影・フォント・ヘッダー高さを一元管理
-   ========================================================= */
 :root {
     --app-header-height: 81px;
 
@@ -38,7 +34,6 @@
     --wp-font-weight-bold: 700;
 }
 
-/* ===== ページ全体 ===== */
 body {
     margin: 0;
     min-height: 100vh;
@@ -53,8 +48,6 @@ select,
 textarea {
     font-family: inherit;
 }
-
-/* ===== 共通ヘッダー ===== */
 
 .app-header {
     background: rgba(255, 255, 255, 0.9);
@@ -74,8 +67,6 @@ textarea {
     align-items: center;
     gap: 16px;
 }
-
-/* ===== ブランド・ロゴ ===== */
 
 .app-header__brand {
     display: flex;
@@ -117,9 +108,6 @@ textarea {
     white-space: nowrap;
 }
 
-/* ===== メインナビゲーション ===== */
-
-/* The wrapper provides the white pill (background / border / radius). */
 .app-header__nav-wrapper {
     flex: 1;
     min-width: 0;
@@ -170,8 +158,6 @@ textarea {
     font-weight: 600;
 }
 
-/* ===== ヘッダー右側（ユーザー情報・ログアウト） ===== */
-
 .app-header__right {
     display: flex;
     align-items: center;
@@ -206,8 +192,6 @@ textarea {
     border-color: var(--wp-primary);
     box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.12);
 }
-
-/* ===== プロフィール切り替えドロップダウン ===== */
 
 .app-header__dropdown {
     position: absolute;
@@ -426,7 +410,6 @@ textarea {
     color: #dc2626;
 }
 
-/* ===== モバイル用ナビゲーション切り替えボタン ===== */
 .app-header__nav-toggle {
     display: none;
     align-items: center;
@@ -446,7 +429,6 @@ textarea {
     color: #111827;
 }
 
-/* ===== ヘッダーのレスポンシブ設定 ===== */
 @media (max-width: 1400px) and (min-width: 1025px) {
     .app-header__inner {
         padding: 10px 12px;
@@ -517,11 +499,6 @@ textarea {
         display: none;
     }
 }
-
-/* =========================================================
-   共通アラート
-   エラー・成功メッセージを各画面で共通表示
-   ========================================================= */
 
 .alert {
     display: flex;
@@ -597,11 +574,6 @@ textarea {
         transform: translateY(0);
     }
 }
-
-/* =========================================================
-   共通フィードバックカード
-   レベル別の色は変数 (--lv-title / --lv-badge) で切り替える
-   ========================================================= */
 
 .feedback-list {
     display: flex;
@@ -717,10 +689,6 @@ textarea {
     padding: 6px 10px;
 }
 
-/* =========================================================
-   共通サマリーカード
-   最新値・平均値・最大値などの統計情報を表示
-   ========================================================= */
 .summary-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -761,7 +729,6 @@ textarea {
     margin-top: 4px;
 }
 
-/* size / weight / height come from .badge */
 .summary-card__value .badge {
     padding: 0 10px;
     align-self: center;
@@ -775,10 +742,6 @@ textarea {
     line-height: 1.3;
 }
 
-/* =========================================================
-   Common Health Status Badge
-   目標達成率に応じた4段階の状態表示
-   ========================================================= */
 .badge {
     display: inline-flex;
     align-items: center;
@@ -794,51 +757,41 @@ textarea {
     box-sizing: border-box;
 }
 
-/* BMI: 低体重  */
 .badge--underweight {
     background: #e3f2fd;
     color: #1976d2;
 }
 
-/* BMI: 普通体重  */
 .badge--normal {
     background: #e8f5e9;
     color: #2e7d32;
 }
 
-/* BMI: 肥満(1度)  */
 .badge--warning {
     background: #fef3c7;
     color: #b45309;
 }
 
-/* BMI: 肥満(2度以上)  */
 .badge--obese {
     background: #fde8e8;
     color: #dc2626;
 }
 
-/* < 50% */
 .badge--danger {
     background: #fee2e2;
     color: #b91c1c;
 }
 
-/* 80% - 99% */
 .badge--info {
     background: #dbeafe;
     color: #1d4ed8;
 }
 
-/* >= 100% */
 .badge--success {
     background: #d1fae5;
     color: #047857;
 }
 
-/* =========================================================
-   Common Filter Bar
-   ========================================================= */
 .filter-bar {
     display: flex;
     align-items: center;
@@ -972,10 +925,6 @@ textarea {
     white-space: nowrap;
 }
 
-/* =========================================================
-   共通グラフカード
-   体重・睡眠・水分・歩数などの推移グラフを表示
-   ========================================================= */
 .chart-card {
     background: var(--wp-surface);
     border-radius: var(--wp-radius-lg);
@@ -1243,11 +1192,6 @@ textarea {
     padding: 40px 0;
 }
 
-/* =========================================================
-   共通履歴テーブル
-   スクロール・メモ展開・差分バッジ・操作ボタンを管理
-   ========================================================= */
-
 .memo-cell {
     max-width: 200px;
     white-space: nowrap;
@@ -1395,10 +1339,6 @@ textarea {
     display: inline-flex;
 }
 
-/* =========================================================
-   共通ページネーション
-   履歴一覧のページ切り替えに使用
-   ========================================================= */
 .stats-period-note {
     display: flex;
     align-items: center;
@@ -1449,11 +1389,6 @@ textarea {
     font-weight: 700;
 }
 
-/* =========================================================
-   共通空データ表示
-   記録がない場合や検索結果がない場合に使用
-   ========================================================= */
-
 .empty-state {
     display: flex;
     flex-direction: column;
@@ -1477,11 +1412,6 @@ textarea {
 .text-muted {
     color: var(--wp-text-muted);
 }
-
-/* =========================================================
-   共通ボタン
-   通常・主要・キャンセル・削除ボタンを統一
-   ========================================================= */
 
 .btn {
     display: inline-flex;
@@ -1551,11 +1481,6 @@ textarea {
     font-weight: 600;
     transition: 0.2s;
 }
-
-/* =========================================================
-   共通モーダル
-   ヘッダー下に固定し、長いフォームはモーダル内でスクロール
-   ========================================================= */
 
 .modal-overlay {
     position: fixed;
@@ -1645,18 +1570,12 @@ textarea {
     white-space: pre-line;
 }
 
-/* =========================================================
-   共通フォーム
-   入力欄・セレクト・テキストエリア・入力エラーを統一
-   ========================================================= */
-
 .form {
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
 
-/* モーダル内フォームの共通余白 */
 .modal .form {
     padding: 20px 24px 24px;
 }
@@ -1671,7 +1590,7 @@ textarea {
     display: flex;
     align-items: center;
     gap: 4px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--wp-text);
 }
@@ -1703,7 +1622,7 @@ textarea {
     border-radius: var(--wp-radius-sm);
     box-sizing: border-box;
     font-family: var(--wp-font);
-    font-size: 14px;
+    font-size: 15px;
     color: var(--wp-text);
 }
 
@@ -1741,11 +1660,6 @@ textarea {
     display: flex;
 }
 
-/* =========================================================
-   共通モーダルフッター
-   保存・キャンセル・削除ボタンの配置を統一
-   ========================================================= */
-
 .modal__footer {
     display: flex;
     gap: 8px;
@@ -1762,11 +1676,6 @@ textarea {
     flex: 65;
 }
 
-/* =========================================================
-   共通レスポンシブ設定
-   画面幅に応じてサマリー・ヘッダー・フィルター・モーダルを調整
-   ========================================================= */
-/* 860px以下 */
 @media (max-width: 860px) {
     .summary-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -1794,13 +1703,11 @@ textarea {
     }
 }
 
-/* 600px以下 */
 @media (max-width: 600px) {
     :root {
         --app-header-height: 61px;
     }
 
-    /* Header */
     .app-header__inner {
         padding: 10px 12px;
         gap: 10px;
@@ -1850,7 +1757,6 @@ textarea {
         margin-left: -110px;
     }
 
-    /* Feedback */
     .feedback-card {
         grid-template-columns: minmax(0, 1fr);
         row-gap: 8px;
@@ -1895,7 +1801,6 @@ textarea {
         padding: 3px 8px;
     }
 
-    /* Filter */
     .filter-bar {
         padding: 14px;
         gap: 12px;
@@ -1956,7 +1861,6 @@ textarea {
         margin-top: -2px;
     }
 
-    /* Modal */
     .modal-overlay {
         padding: 12px;
     }
@@ -1965,7 +1869,6 @@ textarea {
         max-height: calc(100dvh - var(--app-header-height) - 24px);
     }
 
-    /* Chart legend */
     .chart-card__header {
         flex-wrap: wrap;
     }
@@ -2007,7 +1910,6 @@ textarea {
     }
 }
 
-/* 560px以下 */
 @media (max-width: 560px) {
     .summary-grid {
         gap: 12px;
@@ -2023,7 +1925,6 @@ textarea {
     }
 }
 
-/* 420px以下 */
 @media (max-width: 420px) {
     .filter-bar__quick {
         grid-template-columns: repeat(3, 1fr);

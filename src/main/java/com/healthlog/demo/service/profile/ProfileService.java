@@ -25,4 +25,13 @@ public interface ProfileService {
     void switchProfile(HttpSession session, Long userId, Long profileId);
 
     Profile resolveCurrentProfile(HttpSession session, Long userId);
+
+    boolean hasPin(Long userId, Long profileId);
+
+    void verifyPin(Long userId, Long profileId, String pin);
+
+    void updatePin(Long userId, Long profileId, String action, String currentPin,
+            String newPin, String confirmation);
+
+    void removePinWithAccountPassword(Long userId, Long profileId, String accountPassword);
 }

@@ -4,5 +4,5 @@ import com.healthlog.demo.dto.auth.PasswordResetConfirmRequest;
 
 public interface PasswordResetService {
     void sendPasswordResetEmail(String email);
-    void resetPassword(String email, PasswordResetConfirmRequest request);
+    void resetPassword(String email, PasswordResetConfirmRequest request, Long pinProfileId);
 }

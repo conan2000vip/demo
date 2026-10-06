@@ -83,14 +83,14 @@
         try {
             if (localStorage.getItem(storageKey)) return;
         } catch (e) {
-            // Continue showing the notice if storage is unavailable.
+            // ストレージを利用できない場合も通知を表示し続ける。
         }
 
         showAchievement(0, true, days);
         try {
             localStorage.setItem(storageKey, "true");
         } catch (e) {
-            // Without storage, the notice may appear again on later visits.
+            // ストレージがない場合は次回訪問時にも通知されることがある。
         }
     }
 
@@ -134,7 +134,7 @@
         }
     }
 
-    /* ---------- Roadmap ---------- */
+    /* 連続記録のロードマップ */
     function calcRoadmapFill(streak, nodes) {
         const last = nodes.length - 1;
         if (streak >= nodes[last].days) return 100;
@@ -162,7 +162,7 @@
             milestones.findIndex((milestone) => milestone.days > streak),
         );
 
-        // Show 4 nodes around the target
+        // 対象の前後4ノードを表示する。
         const startIdx = Math.min(Math.max(0, targetIndex - 1), Math.max(0, milestones.length - ROADMAP_NODE_COUNT));
         const nodes = milestones.slice(startIdx, startIdx + ROADMAP_NODE_COUNT);
 
@@ -267,7 +267,7 @@
         }
     }
 
-    /* ---------- Show / close ---------- */
+    /* 表示と閉じる処理 */
     function pickIcon(days) {
         if (days >= 1095) return "💎";
         if (days >= 365) return "👑";
@@ -360,7 +360,7 @@
         $("streakViewButton")?.focus();
     }
 
-    /* ---------- Init ---------- */
+    /* 初期化 */
     function readCurrentStreak() {
         const button = $("streakViewButton");
         const strong = button?.querySelector("strong");

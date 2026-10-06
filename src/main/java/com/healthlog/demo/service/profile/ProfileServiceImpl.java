@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +15,7 @@ import com.healthlog.demo.entity.User;
 import com.healthlog.demo.exception.BusinessException;
 import com.healthlog.demo.repository.ProfileRepository;
 import com.healthlog.demo.repository.UserRepository;
+import com.healthlog.demo.service.helper.ProfileAccessValidation;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,8 @@ public class ProfileServiceImpl implements ProfileService {
 
     private final ProfileRepository profileRepository;
     private final UserRepository userRepository;
+    private final ProfileAccessValidation profileAccessValidation;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional(readOnly = true)
@@ -58,6 +62,8 @@ public class ProfileServiceImpl implements ProfileService {
         dto.setDailySleepGoal(profile.getDailySleepGoal());
         dto.setAvatar(profile.getAvatar());
         dto.setPrimary(profile.isPrimary());
+        dto.setManagedByPrimary(profile.isManagedByPrimary());
+        dto.setPinEnabled(profile.getPinHash() != null);
         return dto;
     }
 
@@ -96,6 +102,7 @@ public class ProfileServiceImpl implements ProfileService {
             profile.setRelationship("本人");
         } else {
             profile.setPrimary(false);
+            profile.setManagedByPrimary(dto.isManagedByPrimary());
             if (dto.getRelationship() == null || dto.getRelationship().isBlank()) {
                 throw new BusinessException(HttpStatus.BAD_REQUEST, "続柄を選択してください");
             }
@@ -105,6 +112,10 @@ public class ProfileServiceImpl implements ProfileService {
                     .existsByUser_IdAndRelationship(userId, dto.getRelationship())) {
                 throw new BusinessException(HttpStatus.BAD_REQUEST, "「" + dto.getRelationship() + "」はすでに登録されています");
             }
+        }
+
+        if (dto.isPinEnabled()) {
+            profile.setPinHash(encodePin(dto.getPin(), dto.getPinConfirmation()));
         }
 
         return profileRepository.save(profile);
@@ -139,6 +150,21 @@ public class ProfileServiceImpl implements ProfileService {
         dbProfile.setStepGoal(dto.getStepGoal());
         dbProfile.setDailySleepGoal(dto.getDailySleepGoal());
 
+        if (dbProfile.getPinHash() != null
+                && (dto.getCurrentPin() == null || !passwordEncoder.matches(dto.getCurrentPin(), dbProfile.getPinHash()))) {
+            if (!dto.isPinEnabled() || hasNewPin(dto)) {
+                throw new BusinessException(HttpStatus.FORBIDDEN, "現在の暗証番号が正しくありません");
+            }
+        }
+        if (dto.isPinEnabled() && dbProfile.getPinHash() == null && !hasNewPin(dto)) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "新しい暗証番号を入力してください");
+        }
+        if (!dto.isPinEnabled()) {
+            dbProfile.setPinHash(null);
+        } else if (hasNewPin(dto)) {
+            dbProfile.setPinHash(encodePin(dto.getPin(), dto.getPinConfirmation()));
+        }
+
         return profileRepository.save(dbProfile);
     }
 
@@ -167,7 +193,7 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     @Transactional
     public void switchProfile(HttpSession session, Long userId, Long profileId) {
-        Profile profile = getProfile(userId, profileId);
+        Profile profile = profileAccessValidation.validateCanViewProfile(profileId, userId);
         session.setAttribute(SessionConstants.CURRENT_PROFILE_ID, profile.getId());
     }
 
@@ -186,5 +212,65 @@ public class ProfileServiceImpl implements ProfileService {
         Optional<Profile> primary = profileRepository.findByUser_IdAndIsPrimaryTrue(userId);
         primary.ifPresent(profile -> session.setAttribute(SessionConstants.CURRENT_PROFILE_ID, profile.getId()));
         return primary.orElse(null);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean hasPin(Long userId, Long profileId) {
+        return getProfile(userId, profileId).getPinHash() != null;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public void verifyPin(Long userId, Long profileId, String pin) {
+        Profile profile = getProfile(userId, profileId);
+        if (profile.getPinHash() == null || !passwordEncoder.matches(pin, profile.getPinHash())) {
+            throw new BusinessException(HttpStatus.FORBIDDEN, "PINが正しくありません");
+        }
+    }
+
+    @Override
+    @Transactional
+    public void updatePin(Long userId, Long profileId, String action, String currentPin,
+            String newPin, String confirmation) {
+        Profile profile = getProfile(userId, profileId);
+        String normalizedAction = action == null ? "" : action.toUpperCase();
+        if (profile.getPinHash() != null
+                && (currentPin == null || !passwordEncoder.matches(currentPin, profile.getPinHash()))) {
+            throw new BusinessException(HttpStatus.FORBIDDEN, "現在のPINが正しくありません");
+        }
+        if ("REMOVE".equals(normalizedAction)) {
+            profile.setPinHash(null);
+        } else if ("SET".equals(normalizedAction) || "CHANGE".equals(normalizedAction)) {
+            profile.setPinHash(encodePin(newPin, confirmation));
+        } else {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "PIN操作が正しくありません");
+        }
+        profileRepository.save(profile);
+    }
+
+    @Override
+    @Transactional
+    public void removePinWithAccountPassword(Long userId, Long profileId, String accountPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "アカウントが見つかりません"));
+        if (accountPassword == null || accountPassword.isBlank()
+                || !passwordEncoder.matches(accountPassword, user.getPasswordHash())) {
+            throw new BusinessException(HttpStatus.FORBIDDEN, "アカウントのパスワードが正しくありません");
+        }
+        Profile profile = getProfile(userId, profileId);
+        profile.setPinHash(null);
+        profileRepository.save(profile);
+    }
+
+    private String encodePin(String pin, String confirmation) {
+        if (pin == null || !pin.matches("\\d{4}") || !pin.equals(confirmation)) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "PINは4桁の数字を同じ内容で入力してください");
+        }
+        return passwordEncoder.encode(pin);
+    }
+
+    private boolean hasNewPin(ProfileFormDto dto) {
+        return dto.getPin() != null && !dto.getPin().isBlank();
     }
 }
