@@ -26,8 +26,7 @@
 
             <div class="profile-list">
                 <a th:each="profile : ${profiles}" th:href="@{/profile/{id}/select(id=${profile.id})}"
-                    th:attr="data-profile-id=${profile.id}"
-                    class="profile-card">
+                    th:attr="data-profile-id=${profile.id}" class="profile-card">
                     <img class="profile-avatar"
                         th:src="@{/image/avatar/{name}.png(name=${profile.avatar ?: 'avatar_01'})}"
                         th:alt="${profile.name}" />
@@ -50,57 +49,77 @@
         </div>
     </div>
     <div id="selectPinModal" class="pin-modal" th:hidden="${pinRequired != true}"
-        th:attr="data-profile-id=${pinProfileId}" role="dialog"
-        aria-modal="true" aria-labelledby="selectPinTitle">
+        th:attr="data-profile-id=${pinProfileId}" role="dialog" aria-modal="true" aria-labelledby="selectPinTitle">
         <div class="pin-modal__backdrop"></div>
         <div class="pin-modal__card">
-            <h2 id="selectPinTitle">PIN認証</h2>
-            <p><strong th:text="${pinProfile?.name ?: 'プロファイル'}">プロファイル</strong> さんの画面を開くには、暗証番号が必要です。</p>
-            <form th:action="@{/profile/{id}/verify-pin(id=${pinProfileId})}" method="post">
-                <label>4桁のPIN</label>
-                <div class="pin-digit-inputs" role="group" aria-label="4桁のPIN">
-                    <input class="pin-digit-input" type="password" inputmode="numeric"
-                        maxlength="1" autocomplete="one-time-code" aria-label="PIN 1桁目" required>
-                    <input class="pin-digit-input" type="password" inputmode="numeric"
-                        maxlength="1" autocomplete="off" aria-label="PIN 2桁目" required>
-                    <input class="pin-digit-input" type="password" inputmode="numeric"
-                        maxlength="1" autocomplete="off" aria-label="PIN 3桁目" required>
-                    <input class="pin-digit-input" type="password" inputmode="numeric"
-                        maxlength="1" autocomplete="off" aria-label="PIN 4桁目" required>
+            <div id="selectPinView" class="pin-modal__view">
+                <div class="pin-modal__heading">
+                    <span class="pin-modal__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                            <rect x="5" y="10" width="14" height="10" rx="2"></rect>
+                            <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+                        </svg>
+                    </span>
+                    <div>
+                        <h2 id="selectPinTitle">PINロックの解除</h2>
+                        <p><strong th:text="${pinProfile?.name ?: 'プロファイル'}">プロファイル</strong> さんの暗証番号(PIN)を入力してください。</p>
+                    </div>
                 </div>
-                <input id="selectPinInput" name="pin" type="hidden">
-                <p id="selectPinError" class="pin-modal__error" role="alert"
-                    th:text="${pinErrorMessage}"></p>
-            </form>
-            <a href="#" id="selectForgotPin" class="pin-forgot-link">暗証番号を忘れた場合</a>
-            <a th:href="@{/profile/select}" class="pin-back-link">← 戻る</a>
-        </div>
-    </div>
-    <div id="selectAccountPasswordModal" class="pin-modal" hidden role="dialog"
-        aria-modal="true" aria-labelledby="selectAccountPasswordTitle">
-        <div class="pin-modal__backdrop"></div>
-        <div class="pin-modal__card">
-            <h2 id="selectAccountPasswordTitle">アカウントのパスワードを入力</h2>
-            <p>アカウントのパスワードを入力して、暗証番号を解除してください。</p>
-            <form id="selectAccountPasswordForm" method="post">
-                <label for="selectAccountPassword">アカウントのパスワード</label>
-                <input id="selectAccountPassword" name="accountPassword" type="password"
-                    autocomplete="current-password" required>
-                <p id="selectAccountPasswordError" class="pin-modal__error" role="alert"
-                    th:text="${accountPasswordErrorMessage}"></p>
-                <a class="pin-forgot-link"
-                    th:href="@{/auth/forgot-password(returnTo=${'/profile/' + pinProfileId + '/edit'})}">
-                    パスワードを忘れた場合
+                <form th:action="@{/profile/{id}/verify-pin(id=${pinProfileId})}" method="post">
+                    <label class="sr-only" for="selectPinInput">4桁のPIN</label>
+                    <div class="pin-digit-inputs" role="group" aria-label="4桁のPIN">
+                        <input class="pin-digit-input" type="password" inputmode="numeric" maxlength="1"
+                            autocomplete="one-time-code" aria-label="PIN 1桁目" required>
+                        <input class="pin-digit-input" type="password" inputmode="numeric" maxlength="1"
+                            autocomplete="off" aria-label="PIN 2桁目" required>
+                        <input class="pin-digit-input" type="password" inputmode="numeric" maxlength="1"
+                            autocomplete="off" aria-label="PIN 3桁目" required>
+                        <input class="pin-digit-input" type="password" inputmode="numeric" maxlength="1"
+                            autocomplete="off" aria-label="PIN 4桁目" required>
+                    </div>
+                    <input id="selectPinInput" name="pin" type="hidden">
+                    <p id="selectPinError" class="pin-modal__error" role="alert" th:text="${pinErrorMessage}"></p>
+                </form>
+                <a href="#" id="selectForgotPin" class="pin-forgot-link">
+                    暗証番号を忘れた場合
                 </a>
-                <div class="pin-modal__actions pin-modal__actions--password">
-                    <button type="button" class="pin-back-button"
-                        data-account-password-close>← 戻る</button>
-                    <button type="submit" class="btn btn--primary">PINを解除する</button>
+                <div class="pin-modal__divider"></div>
+                <div class="pin-password-footer">
+                    <a th:href="@{/profile/select}" class="pin-back-link">← 戻る</a>
                 </div>
-            </form>
+            </div>
+            <div id="selectPasswordView" class="pin-modal__view" hidden>
+                <div class="pin-modal__heading">
+                    <span class="pin-modal__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                            <rect x="5" y="10" width="14" height="10" rx="2"></rect>
+                            <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+                        </svg>
+                    </span>
+                    <div>
+                        <h2 id="selectAccountPasswordTitle">PINロックの解除</h2>
+                        <p>アカウントのパスワードを入力して、PINロックを解除してください。</p>
+                    </div>
+                </div>
+                <form id="selectAccountPasswordForm" method="post">
+                    <label for="selectAccountPassword">アカウントのパスワード</label>
+                    <input id="selectAccountPassword" name="accountPassword" type="password"
+                        autocomplete="current-password" required>
+                    <p id="selectAccountPasswordError" class="pin-modal__error" role="alert"
+                        th:text="${accountPasswordErrorMessage}"></p>
+                    <a class="pin-forgot-link pin-account-forgot-link"
+                        th:href="@{/auth/forgot-password(returnTo=${'/profile/' + pinProfileId + '/edit'})}">
+                        パスワードを忘れた場合
+                    </a>
+                </form>
+                <div class="pin-modal__divider"></div>
+                <div class="pin-password-footer">
+                    <button type="button" class="pin-back-button" data-account-password-close>← 戻る</button>
+                    <button type="submit" class="btn btn--primary" form="selectAccountPasswordForm">PINを解除する</button>
+                </div>
+            </div>
         </div>
-    </div>
-    <script th:src="@{/js/select-profile.js}"></script>
+        <script th:src="@{/js/select-profile.js}"></script>
 </body>
 
 </html>

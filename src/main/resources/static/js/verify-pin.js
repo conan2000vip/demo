@@ -335,8 +335,19 @@
     } else {
         initializePinPage();
     }
-
     window.beginPinChange = beginPinChange;
     window.cancelPinChange = cancelPinChange;
     window.submitPinSetup = submitPinSetup;
 })();
+
+document.querySelectorAll('[data-account-password-back]').forEach(function (button) {
+    button.addEventListener('click', function () {
+        const modal = document.getElementById('accountPasswordModal');
+        const input = document.getElementById('accountPasswordInput');
+        const error = document.getElementById('accountPasswordError');
+        if (input) input.value = '';
+        if (error) error.textContent = '';
+        if (modal) modal.hidden = true;
+        openPinUnlockModal();
+    });
+});

@@ -541,23 +541,23 @@ body.share-settings-open {
     transition: transform .18s ease;
 }
 
-.toggle-switch input:checked ~ .toggle-switch__track {
+.toggle-switch input:checked~.toggle-switch__track {
     background: linear-gradient(135deg, #1789a7, #16b6ac);
     box-shadow: 0 4px 12px rgba(22, 182, 172, .3);
 }
 
-.toggle-switch input:checked ~ .toggle-switch__track::before {
+.toggle-switch input:checked~.toggle-switch__track::before {
     content: "ON";
     left: 9px;
     right: auto;
     color: #f2ffff;
 }
 
-.toggle-switch input:checked ~ .toggle-switch__track::after {
+.toggle-switch input:checked~.toggle-switch__track::after {
     transform: translateX(36px);
 }
 
-.toggle-switch input:focus-visible ~ .toggle-switch__track {
+.toggle-switch input:focus-visible~.toggle-switch__track {
     outline: 2px solid rgba(15, 118, 110, .3);
     outline-offset: 2px;
 }
@@ -620,6 +620,33 @@ body.share-settings-open {
     box-shadow: 0 24px 60px rgba(15, 23, 42, .22);
 }
 
+.pin-modal__heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.pin-modal__icon {
+    display: grid;
+    flex: 0 0 76px;
+    width: 76px;
+    height: 76px;
+    place-items: center;
+    border-radius: 50%;
+    background: #dff7f1;
+    color: var(--wp-primary);
+}
+
+.pin-modal__icon svg {
+    width: 32px;
+    height: 32px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
+}
+
 .pin-modal__card h2,
 .pin-modal__card h3 {
     margin: 0 40px 8px 0;
@@ -634,6 +661,41 @@ body.share-settings-open {
     color: var(--wp-text-muted);
     font-size: 14px;
     line-height: 1.65;
+}
+
+.pin-modal__heading p {
+    margin-bottom: 28px;
+}
+
+#selectPinModal .pin-modal__card {
+    width: min(100%, 440px);
+    box-sizing: border-box;
+    height: auto;
+    min-height: 320px;
+    padding: 18px 18px 20px;
+}
+
+#selectPinModal .pin-modal__card h2 {
+    font-size: 22px;
+}
+
+#selectPinModal .pin-modal__card p {
+    font-size: 14px;
+}
+
+#selectPinModal .pin-modal__icon {
+    flex-basis: 56px;
+    width: 56px;
+    height: 56px;
+}
+
+#selectPinModal .pin-modal__icon svg {
+    width: 26px;
+    height: 26px;
+}
+
+#selectPinModal .pin-modal__divider {
+    margin: 20px 0 16px;
 }
 
 .pin-modal__card input {
@@ -672,13 +734,13 @@ body.share-settings-open {
 .pin-digit-inputs {
     display: flex;
     justify-content: center;
-    gap: 10px;
-    margin: 12px 0 2px;
+    gap: 8px;
+    margin: 14px 0 2px;
 }
 
 .pin-digit-inputs .pin-digit-input {
-    width: 58px;
-    height: 60px;
+    width: 70px;
+    height: 70px;
     padding: 0;
     border: 1px solid #cbd8d4;
     border-radius: 12px;
@@ -727,6 +789,12 @@ body.share-settings-open {
     color: var(--wp-danger) !important;
     font-size: 12px !important;
     line-height: 1.45;
+}
+
+.pin-modal__divider {
+    height: 1px;
+    margin: 38px 0 28px;
+    background: #e5ecea;
 }
 
 .pin-modal__actions {
@@ -788,6 +856,148 @@ body.share-settings-open {
     color: var(--wp-primary);
 }
 
+#selectPinModal .pin-forgot-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+#selectPinModal .pin-forgot-link>span:last-child {
+    font-size: 24px;
+    line-height: 1;
+    text-decoration: none;
+}
+
+#selectPinModal #selectForgotPin {
+    margin-top: 14px;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+#selectPinModal #selectPinView .pin-password-footer {
+    justify-content: flex-start;
+}
+
+#selectPinModal .pin-back-link {
+    margin-top: 0;
+    font-size: 16px;
+}
+
+#selectPinModal .pin-account-forgot-link {
+    margin-top: 4px;
+    font-size: 16px;
+}
+
+#selectPasswordView:not([hidden]) {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: auto;
+}
+
+#selectPasswordView .pin-modal__heading {
+    flex: 0 0 auto;
+}
+
+#selectPasswordView form {
+     flex: 0 0 auto;
+    padding-bottom: 4px;
+}
+
+#selectPasswordView .pin-modal__divider {
+    margin: 20px 0 16px;
+}
+
+#selectPinModal .pin-password-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 38px;
+}
+
+#selectPinModal .pin-password-footer .pin-back-button {
+    display: inline-flex;
+    align-items: center;
+    height: 38px;
+    font-size: 16px;
+}
+
+#selectPinModal .pin-password-footer .btn--primary {
+    min-height: 38px;
+    padding: 8px 14px;
+    font-size: 14px;
+}
+
+.profile-pin-unlock-card {
+    width: min(100%, 440px);
+    box-sizing: border-box;
+    padding: 18px;
+}
+
+.profile-pin-unlock-card .pin-modal__heading {
+    gap: 10px;
+}
+
+.profile-pin-unlock-card .pin-modal__icon {
+    flex-basis: 56px;
+    width: 56px;
+    height: 56px;
+}
+
+.profile-pin-unlock-card .pin-modal__icon svg {
+    width: 26px;
+    height: 26px;
+}
+
+.profile-pin-unlock-card h3 {
+    margin-bottom: 4px;
+    font-size: 22px;
+}
+
+.profile-pin-unlock-card .pin-modal__heading p {
+    margin-bottom: 14px;
+    font-size: 14px;
+}
+
+.profile-pin-unlock-card #unlockCurrentPin {
+    margin-top: 2px;
+}
+
+.profile-pin-unlock-card .pin-forgot-link {
+    margin-top: 4px;
+    font-size: 16px;
+}
+
+.profile-pin-unlock-divider {
+    height: 1px;
+    margin: 20px 0 16px;
+    background: #e5ecea;
+}
+
+.profile-pin-unlock-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 38px;
+}
+
+.profile-pin-unlock-footer .pin-back-button {
+    display: inline-flex;
+    align-items: center;
+    height: 38px;
+    font-size: 16px;
+}
+
+.profile-pin-unlock-footer .btn--primary {
+    min-height: 38px;
+    padding: 8px 14px;
+    font-size: 14px;
+}
+
 .pin-modal__card .btn--primary {
     min-height: 42px;
     padding: 10px 16px;
@@ -818,6 +1028,56 @@ body.share-settings-open {
         border-radius: 16px;
     }
 
+    #selectPinModal .pin-modal__card {
+        height: auto;
+        min-height: 340px;
+        box-sizing: border-box;
+        padding: 24px 20px;
+    }
+
+    #selectPinModal .pin-modal__heading {
+        gap: 10px;
+    }
+
+    #selectPinModal .pin-modal__icon {
+        flex-basis: 48px;
+        width: 48px;
+        height: 48px;
+    }
+
+    #selectPinModal .pin-modal__icon svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    #selectPinModal .pin-modal__card h2 {
+        font-size: 22px;
+    }
+
+    #selectPinModal .pin-modal__card p {
+        font-size: 15px;
+    }
+
+    #selectPinModal .pin-forgot-link {
+        gap: 8px;
+        margin-top: 20px;
+        font-size: 17px;
+    }
+
+    #selectPinModal .pin-forgot-link>span:last-child {
+        font-size: 24px;
+    }
+
+    #selectPinModal .pin-back-link {
+        font-size: 16px;
+    }
+
+    #selectPinModal .pin-account-forgot-link {
+        margin-top: 14px;
+        margin-bottom: 4px;
+        font-size: 16px;
+    }
+
     .pin-modal__close {
         top: 18px;
         right: 16px;
@@ -830,6 +1090,7 @@ body.share-settings-open {
     .pin-digit-inputs .pin-digit-input {
         width: 54px;
         height: 56px;
+        font-size: 24px;
     }
 }
 
@@ -1218,7 +1479,7 @@ body.share-settings-open {
 
 .input-row .input-group {
     min-width: 0;
-    }
+}
 
 .avatar-picker {
     display: grid;

@@ -2,7 +2,8 @@
     'use strict';
 
     const pinModal = document.getElementById('selectPinModal');
-    const passwordModal = document.getElementById('selectAccountPasswordModal');
+    const pinView = document.getElementById('selectPinView');
+    const passwordView = document.getElementById('selectPasswordView');
     const passwordForm = document.getElementById('selectAccountPasswordForm');
     const pinInput = document.getElementById('selectPinInput');
     const pinDigits = Array.from(document.querySelectorAll('.pin-digit-input'));
@@ -14,7 +15,9 @@
     function showPinModal() {
         if (!pinModal) return;
         pinModal.hidden = false;
-        pinInput?.focus();
+        if (pinView) pinView.hidden = false;
+        if (passwordView) passwordView.hidden = true;
+        pinDigits[0]?.focus();
     }
 
     function closePinModal() {
@@ -22,9 +25,8 @@
     }
 
     function showPasswordModal() {
-        closePinModal();
-        if (!passwordModal) return;
-        passwordModal.hidden = false;
+        if (pinView) pinView.hidden = true;
+        if (passwordView) passwordView.hidden = false;
         document.getElementById('selectAccountPassword')?.focus();
     }
 
@@ -42,7 +44,6 @@
     });
 
     document.querySelector('[data-account-password-close]')?.addEventListener('click', () => {
-        if (passwordModal) passwordModal.hidden = true;
         showPinModal();
     });
 

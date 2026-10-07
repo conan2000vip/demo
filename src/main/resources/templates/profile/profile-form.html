@@ -173,17 +173,16 @@
                                             <path d="M12 14v3"></path>
                                         </svg>
                                     </span>
-                                    <input id="currentPin" type="password" th:field="*{currentPin}"
-                                        inputmode="numeric" pattern="[0-9]{4}" maxlength="4" minlength="4"
-                                        placeholder="現在の暗証番号" autocomplete="current-password"
-                                        data-pin-input="current" aria-describedby="currentPinError" />
+                                    <input id="currentPin" type="password" th:field="*{currentPin}" inputmode="numeric"
+                                        pattern="[0-9]{4}" maxlength="4" minlength="4" placeholder="現在の暗証番号"
+                                        autocomplete="current-password" data-pin-input="current"
+                                        aria-describedby="currentPinError" />
                                     <span id="currentPinError" class="pin-field-error" role="alert"></span>
                                 </div>
                                 <div class="pin-input-row" id="newPinRow">
                                     <input id="pin" type="password" th:field="*{pin}" inputmode="numeric"
                                         pattern="[0-9]{4}" maxlength="4" minlength="4" placeholder="新しいPIN（4桁）"
-                                        autocomplete="new-password" data-pin-input="new"
-                                        aria-describedby="pinError" />
+                                        autocomplete="new-password" data-pin-input="new" aria-describedby="pinError" />
                                     <button type="button" class="pin-visibility" data-pin-toggle="pin"
                                         aria-label="PINを表示">
                                         <svg class="pin-eye pin-eye--open" viewBox="0 0 24 24" focusable="false">
@@ -192,17 +191,20 @@
                                         </svg>
                                         <svg class="pin-eye pin-eye--closed" viewBox="0 0 24 24" focusable="false">
                                             <path d="m3 3 18 18"></path>
-                                            <path d="M10.6 5.2A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a18 18 0 0 1-3.1 3.7"></path>
-                                            <path d="M6.2 6.3C3.5 8.1 2 12 2 12s3.5 7 10 7a10.7 10.7 0 0 0 4.1-.8"></path>
+                                            <path
+                                                d="M10.6 5.2A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a18 18 0 0 1-3.1 3.7">
+                                            </path>
+                                            <path d="M6.2 6.3C3.5 8.1 2 12 2 12s3.5 7 10 7a10.7 10.7 0 0 0 4.1-.8">
+                                            </path>
                                         </svg>
                                     </button>
                                     <span id="pinError" class="pin-field-error" role="alert"></span>
                                 </div>
                                 <div class="pin-input-row" id="pinConfirmationRow">
                                     <input id="pinConfirmation" type="password" th:field="*{pinConfirmation}"
-                                        inputmode="numeric" pattern="[0-9]{4}" maxlength="4"
-                                        minlength="4" placeholder="PIN（確認）" autocomplete="new-password"
-                                        data-pin-input="confirmation" aria-describedby="pinConfirmationError" />
+                                        inputmode="numeric" pattern="[0-9]{4}" maxlength="4" minlength="4"
+                                        placeholder="PIN（確認）" autocomplete="new-password" data-pin-input="confirmation"
+                                        aria-describedby="pinConfirmationError" />
                                     <button type="button" class="pin-visibility" data-pin-toggle="pinConfirmation"
                                         aria-label="確認用PINを表示">
                                         <svg class="pin-eye pin-eye--open" viewBox="0 0 24 24" focusable="false">
@@ -211,62 +213,85 @@
                                         </svg>
                                         <svg class="pin-eye pin-eye--closed" viewBox="0 0 24 24" focusable="false">
                                             <path d="m3 3 18 18"></path>
-                                            <path d="M10.6 5.2A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a18 18 0 0 1-3.1 3.7"></path>
-                                            <path d="M6.2 6.3C3.5 8.1 2 12 2 12s3.5 7 10 7a10.7 10.7 0 0 0 4.1-.8"></path>
+                                            <path
+                                                d="M10.6 5.2A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a18 18 0 0 1-3.1 3.7">
+                                            </path>
+                                            <path d="M6.2 6.3C3.5 8.1 2 12 2 12s3.5 7 10 7a10.7 10.7 0 0 0 4.1-.8">
+                                            </path>
                                         </svg>
                                     </button>
                                     <span id="pinConfirmationError" class="pin-field-error" role="alert"></span>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn--primary btn--sm pin-save-button"
-                                id="pinSaveButton" onclick="return submitPinSetup()">PINを保存</button>
+                            <button type="submit" class="btn btn--primary btn--sm pin-save-button" id="pinSaveButton"
+                                onclick="return submitPinSetup()">PINを保存</button>
                             <button type="button" class="btn btn--ghost btn--sm pin-cancel-button"
                                 th:if="${profile.pinEnabled}" onclick="cancelPinChange()">キャンセル</button>
                         </section>
-                        <div id="pinUnlockModal" class="pin-modal" hidden role="dialog"
-                            aria-modal="true" aria-labelledby="pinUnlockTitle">
+                        <div id="pinUnlockModal" class="pin-modal" hidden role="dialog" aria-modal="true"
+                            aria-labelledby="pinUnlockTitle">
                             <div class="pin-modal__backdrop" data-pin-modal-close></div>
-                            <div class="pin-modal__card">
+                            <div class="pin-modal__card profile-pin-unlock-card">
                                 <button type="button" class="pin-modal__close" data-pin-modal-close
                                     aria-label="閉じる">×</button>
-                                <h3 id="pinUnlockTitle">ロックを解除</h3>
-                                <p>ロックを解除するには、現在の暗証番号を入力してください。</p>
-                                <input id="unlockCurrentPin" type="password" inputmode="numeric"
-                                    maxlength="4" autocomplete="current-password"
-                                    placeholder="現在の暗証番号" />
+                                <div class="pin-modal__heading">
+                                    <span class="pin-modal__icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" focusable="false">
+                                            <rect x="5" y="10" width="14" height="10" rx="2"></rect>
+                                            <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+                                        </svg>
+                                    </span>
+                                    <div>
+                                        <h3 id="pinUnlockTitle">PINロックを解除</h3>
+                                        <p>PINロックを解除するには、現在の暗証番号を入力してください。</p>
+                                    </div>
+                                </div>
+                                <input id="unlockCurrentPin" type="password" inputmode="numeric" maxlength="4"
+                                    autocomplete="current-password" placeholder="現在の暗証番号" />
                                 <p id="unlockPinError" class="pin-modal__error" role="alert"></p>
                                 <a class="pin-forgot-link" id="forgotPinButton" href="#">
                                     暗証番号を忘れた場合
                                 </a>
-                                <div class="pin-modal__actions">
-                                    <button type="button" class="btn btn--ghost btn--sm"
-                                        data-pin-modal-close>キャンセル</button>
+                                <div class="profile-pin-unlock-divider"></div>
+                                <div class="profile-pin-unlock-footer">
+                                    <button type="button" class="pin-back-button" data-pin-modal-close>戻る</button>
                                     <button type="button" class="btn btn--primary btn--sm"
                                         id="confirmPinUnlock">ロックを解除</button>
                                 </div>
                             </div>
                         </div>
-                        <div id="accountPasswordModal" class="pin-modal" hidden role="dialog"
-                            aria-modal="true" aria-labelledby="accountPasswordTitle">
+                        <div id="accountPasswordModal" class="pin-modal" hidden role="dialog" aria-modal="true"
+                            aria-labelledby="accountPasswordTitle">
                             <div class="pin-modal__backdrop" data-account-password-close></div>
-                            <div class="pin-modal__card">
+                            <div class="pin-modal__card profile-pin-unlock-card">
                                 <button type="button" class="pin-modal__close" data-account-password-close
-                                            aria-label="閉じる">×</button>
-                                <h3 id="accountPasswordTitle">アカウントのパスワードを入力</h3>
-                                <p>アカウントのパスワードを入力して、暗証番号を解除してください。</p>
-                                <input id="accountPasswordInput" type="password"
-                                            autocomplete="current-password" placeholder="アカウントのパスワード" />
+                                    aria-label="閉じる">×</button>
+                                <div class="pin-modal__heading">
+                                    <span class="pin-modal__icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" focusable="false">
+                                            <rect x="5" y="10" width="14" height="10" rx="2"></rect>
+                                            <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+                                        </svg>
+                                    </span>
+                                    <div>
+                                        <h3 id="accountPasswordTitle">PINロックを解除</h3>
+                                        <p>アカウントのパスワードを入力して、PINロックを解除してください。</p>
+                                    </div>
+                                </div>
+                                <input id="accountPasswordInput" type="password" autocomplete="current-password"
+                                    placeholder="アカウントのパスワード" />
                                 <p id="accountPasswordError" class="pin-modal__error" role="alert"
-                                            th:text="${pinAccountPasswordErrorMessage}"></p>
+                                    th:text="${pinAccountPasswordErrorMessage}"></p>
                                 <a class="pin-forgot-link"
-                                            th:href="@{/auth/forgot-password(returnTo=${'/profile/' + profile.id + '/edit'})}">
-                                            パスワードを忘れた場合
+                                    th:href="@{/auth/forgot-password(returnTo=${'/profile/' + profile.id + '/edit'})}">
+                                    パスワードを忘れた場合
                                 </a>
-                                <div class="pin-modal__actions">
-                                            <button type="button" class="btn btn--ghost btn--sm"
-                                                data-account-password-close>キャンセル</button>
-                                            <button type="button" class="btn btn--primary btn--sm"
-                                                id="confirmAccountPassword">ロックを解除</button>
+                                <div class="profile-pin-unlock-divider"></div>
+                                <div class="profile-pin-unlock-footer">
+                                    <button type="button" class="pin-back-button" data-account-password-back>←
+                                        戻る</button>
+                                    <button type="button" class="btn btn--primary btn--sm"
+                                        id="confirmAccountPassword">ロックを解除</button>
                                 </div>
                             </div>
                         </div>
@@ -294,8 +319,7 @@
                                 placeholder="1500" />
                             <span class="field-hint" th:if="${profile.waterGoalMl == null}">おすすめ目標：1500 ml</span>
                             <span class="field-hint" th:if="${profile.waterGoalMl != null}">現在の目標：<span
-                                    th:text="${profile.waterGoalMl}"></span>
-                                ml</span>
+                                    th:text="${profile.waterGoalMl}"></span>ml</span>
                             <span class="field-error show" th:if="${#fields.hasErrors('waterGoalMl')}"
                                 th:errors="*{waterGoalMl}"></span>
                         </div>
@@ -308,8 +332,7 @@
                                 placeholder="8000" />
                             <span class="field-hint" th:if="${profile.stepGoal == null}">おすすめ目標：8000 歩</span>
                             <span class="field-hint" th:if="${profile.stepGoal != null}">現在の目標：<span
-                                    th:text="${profile.stepGoal}"></span>
-                                歩</span>
+                                    th:text="${profile.stepGoal}"></span>歩</span>
                             <span class="field-error show" th:if="${#fields.hasErrors('stepGoal')}"
                                 th:errors="*{stepGoal}"></span>
                         </div>
@@ -320,8 +343,7 @@
                                 placeholder="8.0" />
                             <span class="field-hint" th:if="${profile.dailySleepGoal == null}">おすすめ目標：8.0 時間</span>
                             <span class="field-hint" th:if="${profile.dailySleepGoal != null}">現在の目標：<span
-                                    th:text="${profile.dailySleepGoal}"></span>
-                                時間</span>
+                                    th:text="${profile.dailySleepGoal}"></span>時間</span>
                             <span class="field-error show" th:if="${#fields.hasErrors('dailySleepGoal')}"
                                 th:errors="*{dailySleepGoal}"></span>
                         </div>
@@ -341,4 +363,5 @@
     <script th:src="@{/js/common.js}"></script>
     <script th:src="@{/js/verify-pin.js}"></script>
 </body>
+
 </html>
