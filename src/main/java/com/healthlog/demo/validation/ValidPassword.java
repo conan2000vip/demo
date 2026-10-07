@@ -14,7 +14,9 @@ import jakarta.validation.Payload;
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidPassword {
-    String message() default "パスワードの形式が正しくありません";
-    Class<?>[] groups() default {};
-    Class<? extends Payload>[] payload() default {};
+  String message() default "パスワードの形式が正しくありません";
+
+  Class<?>[] groups() default {};
+
+  Class<? extends Payload>[] payload() default {};
 }

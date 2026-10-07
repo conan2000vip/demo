@@ -9,10 +9,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WeightFeedbackImpl implements WeightFeedback {
 
-	private final WeightFeedbackRule weightFeedbackRule;
+    private final WeightFeedbackRule weightFeedbackRule;
 
-	@Override
-	public List<FeedbackItem> evaluate(Long profileId) {
-		return weightFeedbackRule.evaluate(profileId);
-	}
+    @Override
+    public List<FeedbackItem> evaluate(Long profileId) {
+        return weightFeedbackRule.evaluate(profileId);
+    }
 }

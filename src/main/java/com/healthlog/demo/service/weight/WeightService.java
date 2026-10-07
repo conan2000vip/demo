@@ -7,13 +7,13 @@ import com.healthlog.demo.entity.Weight;
 
 public interface WeightService {
 
-	Map<String, Object> chartData(Long profileId, Long currentUserId, DateRangerFilter dateRange);
+    Map<String, Object> chartData(Long profileId, Long currentUserId, DateRangerFilter dateRange);
 
-	Map<String, Object> list(Long profileId, Long currentUserId, DateRangerFilter dateRange, int page);
+    Map<String, Object> list(Long profileId, Long currentUserId, DateRangerFilter dateRange, int page);
 
-	Weight create(Long profileId, Long currentUserId, Weight weight);
+    Weight create(Long profileId, Long currentUserId, Weight weight);
 
-	Weight update(Long profileId, Long currentUserId, Long logId, Weight input);
+    Weight update(Long profileId, Long currentUserId, Long logId, Weight input);
 
-	void delete(Long profileId, Long currentUserId, Long logId);
+    void delete(Long profileId, Long currentUserId, Long logId);
 }

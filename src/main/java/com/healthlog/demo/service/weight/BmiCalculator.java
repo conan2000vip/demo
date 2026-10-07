@@ -20,15 +20,9 @@ public class BmiCalculator {
             return null;
         }
 
-        BigDecimal heightMeter = height.divide(
-                BigDecimal.valueOf(100),
-                4,
-                RoundingMode.HALF_UP);
+        BigDecimal heightMeter = height.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
 
-        return weight.divide(
-                heightMeter.multiply(heightMeter),
-                2,
-                RoundingMode.HALF_UP);
+        return weight.divide(heightMeter.multiply(heightMeter), 2, RoundingMode.HALF_UP);
     }
 
     public BmiStatus statusOf(BigDecimal bmi) {

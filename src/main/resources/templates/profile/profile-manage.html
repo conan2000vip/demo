@@ -2,119 +2,104 @@
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>プロファイル管理 - HealthLog</title>
-    <link rel="stylesheet" th:href="@{/css/common.css}">
-    <link rel="stylesheet" th:href="@{/css/profile.css}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>プロファイル管理 - HealthLog</title>
+  <link rel="stylesheet" th:href="@{/css/common.css}">
+  <link rel="stylesheet" th:href="@{/css/profile.css}">
 </head>
 
 <body>
-    <div th:replace="~{commons/header :: header('profile')}"></div>
+  <div th:replace="~{commons/header :: header('profile')}"></div>
 
-    <main class="profile-manage">
-        <div th:if="${message}" class="alert alert--success">
-            <span th:text="${message}"></span>
-            <button type="button" class="alert__close" onclick="this.parentElement.remove()">&times;</button>
-        </div>
-        <div th:if="${error}" class="alert alert--error">
-            <span th:text="${error}"></span>
-            <button type="button" class="alert__close" onclick="this.parentElement.remove()">&times;</button>
-        </div>
-        <div class="profile-manage__top">
-            <div>
-                <h1 class="profile-manage__title">プロファイル管理</h1>
-                <p class="profile-manage__subtitle">ご家族のプロファイル作成・編集およびデータ共有設定を行えます。</p>
-            </div>
-            <a th:if="${canManageAllProfiles == true}" th:href="@{/profile/new}" class="btn btn--primary">
-                + 新規プロファイル追加
-            </a>
-        </div>
-        <div class="profile-manage__list">
-            <div th:each="p : ${profiles}" class="profile-manage__card"
-                th:classappend="${currentProfile != null and p.id == currentProfile.id} ? 'is-current'">
-
-                <form th:if="${currentProfile != null and p.id != currentProfile.id}"
-                    th:action="@{/profile/switch/{id}(id=${p.id})}" method="post"
-                    class="profile-manage__switch-form">
-                    <button type="submit" class="profile-manage__switch-target"
-                        th:attr="aria-label=|${p.name} プロファイルに切り替える|"></button>
-                </form>
-                <img th:src="@{/image/avatar/{name}.png(name=${p.avatar ?: 'avatar_01'})}" alt="Avatar"
-                    class="profile-manage__avatar" />
-                <div class="profile-manage__info">
-                    <div class="profile-manage__name-row">
-                        <span class="profile-manage__name" th:text="${p.name}">山田 太郎</span>
-                        <span class="badge badge--primary" th:if="${p.isPrimary}">本人</span>
-                        <span class="badge badge--relation" th:unless="${p.isPrimary}"
-                            th:text="${p.relationship}">父</span>
-                        <span class="badge badge--relation"
-                            th:if="${canManageAllProfiles == true and !p.isPrimary and p.managedByPrimary}">
-                            管理対象
-                        </span>
-                        <span class="badge badge--relation" th:if="${!p.isPrimary and !p.managedByPrimary}">
-                            独立
-                        </span>
-                        <span class="badge badge--selected"
-                            th:if="${currentProfile != null and p.id == currentProfile.id}">選択中</span>
-                    </div>
-
-                    <div class="profile-manage__meta">
-                        <span th:text="${#temporals.format(p.birthDate, 'yyyy-MM-dd')}">1980-01-01</span>
-                        <span>（身長: <th:block th:text="${p.height}">170</th:block> cm）</span>
-                    </div>
-                </div>
-                <div class="profile-manage__actions">
-                    <button type="button" class="icon-btn icon-btn--share"
-                        th:if="${(canManageAllProfiles == true and (p.isPrimary or p.managedByPrimary)) or (canManageCurrentProfile == true and currentProfile != null and currentProfile.id == p.id)}"
-                        th:onclick="${currentProfile != null} ? |openShareModal(${p.id}, ${currentProfile.id}, ${currentProfile.isPrimary})| : ''"
-                        data-tooltip="データ共有設定">
-                        <img th:src="@{/image/shield.png}" alt="共有設定" class="icon-btn-img" />
-                    </button>
-                    <a th:if="${(canManageAllProfiles == true and (p.isPrimary or p.managedByPrimary)) or (canManageCurrentProfile == true and currentProfile != null and currentProfile.id == p.id)}"
-                        th:href="@{/profile/{id}/edit(id=${p.id})}" class="icon-btn" data-tooltip="編集">
-                        <img th:src="@{/image/edit.png}" alt="編集" class="icon-btn-img" />
-                    </a>
-                    <form th:if="${(canManageAllProfiles == true and !p.isPrimary) or (canManageCurrentProfile == true and currentProfile != null and currentProfile.id == p.id and !p.isPrimary and !p.managedByPrimary)}"
-                        th:id="'deleteForm-' + ${p.id}" th:action="@{/profile/delete}"
-                        method="post" class="delete-form"
-                        th:attr="data-confirm-message='「' + ${p.name} + '」のプロファイルを削除しますか？&#10;この操作は取り消せません。'">
-                        <input type="hidden" name="profileId" th:value="${p.id}" />
-                        <button type="submit" class="icon-btn icon-btn--danger" data-tooltip="削除">
-                            <img th:src="@{/image/delete.png}" alt="削除" class="icon-btn-img" />
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </main>
-    <div id="shareSettingsModal" class="modal-overlay">
-        <div class="modal share-settings-modal">
-            <div class="modal__header">
-                <h2>データ共有設定</h2>
-                <button type="button" class="modal__close" onclick="closeShareModal()">&times;</button>
-            </div>
-
-            <div class="modal__body">
-                <p class="share-settings__hint">
-                    あなたのデータに対する、各メンバーの閲覧・編集権限を設定します。
-                </p>
-
-                <div class="share-settings__list" id="shareMatrixBody"></div>
-            </div>
-
-            <div class="modal__footer">
-                <button type="button" class="btn btn--ghost" onclick="closeShareModal()">キャンセル</button>
-                <button type="button" class="btn btn--primary" id="btnSaveShareSettings" onclick="saveShareSettings()">
-                    保存する
-                </button>
-            </div>
-        </div>
+  <main class="profile-manage">
+    <div th:if="${message}" class="alert alert--success">
+      <span th:text="${message}"></span>
+      <button type="button" class="alert__close" onclick="this.parentElement.remove()">&times;</button>
     </div>
-    <div th:replace="~{commons/confirm-modal :: deleteModal}"></div>
+    <div th:if="${error}" class="alert alert--error">
+      <span th:text="${error}"></span>
+      <button type="button" class="alert__close" onclick="this.parentElement.remove()">&times;</button>
+    </div>
+    <div class="profile-manage__top">
+      <div>
+        <h1 class="profile-manage__title">プロファイル管理</h1>
+        <p class="profile-manage__subtitle">ご家族のプロファイル作成・編集およびデータ共有設定を行えます。</p>
+      </div>
+      <a th:if="${canManageAllProfiles == true}" th:href="@{/profile/new}" class="btn btn--primary">
+        + 新規プロファイル追加
+      </a>
+    </div>
+    <div class="profile-manage__list">
+      <div th:each="p : ${profiles}" class="profile-manage__card" th:classappend="${currentProfile != null and p.id == currentProfile.id} ? 'is-current'">
 
-    <script th:src="@{/js/common.js}"></script>
-    <script th:src="@{/js/profile-share.js}"></script>
+        <form th:if="${currentProfile != null and p.id != currentProfile.id}" th:action="@{/profile/switch/{id}(id=${p.id})}" method="post" class="profile-manage__switch-form">
+          <button type="submit" class="profile-manage__switch-target" th:attr="aria-label=|${p.name} プロファイルに切り替える|"></button>
+        </form>
+        <img th:src="@{/image/avatar/{name}.png(name=${p.avatar ?: 'avatar_01'})}" alt="Avatar" class="profile-manage__avatar" />
+        <div class="profile-manage__info">
+          <div class="profile-manage__name-row">
+            <span class="profile-manage__name" th:text="${p.name}">山田 太郎</span>
+            <span class="badge badge--primary" th:if="${p.isPrimary}">本人</span>
+            <span class="badge badge--relation" th:unless="${p.isPrimary}" th:text="${p.relationship}">父</span>
+            <span class="badge badge--relation" th:if="${canManageAllProfiles == true and !p.isPrimary and p.managedByPrimary}">
+              管理対象
+            </span>
+            <span class="badge badge--relation" th:if="${!p.isPrimary and !p.managedByPrimary}">
+              独立
+            </span>
+            <span class="badge badge--selected" th:if="${currentProfile != null and p.id == currentProfile.id}">選択中</span>
+          </div>
+
+          <div class="profile-manage__meta">
+            <span th:text="${#temporals.format(p.birthDate, 'yyyy-MM-dd')}">1980-01-01</span>
+            <span>（身長: <th:block th:text="${p.height}">170</th:block> cm）</span>
+          </div>
+        </div>
+        <div class="profile-manage__actions">
+          <button type="button" class="icon-btn icon-btn--share" th:if="${(canManageAllProfiles == true and (p.isPrimary or p.managedByPrimary)) or (canManageCurrentProfile == true and currentProfile != null and currentProfile.id == p.id)}"
+            th:onclick="${currentProfile != null} ? |openShareModal(${p.id}, ${currentProfile.id}, ${currentProfile.isPrimary})| : ''" data-tooltip="データ共有設定">
+            <img th:src="@{/image/shield.png}" alt="共有設定" class="icon-btn-img" />
+          </button>
+          <a th:if="${(canManageAllProfiles == true and (p.isPrimary or p.managedByPrimary)) or (canManageCurrentProfile == true and currentProfile != null and currentProfile.id == p.id)}" th:href="@{/profile/{id}/edit(id=${p.id})}"
+            class="icon-btn" data-tooltip="編集">
+            <img th:src="@{/image/edit.png}" alt="編集" class="icon-btn-img" />
+          </a>
+          <form th:if="${(canManageAllProfiles == true and !p.isPrimary) or (canManageCurrentProfile == true and currentProfile != null and currentProfile.id == p.id and !p.isPrimary and !p.managedByPrimary)}"
+            th:id="'deleteForm-' + ${p.id}" th:action="@{/profile/delete}" method="post" class="delete-form" th:attr="data-confirm-message='「' + ${p.name} + '」のプロファイルを削除しますか？&#10;この操作は取り消せません。'">
+            <input type="hidden" name="profileId" th:value="${p.id}" />
+            <button type="submit" class="icon-btn icon-btn--danger" data-tooltip="削除">
+              <img th:src="@{/image/delete.png}" alt="削除" class="icon-btn-img" />
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+  <div id="shareSettingsModal" class="modal-overlay">
+    <div class="modal share-settings-modal">
+      <div class="modal__header">
+        <h2>データ共有設定</h2>
+        <button type="button" class="modal__close" onclick="closeShareModal()">&times;</button>
+      </div>
+
+      <div class="modal__body">
+        <p class="share-settings__hint">あなたのデータに対する、各メンバーの閲覧・編集権限を設定します。</p>
+        <div class="share-settings__list" id="shareMatrixBody"></div>
+      </div>
+
+      <div class="modal__footer">
+        <button type="button" class="btn btn--ghost" onclick="closeShareModal()">キャンセル</button>
+        <button type="button" class="btn btn--primary" id="btnSaveShareSettings" onclick="saveShareSettings()">
+          保存する
+        </button>
+      </div>
+    </div>
+  </div>
+  <div th:replace="~{commons/confirm-modal :: deleteModal}"></div>
+
+  <script th:src="@{/js/common.js}"></script>
+  <script th:src="@{/js/profile-share.js}"></script>
 </body>
 
 </html>
