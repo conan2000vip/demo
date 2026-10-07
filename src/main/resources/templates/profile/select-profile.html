@@ -43,7 +43,7 @@
   </div>
   <div id="selectPinModal" class="pin-modal" th:hidden="${pinRequired != true}" th:attr="data-profile-id=${pinProfileId}" role="dialog" aria-modal="true" aria-labelledby="selectPinTitle">
     <div class="pin-modal__backdrop"></div>
-    <div class="pin-modal__card">
+    <div class="pin-modal__card profile-pin-unlock-card">
       <div id="selectPinView" class="pin-modal__view">
         <div class="pin-modal__heading">
           <span class="pin-modal__icon" aria-hidden="true">
@@ -68,12 +68,10 @@
           <input id="selectPinInput" name="pin" type="hidden">
           <p id="selectPinError" class="pin-modal__error" role="alert" th:text="${pinErrorMessage}"></p>
         </form>
-        <a href="#" id="selectForgotPin" class="pin-forgot-link">
-          暗証番号を忘れた場合
-        </a>
-        <div class="pin-modal__divider"></div>
-        <div class="pin-password-footer">
-          <a th:href="@{/profile/select}" class="pin-back-link">← 戻る</a>
+        <a href="#" id="selectForgotPin" class="pin-forgot-link">暗証番号を忘れた場合</a>
+        <div class="profile-pin-unlock-divider"></div>
+        <div class="profile-pin-unlock-footer">
+          <a th:href="@{/profile/select}" class="pin-back-button">← 戻る</a>
         </div>
       </div>
       <div id="selectPasswordView" class="pin-modal__view" hidden>
@@ -90,17 +88,15 @@
           </div>
         </div>
         <form id="selectAccountPasswordForm" method="post">
-          <label for="selectAccountPassword">アカウントのパスワード</label>
-          <input id="selectAccountPassword" name="accountPassword" type="password" autocomplete="current-password" required>
+          <label class="sr-only" for="selectAccountPassword">アカウントのパスワード</label>
+          <input id="selectAccountPassword" name="accountPassword" type="password" autocomplete="current-password" placeholder="アカウントのパスワード" required>
           <p id="selectAccountPasswordError" class="pin-modal__error" role="alert" th:text="${accountPasswordErrorMessage}"></p>
-          <a class="pin-forgot-link pin-account-forgot-link" th:href="@{/auth/forgot-password(returnTo=${'/profile/' + pinProfileId + '/edit'})}">
-            パスワードを忘れた場合
-          </a>
+          <a class="pin-forgot-link" th:href="@{/auth/forgot-password(returnTo=${'/profile/' + pinProfileId + '/edit'})}">パスワードを忘れた場合</a>
         </form>
-        <div class="pin-modal__divider"></div>
-        <div class="pin-password-footer">
+        <div class="profile-pin-unlock-divider"></div>
+        <div class="profile-pin-unlock-footer">
           <button type="button" class="pin-back-button" data-account-password-close>← 戻る</button>
-          <button type="submit" class="btn btn--primary" form="selectAccountPasswordForm">PINを解除する</button>
+          <button type="submit" class="btn btn--primary btn--sm" form="selectAccountPasswordForm">PINを解除する</button>
         </div>
       </div>
     </div>

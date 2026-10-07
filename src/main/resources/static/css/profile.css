@@ -675,37 +675,6 @@ body.share-settings-open {
   margin-bottom: 28px;
 }
 
-#selectPinModal .pin-modal__card {
-  width: min(100%, 440px);
-  box-sizing: border-box;
-  height: auto;
-  min-height: 320px;
-  padding: 18px 18px 20px;
-}
-
-#selectPinModal .pin-modal__card h2 {
-  font-size: 22px;
-}
-
-#selectPinModal .pin-modal__card p {
-  font-size: 14px;
-}
-
-#selectPinModal .pin-modal__icon {
-  flex-basis: 56px;
-  width: 56px;
-  height: 56px;
-}
-
-#selectPinModal .pin-modal__icon svg {
-  width: 26px;
-  height: 26px;
-}
-
-#selectPinModal .pin-modal__divider {
-  margin: 20px 0 16px;
-}
-
 .pin-modal__card input {
   width: 100%;
   box-sizing: border-box;
@@ -813,19 +782,6 @@ body.share-settings-open {
   background: #e5ecea;
 }
 
-.pin-modal__actions {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 10px;
-  margin-top: 18px;
-}
-
-.pin-modal__actions--password {
-  justify-content: space-between;
-  align-items: center;
-}
-
 .pin-back-button {
   border: 0;
   padding: 0;
@@ -855,97 +811,8 @@ body.share-settings-open {
   text-align: center;
 }
 
-.pin-back-link {
-  display: inline-flex;
-  margin-top: 18px;
-  color: var(--wp-text-muted);
-  font-size: 13px;
-  text-decoration: none;
-}
-
-.pin-back-link:hover {
-  color: var(--wp-primary);
-  text-decoration: underline;
-}
-
 .pin-forgot-link:hover {
   color: var(--wp-primary);
-}
-
-#selectPinModal .pin-forgot-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 16px;
-  font-size: 16px;
-  line-height: 1.4;
-}
-
-#selectPinModal .pin-forgot-link>span:last-child {
-  font-size: 24px;
-  line-height: 1;
-  text-decoration: none;
-}
-
-#selectPinModal #selectForgotPin {
-  margin-top: 14px;
-  font-size: 16px;
-  font-weight: 700;
-}
-
-#selectPinModal #selectPinView .pin-password-footer {
-  justify-content: flex-start;
-}
-
-#selectPinModal .pin-back-link {
-  margin-top: 0;
-  font-size: 16px;
-}
-
-#selectPinModal .pin-account-forgot-link {
-  margin-top: 4px;
-  font-size: 16px;
-}
-
-#selectPasswordView:not([hidden]) {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  height: auto;
-}
-
-#selectPasswordView .pin-modal__heading {
-  flex: 0 0 auto;
-}
-
-#selectPasswordView form {
-  flex: 0 0 auto;
-  padding-bottom: 4px;
-}
-
-#selectPasswordView .pin-modal__divider {
-  margin: 20px 0 16px;
-}
-
-#selectPinModal .pin-password-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 38px;
-}
-
-#selectPinModal .pin-password-footer .pin-back-button {
-  display: inline-flex;
-  align-items: center;
-  height: 38px;
-  font-size: 16px;
-}
-
-#selectPinModal .pin-password-footer .btn--primary {
-  min-height: 38px;
-  padding: 8px 14px;
-  font-size: 14px;
 }
 
 .profile-pin-unlock-card {
@@ -977,10 +844,6 @@ body.share-settings-open {
 .profile-pin-unlock-card .pin-modal__heading p {
   margin-bottom: 14px;
   font-size: 14px;
-}
-
-.profile-pin-unlock-card #unlockCurrentPin {
-  margin-top: 2px;
 }
 
 .profile-pin-unlock-card .pin-forgot-link {
@@ -1042,56 +905,6 @@ body.share-settings-open {
   .pin-modal__card {
     padding: 24px 20px;
     border-radius: 16px;
-  }
-
-  #selectPinModal .pin-modal__card {
-    height: auto;
-    min-height: 340px;
-    box-sizing: border-box;
-    padding: 24px 20px;
-  }
-
-  #selectPinModal .pin-modal__heading {
-    gap: 10px;
-  }
-
-  #selectPinModal .pin-modal__icon {
-    flex-basis: 48px;
-    width: 48px;
-    height: 48px;
-  }
-
-  #selectPinModal .pin-modal__icon svg {
-    width: 24px;
-    height: 24px;
-  }
-
-  #selectPinModal .pin-modal__card h2 {
-    font-size: 22px;
-  }
-
-  #selectPinModal .pin-modal__card p {
-    font-size: 15px;
-  }
-
-  #selectPinModal .pin-forgot-link {
-    gap: 8px;
-    margin-top: 20px;
-    font-size: 17px;
-  }
-
-  #selectPinModal .pin-forgot-link>span:last-child {
-    font-size: 24px;
-  }
-
-  #selectPinModal .pin-back-link {
-    font-size: 16px;
-  }
-
-  #selectPinModal .pin-account-forgot-link {
-    margin-top: 14px;
-    margin-bottom: 4px;
-    font-size: 16px;
   }
 
   .pin-modal__close {
@@ -1790,4 +1603,87 @@ body.share-settings-open {
     width: 18px;
     height: 18px;
   }
+}
+
+.profile-pin-unlock-footer:has(> .btn:only-child) {
+  justify-content: flex-end;
+}
+
+/* ===== Modal PIN dùng chung cho select-profile và profile-form ===== */
+.pin-modal .profile-pin-unlock-card h2 {
+  margin: 0 40px 4px 0;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+/* 4 ô PIN */
+.pin-modal .profile-pin-unlock-card .pin-digit-inputs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 6px 0 2px;
+}
+
+.pin-modal .profile-pin-unlock-card .pin-digit-inputs .pin-digit-input {
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 1px solid #cbd8d4;
+  border-radius: 12px;
+  background: #fbfdfc;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-align: center;
+  box-shadow: none;
+}
+
+.pin-modal .profile-pin-unlock-card .pin-digit-inputs .pin-digit-input:focus {
+  border-color: var(--wp-primary);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.13);
+}
+
+/* Dòng lỗi dưới 4 ô: canh giữa, cùng vị trí ở cả hai trang */
+.pin-modal .profile-pin-unlock-card .pin-digit-inputs~.pin-modal__error {
+  text-align: center;
+}
+
+/* Ô nhập mật khẩu */
+.pin-modal .profile-pin-unlock-card input:not(.pin-digit-input) {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 48px;
+  padding: 11px 14px;
+  border: 1px solid #d5dfdc;
+  border-radius: 10px;
+  background: #fbfdfc;
+  font-size: 15px;
+}
+
+.pin-modal .profile-pin-unlock-card input:not(.pin-digit-input):focus {
+  border-color: var(--wp-primary);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.13);
+}
+
+/* Nút 戻る dạng <a> (trang select) */
+.profile-pin-unlock-footer a.pin-back-button {
+  text-decoration: none;
+}
+
+.profile-pin-unlock-footer a.pin-back-button:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .pin-modal .profile-pin-unlock-card .pin-digit-inputs .pin-digit-input {
+    width: 54px;
+    height: 56px;
+  }
+}
+
+.pin-save-success[hidden] {
+  display: none;
 }
