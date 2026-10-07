@@ -2,242 +2,221 @@
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>体重管理 | HealthLog</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" />
-    <link rel="stylesheet" th:href="@{/css/common.css}" />
-    <link rel="stylesheet" th:href="@{/css/weight.css}" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>体重管理 | HealthLog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" th:href="@{/css/common.css}" />
+  <link rel="stylesheet" th:href="@{/css/weight.css}" />
 </head>
 
 <body>
-    <div th:replace="~{commons/header :: header('weight')}"></div>
-    <main class="weight-page">
-        <div class="weight-page__inner">
-            <div class="weight-page__header">
-                <div class="weight-page__heading">
-                    <span class="weight-page__icon">
-                        <img th:src="@{/image/scales.png}" alt="" class="weight-page__icon-img" />
-                    </span>
-                    <div>
-                        <h1>体重管理</h1>
-                        <p th:text="${currentProfile != null ? currentProfile.name + ' の体重記録' : 'ゲスト の体重記録'}"></p>
-                    </div>
-                </div>
-                <button type="button" class="btn btn--primary" id="openAddModalBtn">
-                    <i data-lucide="plus"></i>記録する
-                </button>
-            </div>
-            <div class="alert alert--error" th:if="${error}" id="errorAlert" data-auto-hide="true">
-                <i data-lucide="alert-circle"></i><span th:text="${error}"></span>
-                <button type="button" class="alert__close" onclick="this.closest('.alert').remove()">
-                    <i data-lucide="x"></i>
-                </button>
-            </div>
-            <div class="alert alert--success" th:if="${message}" id="successAlert" data-auto-hide="true">
-                <i data-lucide="check-circle"></i><span th:text="${message}"></span>
-                <button type="button" class="alert__close" onclick="this.closest('.alert').remove()">
-                    <i data-lucide="x"></i>
-                </button>
-            </div>
-            <div th:replace="~{commons/data-controls :: feedbackList(${feedbackList})}"></div>
-            <div class="summary-grid">
-                <div class="summary-card">
-                    <span class="summary-card__label">最新体重</span>
-                    <span class="summary-card__value">
-                        <span th:text="${stats != null && stats.latest != null ? stats.latest : '--'}"></span> kg
-                    </span>
-                    <span class="summary-card__sub" th:if="${stats != null && stats.latestDate != null}"
-                        th:text="'最終記録：' + ${#temporals.format(stats.latestDate,'yyyy/MM/dd')}">
-                    </span>
-                </div>
-                <div class="summary-card">
-                    <span class="summary-card__label">現在のBMI</span>
-                    <span class="summary-card__value">
-                        <span
-                            th:text="${stats?.bmi != null ? #numbers.formatDecimal(stats.bmi, 1, 1) : '--'}">31.4</span>
-                        <span th:if="${stats?.bmiStatus != null}" class="badge"
-                            th:classappend="${'badge--' + (stats.bmiStatusCode ?: 'normal')}"
-                            th:text="${stats.bmiStatus}">
-                            肥満(2度以上)
-                        </span>
-                    </span>
-                    <span class="summary-card__sub">（最新体重から算出）</span>
-                </div>
-                <div class="summary-card">
-                    <span class="summary-card__label">最小体重</span>
-                    <span class="summary-card__value">
-                        <span th:text="${stats?.min ?: '--'}"></span> kg
-                    </span>
-                    <span class="summary-card__sub" th:if="${stats?.minDate != null}">
-                        記録日：
-                        <span th:text="${#temporals.format(stats.minDate,'yyyy/MM/dd')}"></span>
-                    </span>
-                </div>
-                <div class="summary-card">
-                    <span class="summary-card__label">最大体重</span>
-                    <span class="summary-card__value">
-                        <span th:text="${stats?.max ?: '--'}"></span> kg
-                    </span>
-                    <span class="summary-card__sub" th:if="${stats?.maxDate != null}">
-                        記録日：
-                        <span th:text="${#temporals.format(stats.maxDate,'yyyy/MM/dd')}"></span>
-                    </span>
-                </div>
-            </div>
-
-            <div
-                th:replace="~{commons/data-controls :: chartCard(
-                    '体重(Kg)', 'weightChart', ${not #lists.isEmpty(logs)},
-                    @{/profile/{profileId}/weight/chart-data(profileId=${profileId})},
-                    'weight', @{/image/scales.png},
-                    '体重',
-                    ${currentProfile?.targetWeight != null ? #numbers.formatDecimal(currentProfile.targetWeight, 1, 1) + ' kg' : null},
-                    @{/profile/{profileId}/weight(profileId=${profileId})},
-                    @{/profile/{profileId}/weight(profileId=${profileId})},
-                    ${filterStartDate}, ${filterEndDate})}">
-            </div>
-            <section class="table-card">
-                <div class="data-table-scroll">
-                    <table class="weight-table" data-history-table th:if="${not #lists.isEmpty(logs)}">
-                        <thead>
-                            <tr>
-                                <th>日付</th>
-                                <th>時間</th>
-                                <th>体重 (kg)</th>
-                                <th>BMI</th>
-                                <th>メモ</th>
-                                <th class="weight-table__actions-col"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="record : ${logs}" th:data-date="${record.recordedDate}"
-                                th:data-value="${record.weight}">
-                                <td th:text="${record.recordedDate}">2026-07-14</td>
-                                <td class="weight-table__time"
-                                    th:text="${#temporals.format(record.measuredAt, 'HH:mm')}"></td>
-                                <td class="weight-table__weight">
-                                    <span th:text="${record.weight}">65</span>
-                                    <span class="diff-badge" data-diff-placeholder></span>
-                                </td>
-                                <td>
-                                    <span class="badge" th:if="${record.bmi != null}"
-                                        th:classappend="${'badge--' + (record.bmiStatusCode ?: 'normal')}"
-                                        th:text="${#numbers.formatDecimal(record.bmi, 1, 1)}">21.2</span>
-                                    <span class="text-muted" th:unless="${record.bmi != null}">--</span>
-                                </td>
-
-                                <td class="weight-table__memo memo-cell"
-                                    th:text="${record.memo != null ? record.memo : ''}"
-                                    th:attr="data-full-memo=${record.memo != null ? record.memo : ''}">
-                                </td>
-
-                                <td class="weight-table__actions">
-                                    <button type="button" class="icon-btn edit-btn" th:data-id="${record.id}"
-                                        th:data-measured-at="${record.measuredAt}" th:data-weight="${record.weight}"
-                                        th:data-height="${record.height}" th:data-memo="${record.memo}">
-                                        <img th:src="@{/image/edit.png}" alt="編集" class="icon-btn-img" />
-                                    </button>
-                                    <button type="submit" th:form="'deleteForm-' + ${record.id}"
-                                        class="icon-btn icon-btn--danger" aria-label="削除">
-                                        <img th:src="@{/image/delete.png}" alt="削除" class="icon-btn-img" />
-                                    </button>
-                                </td>
-                                <form th:id="'deleteForm-' + ${record.id}"
-                                    th:action="@{/profile/{profileId}/weight/{id}/delete(profileId=${profileId},id=${record.id})}"
-                                    method="post" class="delete-form"
-                                    th:attr="data-confirm-message='「' + ${record.recordedDate} + '」の体重記録を削除しますか？&#10;この操作は取り消せません。'">
-                                </form>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div
-                    th:replace="~{commons/data-controls :: pagination(@{/profile/{profileId}/weight(profileId=${profileId})},${filterStartDate}, ${filterEndDate},${currentPage}, ${totalPages}, ${hasPrevious}, ${hasNext})}">
-                </div>
-                <div class="empty-state" th:if="${#lists.isEmpty(logs) and !hasAnyLog}">
-                    <img th:src="@{/image/scales.png}" alt="" class="weight-page__icon-img" />
-                    <p>まだ体重が記録されていません</p>
-                    <button type="button" class="btn btn--primary" id="openAddModalBtnEmpty">
-                        <i data-lucide="plus"></i>最初の記録をつける
-                    </button>
-                </div>
-                <div class="empty-state" th:if="${#lists.isEmpty(logs)} and ${hasAnyLog}">
-                    <i data-lucide="calendar-days"></i>
-                    <p>選択した期間に記録がありません</p>
-                    <button type="button" class="btn btn--primary" id="openAddModalBtnFiltered"
-                        th:data-measured-at="${filterStartDate}">
-                        <i data-lucide="plus"></i>この期間の記録を追加する
-                    </button>
-                </div>
-            </section>
+  <div th:replace="~{commons/header :: header('weight')}"></div>
+  <main class="weight-page">
+    <div class="weight-page__inner">
+      <div class="weight-page__header">
+        <div class="weight-page__heading">
+          <span class="weight-page__icon">
+            <img th:src="@{/image/scales.png}" alt="" class="weight-page__icon-img" />
+          </span>
+          <div>
+            <h1>体重管理</h1>
+            <p th:text="${currentProfile != null ? currentProfile.name + ' の体重記録' : 'ゲスト の体重記録'}"></p>
+          </div>
         </div>
-    </main>
-    <div class="modal-overlay" id="weightModalOverlay">
-        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="weightModalTitle">
-            <div class="modal__header">
-                <h2 id="weightModalTitle">体重を記録する</h2>
-                <button type="button" class="modal__close" id="closeModalBtn" aria-label="閉じる">
-                    <i data-lucide="x"></i>
-                </button>
-            </div>
-
-            <form id="weightForm" th:action="@{/profile/{profileId}/weight/save(profileId=${profileId})}" method="post"
-                class="form" novalidate>
-                <input type="hidden" name="recordId" id="recordId" value="" />
-
-                <div class="input-group">
-                    <label for="measuredAtDate">日付 <span class="required">*</span></label>
-                    <input id="measuredAtDate" name="recordedDate" type="date" required />
-                    <div id="measuredAtError" class="field-error"><span></span></div>
-                </div>
-                <input type="hidden" id="measuredAt" name="measuredAt" />
-
-                <div class="input-group">
-                    <label for="weight">体重 (kg) <span class="required">*</span></label>
-                    <input id="weight" name="weight" type="number" step="0.1" min="1" max="300" placeholder="例: 65.0" />
-                    <div id="weightError" class="field-error"><span></span></div>
-                </div>
-
-                <div class="input-group">
-                    <label for="height">
-                        <i data-lucide="ruler" class="input-group__icon"></i>
-                        身長 (cm) <span class="hint">※BMI計算用、子供の成長記録に</span>
-                    </label>
-                    <input id="height" name="height" type="number" step="0.1" min="30" max="250"
-                        th:value="${currentProfile.height}" placeholder="例: 165" />
-                    <div id="heightError" class="field-error"><span></span></div>
-                </div>
-
-                <div class="input-group">
-                    <label for="memo">メモ</label>
-                    <textarea id="memo" name="memo" rows="3" maxlength="500" placeholder="気づいたことなど..."></textarea>
-                </div>
-
-                <div class="modal__footer">
-                    <button type="button" class="btn btn--ghost" id="cancelModalBtn">キャンセル</button>
-                    <button type="submit" class="btn btn--primary btn--block">
-                        <i data-lucide="check"></i>保存する
-                    </button>
-                </div>
-            </form>
+        <button type="button" class="btn btn--primary" id="openAddModalBtn">
+          <i data-lucide="plus"></i>記録する
+        </button>
+      </div>
+      <div class="alert alert--error" th:if="${error}" id="errorAlert" data-auto-hide="true">
+        <i data-lucide="alert-circle"></i><span th:text="${error}"></span>
+        <button type="button" class="alert__close" onclick="this.closest('.alert').remove()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="alert alert--success" th:if="${message}" id="successAlert" data-auto-hide="true">
+        <i data-lucide="check-circle"></i><span th:text="${message}"></span>
+        <button type="button" class="alert__close" onclick="this.closest('.alert').remove()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div th:replace="~{commons/data-controls :: feedbackList(${feedbackList})}"></div>
+      <div class="summary-grid">
+        <div class="summary-card">
+          <span class="summary-card__label">最新体重</span>
+          <span class="summary-card__value">
+            <span th:text="${stats != null && stats.latest != null ? stats.latest : '--'}"></span> kg
+          </span>
+          <span class="summary-card__sub" th:if="${stats != null && stats.latestDate != null}" th:text="'最終記録：' + ${#temporals.format(stats.latestDate,'yyyy/MM/dd')}">
+          </span>
         </div>
+        <div class="summary-card">
+          <span class="summary-card__label">現在のBMI</span>
+          <span class="summary-card__value">
+            <span th:text="${stats?.bmi != null ? #numbers.formatDecimal(stats.bmi, 1, 1) : '--'}">31.4</span>
+            <span th:if="${stats?.bmiStatus != null}" class="badge" th:classappend="${'badge--' + (stats.bmiStatusCode ?: 'normal')}" th:text="${stats.bmiStatus}">
+              肥満(2度以上)
+            </span>
+          </span>
+          <span class="summary-card__sub">（最新体重から算出）</span>
+        </div>
+        <div class="summary-card">
+          <span class="summary-card__label">最小体重</span>
+          <span class="summary-card__value">
+            <span th:text="${stats?.min ?: '--'}"></span> kg
+          </span>
+          <span class="summary-card__sub" th:if="${stats?.minDate != null}">
+            記録日：
+            <span th:text="${#temporals.format(stats.minDate,'yyyy/MM/dd')}"></span>
+          </span>
+        </div>
+        <div class="summary-card">
+          <span class="summary-card__label">最大体重</span>
+          <span class="summary-card__value">
+            <span th:text="${stats?.max ?: '--'}"></span> kg
+          </span>
+          <span class="summary-card__sub" th:if="${stats?.maxDate != null}">
+            記録日：
+            <span th:text="${#temporals.format(stats.maxDate,'yyyy/MM/dd')}"></span>
+          </span>
+        </div>
+      </div>
+
+      <div th:replace="~{commons/data-controls :: chartCard(
+              '体重(Kg)', 'weightChart', ${not #lists.isEmpty(logs)},
+              @{/profile/{profileId}/weight/chart-data(profileId=${profileId})},
+              'weight', @{/image/scales.png},
+              '体重',
+              ${currentProfile?.targetWeight != null ? #numbers.formatDecimal(currentProfile.targetWeight, 1, 1) + ' kg' : null},
+              @{/profile/{profileId}/weight(profileId=${profileId})},
+              @{/profile/{profileId}/weight(profileId=${profileId})},
+              ${filterStartDate}, ${filterEndDate})}">
+      </div>
+      <section class="table-card">
+        <div class="data-table-scroll">
+          <table class="weight-table" data-history-table th:if="${not #lists.isEmpty(logs)}">
+            <thead>
+              <tr>
+                <th>日付</th>
+                <th>時間</th>
+                <th>体重 (kg)</th>
+                <th>BMI</th>
+                <th>メモ</th>
+                <th class="weight-table__actions-col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="record : ${logs}" th:data-date="${record.recordedDate}" th:data-value="${record.weight}">
+                <td th:text="${record.recordedDate}">2026-07-14</td>
+                <td class="weight-table__time" th:text="${#temporals.format(record.measuredAt, 'HH:mm')}"></td>
+                <td class="weight-table__weight">
+                  <span th:text="${record.weight}">65</span>
+                  <span class="diff-badge" data-diff-placeholder></span>
+                </td>
+                <td>
+                  <span class="badge" th:if="${record.bmi != null}" th:classappend="${'badge--' + (record.bmiStatusCode ?: 'normal')}" th:text="${#numbers.formatDecimal(record.bmi, 1, 1)}">21.2</span>
+                  <span class="text-muted" th:unless="${record.bmi != null}">--</span>
+                </td>
+
+                <td class="weight-table__memo memo-cell" th:text="${record.memo != null ? record.memo : ''}" th:attr="data-full-memo=${record.memo != null ? record.memo : ''}">
+                </td>
+
+                <td class="weight-table__actions">
+                  <button type="button" class="icon-btn edit-btn" th:data-id="${record.id}" th:data-measured-at="${record.measuredAt}" th:data-weight="${record.weight}" th:data-height="${record.height}" th:data-memo="${record.memo}">
+                    <img th:src="@{/image/edit.png}" alt="編集" class="icon-btn-img" />
+                  </button>
+                  <button type="submit" th:form="'deleteForm-' + ${record.id}" class="icon-btn icon-btn--danger" aria-label="削除">
+                    <img th:src="@{/image/delete.png}" alt="削除" class="icon-btn-img" />
+                  </button>
+                </td>
+                <form th:id="'deleteForm-' + ${record.id}" th:action="@{/profile/{profileId}/weight/{id}/delete(profileId=${profileId},id=${record.id})}" method="post" class="delete-form"
+                  th:attr="data-confirm-message='「' + ${record.recordedDate} + '」の体重記録を削除しますか？&#10;この操作は取り消せません。'">
+                </form>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div th:replace="~{commons/data-controls :: pagination(@{/profile/{profileId}/weight(profileId=${profileId})},${filterStartDate}, ${filterEndDate},${currentPage}, ${totalPages}, ${hasPrevious}, ${hasNext})}">
+        </div>
+        <div class="empty-state" th:if="${#lists.isEmpty(logs) and !hasAnyLog}">
+          <img th:src="@{/image/scales.png}" alt="" class="weight-page__icon-img" />
+          <p>まだ体重が記録されていません</p>
+          <button type="button" class="btn btn--primary" id="openAddModalBtnEmpty">
+            <i data-lucide="plus"></i>最初の記録をつける
+          </button>
+        </div>
+        <div class="empty-state" th:if="${#lists.isEmpty(logs)} and ${hasAnyLog}">
+          <i data-lucide="calendar-days"></i>
+          <p>選択した期間に記録がありません</p>
+          <button type="button" class="btn btn--primary" id="openAddModalBtnFiltered" th:data-measured-at="${filterStartDate}">
+            <i data-lucide="plus"></i>この期間の記録を追加する
+          </button>
+        </div>
+      </section>
     </div>
-    <div th:replace="~{commons/confirm-modal :: deleteModal}"></div>
+  </main>
+  <div class="modal-overlay" id="weightModalOverlay">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="weightModalTitle">
+      <div class="modal__header">
+        <h2 id="weightModalTitle">体重を記録する</h2>
+        <button type="button" class="modal__close" id="closeModalBtn" aria-label="閉じる">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
 
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-    <script th:src="@{/js/common.js}"></script>
-    <script th:inline="javascript">
-        window.targetWeight = /*[[${currentProfile != null ? currentProfile.targetWeight : null}]]*/ null;
-        window.weightChartData = { labels: /*[[${labels}]]*/[], values: /*[[${values}]]*/[], chartMode: /*[[${chartMode}]]*/ "DAY", from: /*[[${chartFrom}]]*/ null, to: /*[[${chartTo}]]*/ null };
-        window.profileHeight = /*[[${currentProfile.height}]]*/ null;
-    </script>
-    <script th:src="@{/js/weight.js}"></script>
+      <form id="weightForm" th:action="@{/profile/{profileId}/weight/save(profileId=${profileId})}" method="post" class="form" novalidate>
+        <input type="hidden" name="recordId" id="recordId" value="" />
+
+        <div class="input-group">
+          <label for="measuredAtDate">日付 <span class="required">*</span></label>
+          <input id="measuredAtDate" name="recordedDate" type="date" required />
+          <div id="measuredAtError" class="field-error"><span></span></div>
+        </div>
+        <input type="hidden" id="measuredAt" name="measuredAt" />
+
+        <div class="input-group">
+          <label for="weight">体重 (kg) <span class="required">*</span></label>
+          <input id="weight" name="weight" type="number" step="0.1" min="1" max="300" placeholder="例: 65.0" />
+          <div id="weightError" class="field-error"><span></span></div>
+        </div>
+
+        <div class="input-group">
+          <label for="height">
+            <i data-lucide="ruler" class="input-group__icon"></i>
+            身長 (cm) <span class="hint">※BMI計算用、子供の成長記録に</span>
+          </label>
+          <input id="height" name="height" type="number" step="0.1" min="30" max="250" th:value="${currentProfile.height}" placeholder="例: 165" />
+          <div id="heightError" class="field-error"><span></span></div>
+        </div>
+
+        <div class="input-group">
+          <label for="memo">メモ</label>
+          <textarea id="memo" name="memo" rows="3" maxlength="500" placeholder="気づいたことなど..."></textarea>
+        </div>
+
+        <div class="modal__footer">
+          <button type="button" class="btn btn--ghost" id="cancelModalBtn">キャンセル</button>
+          <button type="submit" class="btn btn--primary btn--block">
+            <i data-lucide="check"></i>保存する
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div th:replace="~{commons/confirm-modal :: deleteModal}"></div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script th:src="@{/js/common.js}"></script>
+  <script th:inline="javascript">
+    window.targetWeight = /*[[${currentProfile != null ? currentProfile.targetWeight : null}]]*/ null;
+    window.weightChartData = { labels: /*[[${labels}]]*/[], values: /*[[${values}]]*/[], chartMode: /*[[${chartMode}]]*/ "DAY", from: /*[[${chartFrom}]]*/ null, to: /*[[${chartTo}]]*/ null };
+    window.profileHeight = /*[[${currentProfile.height}]]*/ null;
+  </script>
+  <script th:src="@{/js/weight.js}"></script>
 </body>
 
 </html>

@@ -2,141 +2,130 @@
 <html lang="ja" xmlns:th="http://thymeleaf.org">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HealthLog - 新規登録</title>
-    <link rel="stylesheet" th:href="@{/css/auth.css}" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HealthLog - 新規登録</title>
+  <link rel="stylesheet" th:href="@{/css/auth.css}" />
 </head>
 
 <body>
-    <div class="auth-page">
-        <div class="auth-card">
-            <aside class="auth-brand">
-                <div class="auth-brand__logo">
-                    <img th:src="@{/image/logo.png}" alt="HealthLog" />
-                    <span>HealthLog</span>
-                </div>
-
-                <div class="auth-brand__art">
-                    <svg viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="150" cy="150" r="120" fill="#FFFFFF" opacity="0.12" />
-                        <circle cx="150" cy="150" r="90" fill="#FFFFFF" opacity="0.10" />
-                        <g fill="#FFFFFF">
-                            <circle cx="105" cy="95" r="16" />
-                            <rect x="85" y="115" width="40" height="46" rx="14" />
-                        </g>
-                        <g fill="#C9D0FB">
-                            <circle cx="150" cy="80" r="19" />
-                            <rect x="126" y="103" width="48" height="55" rx="16" />
-                        </g>
-                        <g fill="#FFFFFF" opacity="0.85">
-                            <circle cx="196" cy="98" r="14" />
-                            <rect x="179" y="115" width="34" height="40" rx="12" />
-                        </g>
-                        <circle cx="215" cy="175" r="18" fill="#22C55E" />
-                        <path d="M215 167 V183 M207 175 H223" stroke="#FFFFFF" stroke-width="4"
-                            stroke-linecap="round" />
-                    </svg>
-                </div>
-
-                <div class="auth-brand__copy">
-                    <h2>家族みんなの健康を、<br />ひとつに。</h2>
-                    <p>アカウントを作成して、家族の健康管理を今日から始めましょう。</p>
-                    <div class="auth-brand__dots">
-                        <span></span><span></span><span></span><span></span>
-                    </div>
-                </div>
-            </aside>
-            <section class="auth-form-panel">
-                <div class="auth-form-panel__header">
-                    <h1>新規登録</h1>
-                    <p>必要な情報を入力してアカウントを作成してください。</p>
-                </div>
-                <div class="banner banner--error" th:if="${errorMessage}">
-                    <i data-lucide="alert-circle"></i>
-                    <span th:text="${errorMessage}"></span>
-                </div>
-                <div class="banner banner--success" th:if="${message}">
-                    <span th:text="${message}"></span>
-                </div>
-
-                <form id="registerForm" th:action="@{/auth/register}" th:object="${registerRequest}" method="post"
-                    class="form" novalidate>
-                    <div class="input-group">
-                        <label for="email">メールアドレス</label>
-                        <div class="input-box">
-                            <i data-lucide="mail"></i>
-                            <input id="email" type="email" th:field="*{email}" placeholder="you@example.com"
-                                autocomplete="email" />
-                        </div>
-                        <div id="emailError" class="field-error"
-                            th:classappend="${#fields.hasErrors('email')} ? 'is-visible'">
-                            <i data-lucide="alert-circle"></i>
-                            <span th:text="${#fields.hasErrors('email')} ? ${#fields.errors('email')[0]} : ''"></span>
-                        </div>
-                    </div>
-                    <div class="input-group">
-                        <label for="password">パスワード</label>
-                        <div class="input-box">
-                            <i data-lucide="lock"></i>
-                            <input id="password" type="password" th:field="*{password}" placeholder="8文字以上で入力"
-                                autocomplete="new-password" />
-                            <button type="button" class="toggle-password" data-target="password" aria-label="パスワードを表示">
-                                <i data-lucide="eye"></i>
-                            </button>
-                        </div>
-                        <div id="passwordError" class="field-error"
-                            th:classappend="${#fields.hasErrors('password')} ? 'is-visible'">
-                            <i data-lucide="alert-circle"></i>
-                            <span
-                                th:text="${#fields.hasErrors('password')} ? ${#fields.errors('password')[0]} : ''"></span>
-                        </div>
-                    </div>
-                    <div class="input-group">
-                        <label for="confirmPassword">パスワード（確認）</label>
-                        <div class="input-box">
-                            <i data-lucide="lock"></i>
-                            <input id="confirmPassword" type="password" th:field="*{confirmPassword}"
-                                placeholder="もう一度入力してください" autocomplete="new-password" />
-                            <button type="button" class="toggle-password" data-target="confirmPassword"
-                                aria-label="パスワードを表示">
-                                <i data-lucide="eye"></i>
-                            </button>
-                        </div>
-                        <div id="confirmPasswordError" class="field-error"
-                            th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-visible'">
-                            <i data-lucide="alert-circle"></i>
-                            <span
-                                th:text="${#fields.hasErrors('confirmPassword')} ? ${#fields.errors('confirmPassword')[0]} : ''"></span>
-                        </div>
-                    </div>
-
-                    <button class="submit-btn" type="submit">
-                        <i data-lucide="user-plus"></i>
-                        登録する
-                    </button>
-                </form>
-
-                <div class="divider">または</div>
-
-                <div class="social-row">
-                    <a th:href="@{/oauth2/authorization/google}" class="social-btn">Google</a>
-                    <a th:href="@{/oauth2/authorization/facebook}" class="social-btn">Facebook</a>
-                </div>
-
-                <div class="auth-footer">
-                    すでにアカウントをお持ちですか？
-                    <a th:href="@{/auth/login}">ログイン</a>
-                </div>
-
-                <p class="security-note">健康データは安全に暗号化されて保存されます</p>
-            </section>
+  <div class="auth-page">
+    <div class="auth-card">
+      <aside class="auth-brand">
+        <div class="auth-brand__logo">
+          <img th:src="@{/image/logo.png}" alt="HealthLog" />
+          <span>HealthLog</span>
         </div>
-    </div>
 
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script th:src="@{/js/common.js}"></script>
-    <script th:src="@{/js/register.js}"></script>
+        <div class="auth-brand__art">
+          <svg viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="150" cy="150" r="120" fill="#FFFFFF" opacity="0.12" />
+            <circle cx="150" cy="150" r="90" fill="#FFFFFF" opacity="0.10" />
+            <g fill="#FFFFFF">
+              <circle cx="105" cy="95" r="16" />
+              <rect x="85" y="115" width="40" height="46" rx="14" />
+            </g>
+            <g fill="#C9D0FB">
+              <circle cx="150" cy="80" r="19" />
+              <rect x="126" y="103" width="48" height="55" rx="16" />
+            </g>
+            <g fill="#FFFFFF" opacity="0.85">
+              <circle cx="196" cy="98" r="14" />
+              <rect x="179" y="115" width="34" height="40" rx="12" />
+            </g>
+            <circle cx="215" cy="175" r="18" fill="#22C55E" />
+            <path d="M215 167 V183 M207 175 H223" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" />
+          </svg>
+        </div>
+
+        <div class="auth-brand__copy">
+          <h2>家族みんなの健康を、<br />ひとつに。</h2>
+          <p>アカウントを作成して、家族の健康管理を今日から始めましょう。</p>
+          <div class="auth-brand__dots">
+            <span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+      </aside>
+      <section class="auth-form-panel">
+        <div class="auth-form-panel__header">
+          <h1>新規登録</h1>
+          <p>必要な情報を入力してアカウントを作成してください。</p>
+        </div>
+        <div class="banner banner--error" th:if="${errorMessage}">
+          <i data-lucide="alert-circle"></i>
+          <span th:text="${errorMessage}"></span>
+        </div>
+        <div class="banner banner--success" th:if="${message}">
+          <span th:text="${message}"></span>
+        </div>
+
+        <form id="registerForm" th:action="@{/auth/register}" th:object="${registerRequest}" method="post" class="form" novalidate>
+          <div class="input-group">
+            <label for="email">メールアドレス</label>
+            <div class="input-box">
+              <i data-lucide="mail"></i>
+              <input id="email" type="email" th:field="*{email}" placeholder="you@example.com" autocomplete="email" />
+            </div>
+            <div id="emailError" class="field-error" th:classappend="${#fields.hasErrors('email')} ? 'is-visible'">
+              <i data-lucide="alert-circle"></i>
+              <span th:text="${#fields.hasErrors('email')} ? ${#fields.errors('email')[0]} : ''"></span>
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="password">パスワード</label>
+            <div class="input-box">
+              <i data-lucide="lock"></i>
+              <input id="password" type="password" th:field="*{password}" placeholder="8文字以上で入力" autocomplete="new-password" />
+              <button type="button" class="toggle-password" data-target="password" aria-label="パスワードを表示">
+                <i data-lucide="eye"></i>
+              </button>
+            </div>
+            <div id="passwordError" class="field-error" th:classappend="${#fields.hasErrors('password')} ? 'is-visible'">
+              <i data-lucide="alert-circle"></i>
+              <span th:text="${#fields.hasErrors('password')} ? ${#fields.errors('password')[0]} : ''"></span>
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="confirmPassword">パスワード（確認）</label>
+            <div class="input-box">
+              <i data-lucide="lock"></i>
+              <input id="confirmPassword" type="password" th:field="*{confirmPassword}" placeholder="もう一度入力してください" autocomplete="new-password" />
+              <button type="button" class="toggle-password" data-target="confirmPassword" aria-label="パスワードを表示">
+                <i data-lucide="eye"></i>
+              </button>
+            </div>
+            <div id="confirmPasswordError" class="field-error" th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-visible'">
+              <i data-lucide="alert-circle"></i>
+              <span th:text="${#fields.hasErrors('confirmPassword')} ? ${#fields.errors('confirmPassword')[0]} : ''"></span>
+            </div>
+          </div>
+
+          <button class="submit-btn" type="submit">
+            <i data-lucide="user-plus"></i>
+            登録する
+          </button>
+        </form>
+
+        <div class="divider">または</div>
+
+        <div class="social-row">
+          <a th:href="@{/oauth2/authorization/google}" class="social-btn">Google</a>
+          <a th:href="@{/oauth2/authorization/facebook}" class="social-btn">Facebook</a>
+        </div>
+
+        <div class="auth-footer">
+          すでにアカウントをお持ちですか？
+          <a th:href="@{/auth/login}">ログイン</a>
+        </div>
+
+        <p class="security-note">健康データは安全に暗号化されて保存されます</p>
+      </section>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script th:src="@{/js/common.js}"></script>
+  <script th:src="@{/js/register.js}"></script>
 </body>
 
 </html>

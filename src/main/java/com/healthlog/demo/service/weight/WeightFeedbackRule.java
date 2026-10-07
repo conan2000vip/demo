@@ -42,8 +42,7 @@ public class WeightFeedbackRule {
         List<Weight> logs = weightRepository.findByProfile_IdOrderByRecordedDateDesc(profileId);
 
         if (logs.isEmpty()) {
-            items.add(buildNoRecordReminder(today, "体重記録がありません",
-                    "まだ体重データが記録されていません。記録を始めてみましょう。"));
+            items.add(buildNoRecordReminder(today, "体重記録がありません", "まだ体重データが記録されていません。記録を始めてみましょう。"));
             return items;
         }
 
@@ -51,31 +50,22 @@ public class WeightFeedbackRule {
         Weight latest = latestLogs.get(0);
         long daysSinceLast = ChronoUnit.DAYS.between(latest.getRecordedDate(), today);
         if (daysSinceLast >= NO_RECORD_DAYS_THRESHOLD) {
-            items.add(new FeedbackItem(
-                    FeedbackType.WEIGHT_NO_RECORD,
-                    FeedbackLevel.LV2,
-                    "最近、体重記録がありません",
-                    "最後の記録から" + daysSinceLast + "日経っています。今日の状態を記録してみましょう。",
-                    latest.getRecordedDate().atStartOfDay(),
+            items.add(new FeedbackItem(FeedbackType.WEIGHT_NO_RECORD, FeedbackLevel.LV2, "最近、体重記録がありません",
+                    "最後の記録から" + daysSinceLast + "日経っています。今日の状態を記録してみましょう。", latest.getRecordedDate().atStartOfDay(),
                     "lightbulb"));
             return items;
         }
 
         boolean hasToday = latestLogs.stream().anyMatch(log -> log.getRecordedDate().isEqual(today));
         if (!hasToday) {
-            items.add(buildNoRecordReminder(today, "体重記録がありません",
-                    "今日の体重データがまだ記録されていません。記録すると、あなたに合ったフィードバックが受け取れます。"));
+            items.add(buildNoRecordReminder(today, "体重記録がありません", "今日の体重データがまだ記録されていません。記録すると、あなたに合ったフィードバックが受け取れます。"));
         } else if (latestLogs.size() >= 2) {
             LocalDate previousDate = latestLogs.get(1).getRecordedDate();
             long totalGap = ChronoUnit.DAYS.between(previousDate, today);
             if (totalGap > 1) {
                 long emptyDays = totalGap - 1;
-                items.add(new FeedbackItem(
-                        FeedbackType.WEIGHT_RESUMED,
-                        FeedbackLevel.LV0,
-                        "記録を再開しました",
-                        "前回の記録から" + emptyDays + "日空きましたが、今日また記録できました。この調子で続けましょう。",
-                        today.atStartOfDay(),
+                items.add(new FeedbackItem(FeedbackType.WEIGHT_RESUMED, FeedbackLevel.LV0, "記録を再開しました",
+                        "前回の記録から" + emptyDays + "日空きましたが、今日また記録できました。この調子で続けましょう。", today.atStartOfDay(),
                         "calendar-check"));
             }
         }
@@ -93,18 +83,14 @@ public class WeightFeedbackRule {
         Weight latest = logs.get(0);
         BigDecimal current = latest.getWeight();
         BigDecimal target = profile.getTargetWeight();
-        if (current == null) return;
+        if (current == null)
+            return;
 
         boolean hasGoal = target != null && target.compareTo(BigDecimal.ZERO) > 0;
         if (!hasGoal) {
             if (latest.getRecordedDate().isEqual(today)) {
-                items.add(new FeedbackItem(
-                        FeedbackType.DAILY_COMPLETE,
-                        FeedbackLevel.LV0,
-                        "今日の健康記録を完了しました",
-                        "体重の記録、お疲れさまでした！目標体重を設定すると、より詳しいフィードバックが受け取れます。",
-                        latest.getMeasuredAt(),
-                        "check-circle"));
+                items.add(new FeedbackItem(FeedbackType.DAILY_COMPLETE, FeedbackLevel.LV0, "今日の健康記録を完了しました",
+                        "体重の記録、お疲れさまでした！目標体重を設定すると、より詳しいフィードバックが受け取れます。", latest.getMeasuredAt(), "check-circle"));
             }
             return;
         }
@@ -112,85 +98,59 @@ public class WeightFeedbackRule {
         BigDecimal diff = current.subtract(target);
         BigDecimal absDiff = diff.abs();
         if (absDiff.compareTo(TARGET_ACHIEVED_TOLERANCE_KG) <= 0) {
-            items.add(new FeedbackItem(
-                    FeedbackType.WEIGHT_GOAL_ACHIEVED,
-                    FeedbackLevel.LV1,
-                    "目標体重を達成しました",
-                    "現在の体重は" + current + "kgです。設定した目標体重に達しています！",
-                    latest.getMeasuredAt(),
-                    "check-circle"));
+            items.add(new FeedbackItem(FeedbackType.WEIGHT_GOAL_ACHIEVED, FeedbackLevel.LV1, "目標体重を達成しました",
+                    "現在の体重は" + current + "kgです。設定した目標体重に達しています！", latest.getMeasuredAt(), "check-circle"));
             return;
         }
 
-        if (!latest.getRecordedDate().isEqual(today)) return;
+        if (!latest.getRecordedDate().isEqual(today))
+            return;
 
         BigDecimal remaining = absDiff.setScale(1, RoundingMode.HALF_UP);
         if (diff.compareTo(BigDecimal.ZERO) > 0) {
-            items.add(new FeedbackItem(
-                    FeedbackType.DAILY_COMPLETE,
-                    FeedbackLevel.LV2,
-                    "目標体重まであと" + remaining + "kgです",
-                    "現在の体重は" + current + "kgです。目標体重" + target
-                            + "kgに向けて、無理のないペースで取り組みましょう。",
-                    latest.getMeasuredAt(),
+            items.add(new FeedbackItem(FeedbackType.DAILY_COMPLETE, FeedbackLevel.LV2, "目標体重まであと" + remaining + "kgです",
+                    "現在の体重は" + current + "kgです。目標体重" + target + "kgに向けて、無理のないペースで取り組みましょう。", latest.getMeasuredAt(),
                     "trending-down"));
         } else {
-            items.add(new FeedbackItem(
-                    FeedbackType.DAILY_COMPLETE,
-                    FeedbackLevel.LV2,
-                    "目標体重まであと" + remaining + "kgです",
-                    "現在の体重は" + current + "kgです。目標体重" + target
-                            + "kgに向けて、バランスのよい食事と適度な運動を心がけましょう。",
-                    latest.getMeasuredAt(),
-                    "trending-up"));
+            items.add(new FeedbackItem(FeedbackType.DAILY_COMPLETE, FeedbackLevel.LV2, "目標体重まであと" + remaining + "kgです",
+                    "現在の体重は" + current + "kgです。目標体重" + target + "kgに向けて、バランスのよい食事と適度な運動を心がけましょう。",
+                    latest.getMeasuredAt(), "trending-up"));
         }
     }
 
     private void checkWeightChange(List<Weight> logs, List<FeedbackItem> items) {
-        if (logs.size() < 2) return;
+        if (logs.size() < 2)
+            return;
 
         Weight latest = logs.get(0);
         Weight previous = logs.get(1);
         BigDecimal current = latest.getWeight();
         BigDecimal before = previous.getWeight();
-        if (current == null || before == null || before.compareTo(BigDecimal.ZERO) == 0) return;
+        if (current == null || before == null || before.compareTo(BigDecimal.ZERO) == 0)
+            return;
 
         BigDecimal diff = current.subtract(before);
-        BigDecimal percent = diff.divide(before, 4, RoundingMode.HALF_UP)
-                .multiply(BigDecimal.valueOf(100)).abs();
+        BigDecimal percent = diff.divide(before, 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)).abs();
         long days = ChronoUnit.DAYS.between(previous.getRecordedDate(), latest.getRecordedDate());
         boolean suddenDaily = days <= 1 && diff.abs().compareTo(LV4_DAILY_CHANGE_KG) >= 0;
         String diffText = (diff.compareTo(BigDecimal.ZERO) > 0 ? "+" : "") + diff + "kg";
 
         if (percent.compareTo(LV4_CHANGE_PERCENT) >= 0 || suddenDaily) {
-            items.add(new FeedbackItem(
-                    FeedbackType.WEIGHT_SUDDEN_CHANGE,
-                    FeedbackLevel.LV4,
-                    "急激な体重変化があります",
-                    "前回比で" + diffText + "の変化がありました。健康状態と入力内容を確認してください。",
-                    latest.getRecordedDate().atStartOfDay(),
+            items.add(new FeedbackItem(FeedbackType.WEIGHT_SUDDEN_CHANGE, FeedbackLevel.LV4, "急激な体重変化があります",
+                    "前回比で" + diffText + "の変化がありました。健康状態と入力内容を確認してください。", latest.getRecordedDate().atStartOfDay(),
                     "alert-octagon"));
             return;
         }
 
         if (percent.compareTo(LV3_CHANGE_PERCENT) >= 0) {
-            items.add(new FeedbackItem(
-                    FeedbackType.WEIGHT_BIG_CHANGE,
-                    FeedbackLevel.LV3,
-                    "体重変化が大きいです",
-                    "前回比で" + diffText + "の変化がありました。入力内容を確認してください。",
-                    latest.getRecordedDate().atStartOfDay(),
+            items.add(new FeedbackItem(FeedbackType.WEIGHT_BIG_CHANGE, FeedbackLevel.LV3, "体重変化が大きいです",
+                    "前回比で" + diffText + "の変化がありました。入力内容を確認してください。", latest.getRecordedDate().atStartOfDay(),
                     "alert-triangle"));
         }
     }
 
     private FeedbackItem buildNoRecordReminder(LocalDate today, String title, String message) {
-        return new FeedbackItem(
-                FeedbackType.WEIGHT_NO_RECORD,
-                FeedbackLevel.LV0,
-                title,
-                message,
-                today.atStartOfDay(),
+        return new FeedbackItem(FeedbackType.WEIGHT_NO_RECORD, FeedbackLevel.LV0, title, message, today.atStartOfDay(),
                 "calendar-x");
     }
 
@@ -201,8 +161,6 @@ public class WeightFeedbackRule {
             latestByDate.merge(weight.getRecordedDate(), weight,
                     (oldWeight, newWeight) -> oldWeight.getId() > newWeight.getId() ? oldWeight : newWeight);
         }
-        return latestByDate.values().stream()
-                .sorted(Comparator.comparing(Weight::getRecordedDate).reversed())
-                .toList();
+        return latestByDate.values().stream().sorted(Comparator.comparing(Weight::getRecordedDate).reversed()).toList();
     }
 }
