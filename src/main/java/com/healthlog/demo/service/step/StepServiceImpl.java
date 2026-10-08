@@ -48,7 +48,6 @@ public class StepServiceImpl extends BaseLogService<Step, Step> implements StepS
         return Category.step;
     }
 
-    @SuppressWarnings("null")
     @Override
     @Transactional(readOnly = true)
     public Map<String, Object> list(Long profileId, Long currentUserId, DateRangerFilter range, int page) {

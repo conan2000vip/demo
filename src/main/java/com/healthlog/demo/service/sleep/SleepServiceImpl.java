@@ -53,7 +53,6 @@ public class SleepServiceImpl extends BaseLogService<Sleep, Sleep> implements Sl
         return Category.sleep;
     }
 
-    @SuppressWarnings("null")
     @Override
     @Transactional(readOnly = true)
     public Map<String, Object> list(Long profileId, Long currentUserId, DateRangerFilter dateRange, int page) {
@@ -66,29 +65,25 @@ public class SleepServiceImpl extends BaseLogService<Sleep, Sleep> implements Sl
         LocalDate now = LocalDate.now();
         LocalDate monthStart = now.withDayOfMonth(1);
         LocalDate monthEnd = monthStart.withDayOfMonth(monthStart.lengthOfMonth());
-        DateRangerFilter summaryRange = customRange ? dateRange
-                : new DateRangerFilter(monthStart, monthEnd);
-        List<Sleep> summaryLogs = customRange ? filteredLogs
-                : getLogs(profileId, currentUserId, summaryRange);
+        DateRangerFilter summaryRange = customRange ? dateRange : new DateRangerFilter(monthStart, monthEnd);
+        List<Sleep> summaryLogs = customRange ? filteredLogs : getLogs(profileId, currentUserId, summaryRange);
         Map<LocalDate, Sleep> dailyFiltered = aggregateDaily(filteredLogs);
         Map<LocalDate, Sleep> dailySummary = aggregateDaily(summaryLogs);
         Sleep latestLog = sleepRepository.findTopByProfile_IdOrderByRecordedDateDesc(profileId).orElse(null);
-        Sleep shortestLog = dailySummary.values().stream()
-                .min(Comparator.comparing(Sleep::getSleepMinutes)).orElse(null);
-        Sleep longestLog = dailySummary.values().stream()
-                .max(Comparator.comparing(Sleep::getSleepMinutes)).orElse(null);
+        Sleep shortestLog = dailySummary.values().stream().min(Comparator.comparing(Sleep::getSleepMinutes))
+                .orElse(null);
+        Sleep longestLog = dailySummary.values().stream().max(Comparator.comparing(Sleep::getSleepMinutes))
+                .orElse(null);
 
         int totalMinutes = dailySummary.values().stream().mapToInt(Sleep::getSleepMinutes).sum();
         int dayCount = dailySummary.size();
         Integer averageMinutes = dayCount == 0 ? null
                 : BigDecimal.valueOf(totalMinutes).divide(BigDecimal.valueOf(dayCount), 0, RoundingMode.HALF_UP)
                         .intValue();
-        List<Sleep> chartLogs = isSingleDay(dateRange)
-                ? aggregateHourly(filteredLogs, dateRange.getFrom())
+        List<Sleep> chartLogs = isSingleDay(dateRange) ? aggregateHourly(filteredLogs, dateRange.getFrom())
                 : new ArrayList<>(dailyFiltered.values());
-        ChartDataResponse chart = chartDataBuilder.build(chartLogs, dateRange,
-                log -> BigDecimal.valueOf(log.getSleepMinutes()).divide(BigDecimal.valueOf(60), 2,
-                        RoundingMode.HALF_UP));
+        ChartDataResponse chart = chartDataBuilder.build(chartLogs, dateRange, log -> BigDecimal
+                .valueOf(log.getSleepMinutes()).divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP));
 
         Map<String, Object> stats = new HashMap<>();
         stats.put("latest", latestLog != null ? latestLog.getSleepMinutes() : null);
@@ -179,9 +174,8 @@ public class SleepServiceImpl extends BaseLogService<Sleep, Sleep> implements Sl
         List<Sleep> logs = getLogs(profileId, currentUserId, dateRange);
         List<Sleep> chartLogs = isSingleDay(dateRange) ? aggregateHourly(logs, dateRange.getFrom())
                 : new ArrayList<>(aggregateDaily(logs).values());
-        ChartDataResponse chart = chartDataBuilder.build(chartLogs, dateRange,
-                log -> BigDecimal.valueOf(log.getSleepMinutes()).divide(BigDecimal.valueOf(60), 2,
-                        RoundingMode.HALF_UP));
+        ChartDataResponse chart = chartDataBuilder.build(chartLogs, dateRange, log -> BigDecimal
+                .valueOf(log.getSleepMinutes()).divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP));
         return Map.of("labels", chart.labels(), "values", chart.values(), "chartMode", chart.chartMode());
     }
 
@@ -189,8 +183,8 @@ public class SleepServiceImpl extends BaseLogService<Sleep, Sleep> implements Sl
     public Sleep create(Long profileId, Long currentUserId, Sleep input) {
         Profile profile = validateAndGetEditableProfile(profileId, currentUserId);
         prepareAndValidate(input);
-        Optional<Sleep> duplicate = sleepRepository.findFirstByProfile_IdAndRecordedDateAndSleepType(
-                profileId, input.getRecordedDate(), input.getSleepType());
+        Optional<Sleep> duplicate = sleepRepository.findFirstByProfile_IdAndRecordedDateAndSleepType(profileId,
+                input.getRecordedDate(), input.getSleepType());
         if (duplicate.isPresent()) {
             throw duplicateSleepTypeException(input.getSleepType());
         }
@@ -203,8 +197,8 @@ public class SleepServiceImpl extends BaseLogService<Sleep, Sleep> implements Sl
         validateAndGetEditableProfile(profileId, currentUserId);
         Sleep existing = findEntityByIdAndProfile(logId, profileId);
         prepareAndValidate(input);
-        Optional<Sleep> duplicate = sleepRepository.findFirstByProfile_IdAndRecordedDateAndSleepType(
-                profileId, input.getRecordedDate(), input.getSleepType());
+        Optional<Sleep> duplicate = sleepRepository.findFirstByProfile_IdAndRecordedDateAndSleepType(profileId,
+                input.getRecordedDate(), input.getSleepType());
         if (duplicate.isPresent() && !duplicate.get().getId().equals(logId)) {
             throw duplicateSleepTypeException(input.getSleepType());
         }
@@ -219,9 +213,7 @@ public class SleepServiceImpl extends BaseLogService<Sleep, Sleep> implements Sl
     }
 
     private BusinessException duplicateSleepTypeException(SleepType sleepType) {
-        String message = sleepType == SleepType.NIGHT
-                ? "この日の夜間睡眠は既に登録されています"
-                : "この日の昼寝は既に登録されています";
+        String message = sleepType == SleepType.NIGHT ? "この日の夜間睡眠は既に登録されています" : "この日の昼寝は既に登録されています";
         return new BusinessException(HttpStatus.BAD_REQUEST, message);
     }
 

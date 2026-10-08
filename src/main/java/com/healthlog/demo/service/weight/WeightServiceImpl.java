@@ -60,7 +60,6 @@ public class WeightServiceImpl extends BaseLogService<Weight, Weight> implements
     public Map<String, Object> chartData(Long profileId, Long currentUserId, DateRangerFilter dateRange) {
         validateDateRange(dateRange);
         List<Weight> logs = getLogs(profileId, currentUserId, dateRange);
-        @SuppressWarnings("null")
         ChartDataResponse chartData = chartDataBuilder.build(logs, dateRange, Weight::getWeight);
 
         Map<String, Object> result = new HashMap<>();
@@ -70,7 +69,6 @@ public class WeightServiceImpl extends BaseLogService<Weight, Weight> implements
         return result;
     }
 
-    @SuppressWarnings("null")
     @Override
     @Transactional(readOnly = true)
     public Map<String, Object> list(Long profileId, Long currentUserId, DateRangerFilter dateRange, int page) {

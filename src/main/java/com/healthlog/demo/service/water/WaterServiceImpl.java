@@ -54,7 +54,6 @@ public class WaterServiceImpl extends BaseLogService<Water, Water> implements Wa
         return Category.water;
     }
 
-    @SuppressWarnings("null")
     @Override
     @Transactional(readOnly = true)
     public Map<String, Object> list(Long profileId, Long currentUserId, DateRangerFilter dateRange, int page) {
@@ -67,15 +66,14 @@ public class WaterServiceImpl extends BaseLogService<Water, Water> implements Wa
         List<Water> todayLogs = waterRepository.findByProfile_IdAndRecordedDateOrderByIdAsc(profileId, today);
         Integer todayTotal = todayLogs.isEmpty() ? null : todayLogs.stream().mapToInt(Water::getAmountMl).sum();
         LocalDate monthEnd = monthStart.withDayOfMonth(monthStart.lengthOfMonth());
-        List<Water> monthLogs = waterRepository.findByProfile_IdAndRecordedDateBetweenOrderByRecordedDateDesc(
-                profileId, monthStart, monthEnd);
+        List<Water> monthLogs = waterRepository.findByProfile_IdAndRecordedDateBetweenOrderByRecordedDateDesc(profileId,
+                monthStart, monthEnd);
         Map<LocalDate, Integer> monthDailyTotals = new TreeMap<>();
         monthLogs.forEach(log -> monthDailyTotals.merge(log.getRecordedDate(), log.getAmountMl(), Integer::sum));
         Integer monthAverage = monthDailyTotals.isEmpty() ? null
                 : (int) Math.round(monthDailyTotals.values().stream().mapToInt(Integer::intValue).average().orElse(0));
         Integer goal = profile.getWaterGoalMl();
-        Integer goalRate = todayTotal != null && goal != null && goal > 0
-                ? (int) Math.round(todayTotal * 100.0 / goal)
+        Integer goalRate = todayTotal != null && goal != null && goal > 0 ? (int) Math.round(todayTotal * 100.0 / goal)
                 : null;
         Water latest = waterRepository.findByProfile_IdOrderByRecordedDateDesc(profileId).stream()
                 .max(Comparator.comparing(Water::getRecordedDate)
@@ -118,7 +116,6 @@ public class WaterServiceImpl extends BaseLogService<Water, Water> implements Wa
     public Map<String, Object> chartData(Long profileId, Long currentUserId, DateRangerFilter dateRange) {
         validateDateRange(dateRange);
         List<Water> logs = getLogs(profileId, currentUserId, dateRange);
-        @SuppressWarnings("null")
         ChartDataResponse chart = chartDataBuilder.build(aggregateForChart(logs, dateRange), dateRange,
                 WaterChartPoint::getChartAmount);
         return Map.of("labels", chart.labels(), "values", chart.values(), "chartMode", chart.chartMode());

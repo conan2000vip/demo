@@ -44,11 +44,8 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
         List<AuthToken> otpTokens = new java.util.ArrayList<>(authTokenRepository
                 .findByUser_IdAndTokenTypeAndUsedFlgFalse(user.getId(), AuthToken.TokenType.EMAIL_VERIFICATION));
         otpTokens.addAll(authTokenRepository.findByUser_IdAndTokenTypeAndUsedFlgFalse(user.getId(), TOKEN_TYPE_OTP));
-        @SuppressWarnings("null")
-        AuthToken otpToken = otpTokens.stream()
-                .max(Comparator.comparing(AuthToken::getCreatedAt))
-                .orElseThrow(() -> new BusinessException(HttpStatus.BAD_REQUEST,
-                        "確認コードが正しくないか、すでに有効期限が切れています。新しいコードを再発行してください。"));
+        AuthToken otpToken = otpTokens.stream().max(Comparator.comparing(AuthToken::getCreatedAt)).orElseThrow(
+                () -> new BusinessException(HttpStatus.BAD_REQUEST, "確認コードが正しくないか、すでに有効期限が切れています。新しいコードを再発行してください。"));
         if (otpToken.getExpiresAt().isBefore(LocalDateTime.now())) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "確認コードの有効期限が切れています。新しいコードを再発行してください。");
         }
@@ -63,7 +60,6 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
         }
     }
 
-    @SuppressWarnings("null")
     @Override
     @Transactional
     public void resendCode(String email) {
@@ -72,21 +68,18 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
         User user = userRepository.findByEmail(normalizedEmail)
                 .orElseThrow(() -> new BusinessException(HttpStatus.BAD_REQUEST, "メールアドレスが見つかりません。"));
 
-        AuthToken.TokenType tokenType = (user.getEmailVerifiedAt() == null)
-                ? AuthToken.TokenType.EMAIL_VERIFICATION
+        AuthToken.TokenType tokenType = (user.getEmailVerifiedAt() == null) ? AuthToken.TokenType.EMAIL_VERIFICATION
                 : TOKEN_TYPE_OTP;
 
-        List<AuthToken> existingTokens = authTokenRepository
-                .findByUser_IdAndTokenTypeAndUsedFlgFalse(user.getId(), tokenType);
+        List<AuthToken> existingTokens = authTokenRepository.findByUser_IdAndTokenTypeAndUsedFlgFalse(user.getId(),
+                tokenType);
 
-        existingTokens.stream()
-                .max(Comparator.comparing(AuthToken::getCreatedAt))
-                .ifPresent(lastToken -> {
-                    long seconds = Duration.between(lastToken.getCreatedAt(), LocalDateTime.now()).getSeconds();
-                    if (seconds < RESEND_COOLDOWN_SECONDS) {
-                        throw new BusinessException(HttpStatus.TOO_MANY_REQUESTS, "しばらく時間をおいてから再度お試しください。");
-                    }
-                });
+        existingTokens.stream().max(Comparator.comparing(AuthToken::getCreatedAt)).ifPresent(lastToken -> {
+            long seconds = Duration.between(lastToken.getCreatedAt(), LocalDateTime.now()).getSeconds();
+            if (seconds < RESEND_COOLDOWN_SECONDS) {
+                throw new BusinessException(HttpStatus.TOO_MANY_REQUESTS, "しばらく時間をおいてから再度お試しください。");
+            }
+        });
 
         existingTokens.forEach(token -> {
             token.setUsedFlg(true);

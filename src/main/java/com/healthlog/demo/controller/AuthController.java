@@ -43,7 +43,7 @@ public class AuthController {
     private final RegisterService registerService;
     private final VerifyCodeService verifyCodeService;
     private final PasswordResetService passwordResetService;
-    private final ProfileService profileService; // Inject ProfileService để kết nối luồng Profile
+    private final ProfileService profileService;
 
     // 1. ログイン画面を表示し、ユーザーがメールアドレスとパスワードを入力できるフォームを準備する。
     @GetMapping("/login")
@@ -54,8 +54,7 @@ public class AuthController {
 
     // 2. ログイン入力を検証し、成功時はプロファイル存在チェックを行って画面を遷移する。
     @PostMapping("/login")
-    public String login(
-            @Valid @ModelAttribute("loginRequest") LoginRequest loginRequest, BindingResult bindingResult,
+    public String login(@Valid @ModelAttribute("loginRequest") LoginRequest loginRequest, BindingResult bindingResult,
             HttpServletRequest request, HttpServletResponse response, HttpSession session, Model model) {
 
         if (bindingResult.hasErrors()) {
@@ -95,9 +94,8 @@ public class AuthController {
 
     // 4. 登録入力を検証し、仮登録後にメール確認コードの入力画面へメールアドレスを引き継ぐ。
     @PostMapping("/register")
-    public String handleRegister(
-            @Valid @ModelAttribute("registerRequest") RegisterRequest request, BindingResult bindingResult,
-            HttpSession session, Model model, RedirectAttributes redirectAttributes) {
+    public String handleRegister(@Valid @ModelAttribute("registerRequest") RegisterRequest request,
+            BindingResult bindingResult, HttpSession session, Model model, RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             return "auth/register";
         }
@@ -116,8 +114,7 @@ public class AuthController {
 
     // 5. パスワード再設定依頼画面を表示し、確認コード送信用のメールアドレス入力フォームを準備する。
     @GetMapping("/forgot-password")
-    public String showForgotPasswordForm(
-            @RequestParam(value = "returnTo", required = false) String returnTo,
+    public String showForgotPasswordForm(@RequestParam(value = "returnTo", required = false) String returnTo,
             HttpSession session, Model model) {
         String safeReturnTo = normalizeReturnTo(returnTo);
         if (safeReturnTo != null) {
@@ -128,23 +125,21 @@ public class AuthController {
             session.removeAttribute("PASSWORD_RESET_PROFILE_ID");
         }
         model.addAttribute("passwordResetRequest", new PasswordResetRequest());
-        model.addAttribute("returnTo", safeReturnTo != null
-                ? safeReturnTo : session.getAttribute("PASSWORD_RESET_RETURN_TO"));
+        model.addAttribute("returnTo",
+                safeReturnTo != null ? safeReturnTo : session.getAttribute("PASSWORD_RESET_RETURN_TO"));
         return "auth/forgot-password";
     }
 
     // 6. メールアドレスを検証し、パスワード再設定用の確認コードを送信して確認画面へ遷移する。
     @PostMapping("/forgot-password")
-    public String handleForgotPassword(
-            @Valid @ModelAttribute("passwordResetRequest") PasswordResetRequest request,
+    public String handleForgotPassword(@Valid @ModelAttribute("passwordResetRequest") PasswordResetRequest request,
             BindingResult bindingResult, HttpSession session, Model model, RedirectAttributes redirectAttributes) {
         String returnTo = normalizeReturnTo(request.getReturnTo());
         if (returnTo != null) {
             session.setAttribute("PASSWORD_RESET_RETURN_TO", returnTo);
             storePinProfileId(session, returnTo);
         }
-        model.addAttribute("returnTo", returnTo != null
-                ? returnTo : session.getAttribute("PASSWORD_RESET_RETURN_TO"));
+        model.addAttribute("returnTo", returnTo != null ? returnTo : session.getAttribute("PASSWORD_RESET_RETURN_TO"));
         if (bindingResult.hasErrors()) {
             return "auth/forgot-password";
         }
@@ -162,8 +157,7 @@ public class AuthController {
     }
 
     private String normalizeReturnTo(String returnTo) {
-        if (returnTo == null || returnTo.isBlank()
-                || !returnTo.startsWith("/") || returnTo.startsWith("//")
+        if (returnTo == null || returnTo.isBlank() || !returnTo.startsWith("/") || returnTo.startsWith("//")
                 || returnTo.contains("\r") || returnTo.contains("\n")) {
             return null;
         }
@@ -171,9 +165,7 @@ public class AuthController {
     }
 
     private void storePinProfileId(HttpSession session, String returnTo) {
-        java.util.regex.Matcher matcher = java.util.regex.Pattern
-                .compile("^/profile/(\\d+)/edit$")
-                .matcher(returnTo);
+        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("^/profile/(\\d+)/edit$").matcher(returnTo);
         if (matcher.matches()) {
             session.setAttribute("PASSWORD_RESET_PROFILE_ID", Long.valueOf(matcher.group(1)));
         } else {
@@ -183,8 +175,8 @@ public class AuthController {
 
     // 7. 登録またはパスワード再設定で受け取ったメールアドレスをフォームに設定し、確認コード画面を表示する。
     @GetMapping("/verify-code")
-    public String showVerifyCodeForm(
-            @RequestParam(value = "email", required = false) String paramEmail, HttpSession session, Model model) {
+    public String showVerifyCodeForm(@RequestParam(value = "email", required = false) String paramEmail,
+            HttpSession session, Model model) {
         String email = (String) model.getAttribute("email");
         if (email == null || email.isBlank()) {
             email = paramEmail;
@@ -205,8 +197,7 @@ public class AuthController {
 
     // 8. 入力された確認コードを検証し、成功した場合は再設定対象のメールアドレスをセッションに保存する。
     @PostMapping("/verify-code")
-    public String handleVerifyCode(
-            @Valid @ModelAttribute("verifyCodeRequest") VerifyCodeRequest request,
+    public String handleVerifyCode(@Valid @ModelAttribute("verifyCodeRequest") VerifyCodeRequest request,
             BindingResult bindingResult, HttpSession session, Model model, RedirectAttributes redirectAttributes) {
         Boolean isResetFlow = (Boolean) session.getAttribute(SessionConstants.IS_RESET_FLOW);
         if (bindingResult.hasErrors()) {
@@ -255,8 +246,7 @@ public class AuthController {
     @PostMapping("/reset-password")
     public String handleResetPassword(
             @Valid @ModelAttribute("passwordResetConfirmRequest") PasswordResetConfirmRequest request,
-            BindingResult bindingResult,
-            @RequestParam(value = "email", required = false) String paramEmail,
+            BindingResult bindingResult, @RequestParam(value = "email", required = false) String paramEmail,
             HttpSession session, Model model, RedirectAttributes redirectAttributes) {
 
         String resetEmail = (String) session.getAttribute(SessionConstants.RESET_EMAIL);
