@@ -60,7 +60,6 @@ public class FeedbackService {
     }
 
     /** 重要度が高いカードを1件残し、同じ場合は新しいカードを優先する。 */
-    @SuppressWarnings("null")
     private List<FeedbackItem> pickTop(List<FeedbackItem> items) {
         return items.stream().max(Comparator.comparingInt((FeedbackItem i) -> i.getLevel().getPriority())
                 .thenComparing(FeedbackItem::getOccurredAt)).map(List::of).orElse(List.of());
@@ -68,9 +67,9 @@ public class FeedbackService {
 
     private FeedbackItem checkHealthRecordStreak(Long profileId) {
         LocalDate today = LocalDate.now(ZoneId.systemDefault());
-        HomeStreakService.StreakInfo streakInfo = homeStreakService.getCurrentStreakInfo(profileId, today)
-                .orElse(null);
-        if (streakInfo == null) return null;
+        HomeStreakService.StreakInfo streakInfo = homeStreakService.getCurrentStreakInfo(profileId, today).orElse(null);
+        if (streakInfo == null)
+            return null;
         int streak = streakInfo.days();
         for (int milestone : HEALTH_STREAK_MILESTONES) {
             if (streak == milestone)
@@ -89,10 +88,8 @@ public class FeedbackService {
     private FeedbackItem createStreakFeedback(int streak, LocalDate today, Long years) {
         if (years != null) {
             String yearLabel = years == 1 ? "1年" : years + "年";
-            return new FeedbackItem(FeedbackType.HEALTH_STREAK, FeedbackLevel.LV1,
-                    streak + "日間連続で健康記録を続けています！",
-                    yearLabel + "間、健康記録を続けることができました！\n本当に素晴らしい継続です！",
-                    today.atStartOfDay(), "trophy");
+            return new FeedbackItem(FeedbackType.HEALTH_STREAK, FeedbackLevel.LV1, streak + "日間連続で健康記録を続けています！",
+                    yearLabel + "間、健康記録を続けることができました！\n本当に素晴らしい継続です！", today.atStartOfDay(), "trophy");
         }
 
         String title;
@@ -130,7 +127,6 @@ public class FeedbackService {
                 "trophy");
     }
 
-    @SuppressWarnings("null")
     private List<FeedbackItem> sortByPriority(List<FeedbackItem> items) {
         return items.stream().sorted(Comparator.comparingInt((FeedbackItem item) -> item.getLevel().getPriority())
                 .reversed().thenComparing(FeedbackItem::getOccurredAt, Comparator.reverseOrder())).toList();

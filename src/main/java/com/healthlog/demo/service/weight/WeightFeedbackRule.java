@@ -154,7 +154,6 @@ public class WeightFeedbackRule {
                 "calendar-x");
     }
 
-    @SuppressWarnings("null")
     private List<Weight> latestPerDateDesc(List<Weight> logs) {
         Map<LocalDate, Weight> latestByDate = new HashMap<>();
         for (Weight weight : logs) {

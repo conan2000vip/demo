@@ -75,7 +75,6 @@ public class HomeSummaryChartServiceImpl implements HomeSummaryChartService {
     }
 
     /** values: そのまま / first・last: 値のある最初と最後 / diff: last - first */
-    @SuppressWarnings("null")
     private Map<String, Object> series(Map<String, Object> chartData) {
         List<?> values = (List<?>) chartData.get("values");
         BigDecimal first = null;

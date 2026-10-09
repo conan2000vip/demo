@@ -37,7 +37,8 @@
         <img th:src="@{/image/warning.png}" alt="" class="alert-icon" />
         <span th:text="${errorMessage}">エラーが発生しました</span>
       </div>
-      <form th:object="${profile}" th:action="${profile.id != null} ? @{/profile/{id}/edit(id=${profile.id})} : @{/profile/new}" method="post" class="profile-form">
+      <form th:object="${profile}" th:action="${profile.id != null} ? @{/profile/{id}/edit(id=${profile.id})} : @{/profile/new}" method="post"
+        class="profile-form">
         <input type="hidden" th:field="*{id}" />
         <input type="hidden" id="pinAction" name="pinAction" value="" />
         <input type="hidden" id="accountPassword" name="accountPassword" value="" />
@@ -129,7 +130,8 @@
                 OFFにすると、暗証番号なしで、ボタンを押すだけで画面が開きます。
               </p>
             </div>
-            <section th:if="${profile.pinEnabled and pinEditError != true}" id="pinSavedState" class="pin-setup-panel pin-saved-state" aria-labelledby="pinSetupTitle">
+            <section th:if="${profile.pinEnabled and pinEditError != true}" id="pinSavedState" class="pin-setup-panel pin-saved-state"
+              aria-labelledby="pinSetupTitle">
               <h3 id="pinSetupTitle">PINを設定</h3>
               <p>ご本人確認のための暗証番号（4桁）を設定します。</p>
               <div class="pin-save-success" th:if="${pinSaved}" id="pinSaveSuccess" role="status">
@@ -140,16 +142,15 @@
                 <strong>● ● ● ●</strong>
                 <span>暗証番号（4桁）が設定されています。</span>
               </div>
-              <p class="pin-action-error" th:if="${pinRemoveError}" role="alert">
-                現在の暗証番号が正しくありません。PINは解除されていません。
-              </p>
+
               <div class="pin-saved-actions">
                 <button type="button" class="btn btn--ghost btn--sm" onclick="beginPinChange()">
                   PINを変更
                 </button>
               </div>
             </section>
-            <section id="pinFields" class="pin-setup-panel pin-editor" th:classappend="${profile.pinEnabled and pinEditError != true} ? ' pin-editor--hidden' : ''" aria-labelledby="pinEditorTitle">
+            <section id="pinFields" class="pin-setup-panel pin-editor"
+              th:classappend="${profile.pinEnabled and pinEditError != true} ? ' pin-editor--hidden' : ''" aria-labelledby="pinEditorTitle">
               <h3 id="pinEditorTitle">PINを設定</h3>
               <p>ご本人確認のための暗証番号（4桁）を設定します。</p>
               <div class="pin-fields" data-pin-fields>
@@ -161,12 +162,13 @@
                       <path d="M12 14v3"></path>
                     </svg>
                   </span>
-                  <input id="currentPin" type="password" th:field="*{currentPin}" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" minlength="4" placeholder="現在の暗証番号" autocomplete="current-password" data-pin-input="current"
-                    aria-describedby="currentPinError" />
+                  <input id="currentPin" type="password" th:field="*{currentPin}" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" minlength="4"
+                    placeholder="現在の暗証番号" autocomplete="current-password" data-pin-input="current" aria-describedby="currentPinError" />
                   <span id="currentPinError" class="pin-field-error" role="alert"></span>
                 </div>
                 <div class="pin-input-row" id="newPinRow">
-                  <input id="pin" type="password" th:field="*{pin}" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" minlength="4" placeholder="新しいPIN（4桁）" autocomplete="new-password" data-pin-input="new" aria-describedby="pinError" />
+                  <input id="pin" type="password" th:field="*{pin}" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" minlength="4"
+                    placeholder="新しいPIN（4桁）" autocomplete="new-password" data-pin-input="new" aria-describedby="pinError" />
                   <button type="button" class="pin-visibility" data-pin-toggle="pin" aria-label="PINを表示">
                     <svg class="pin-eye pin-eye--open" viewBox="0 0 24 24" focusable="false">
                       <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path>
@@ -181,7 +183,8 @@
                   <span id="pinError" class="pin-field-error" role="alert"></span>
                 </div>
                 <div class="pin-input-row" id="pinConfirmationRow">
-                  <input id="pinConfirmation" type="password" th:field="*{pinConfirmation}" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" minlength="4" placeholder="PIN（確認）" autocomplete="new-password" data-pin-input="confirmation"
+                  <input id="pinConfirmation" type="password" th:field="*{pinConfirmation}" inputmode="numeric" pattern="[0-9]{4}" maxlength="4"
+                    minlength="4" placeholder="PIN（確認）" autocomplete="new-password" data-pin-input="confirmation"
                     aria-describedby="pinConfirmationError" />
                   <button type="button" class="pin-visibility" data-pin-toggle="pinConfirmation" aria-label="確認用PINを表示">
                     <svg class="pin-eye pin-eye--open" viewBox="0 0 24 24" focusable="false">
@@ -204,7 +207,8 @@
                 キャンセル
               </button>
             </section>
-            <div id="pinUnlockModal" class="pin-modal" hidden role="dialog" aria-modal="true" aria-labelledby="pinUnlockTitle">
+            <div id="pinUnlockModal" class="pin-modal" th:hidden="${pinRemoveError != true}" role="dialog" aria-modal="true"
+              aria-labelledby="pinUnlockTitle">
               <div class="pin-modal__backdrop" data-pin-modal-close></div>
               <div class="pin-modal__card profile-pin-unlock-card">
                 <button type="button" class="pin-modal__close" data-pin-modal-close aria-label="閉じる">
@@ -222,12 +226,17 @@
                     <p>PINロックを解除するには、現在の暗証番号を入力してください。</p>
                   </div>
                 </div>
-                <input id="unlockCurrentPin" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password" placeholder="現在の暗証番号" />
-                <p id="unlockPinError" class="pin-modal__error" role="alert"></p>
+                <div class="pin-digit-inputs" id="unlockPinDigits" role="group" aria-label="4桁のPIN">
+                  <input class="pin-digit-input" type="password" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="PIN 1桁目">
+                  <input class="pin-digit-input" type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="PIN 2桁目">
+                  <input class="pin-digit-input" type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="PIN 3桁目">
+                  <input class="pin-digit-input" type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="PIN 4桁目">
+                </div>
+                <input id="unlockCurrentPin" type="hidden">
+                <p id="unlockPinError" class="pin-modal__error" role="alert" th:text="${pinRemoveError == true} ? '現在の暗証番号が正しくありません。' : ''"></p>
                 <a class="pin-forgot-link" id="forgotPinButton" href="#">暗証番号を忘れた場合</a>
                 <div class="profile-pin-unlock-divider"></div>
                 <div class="profile-pin-unlock-footer">
-                  <button type="button" class="pin-back-button" data-pin-modal-close>戻る</button>
                   <button type="button" class="btn btn--primary btn--sm" id="confirmPinUnlock">ロックを解除</button>
                 </div>
               </div>

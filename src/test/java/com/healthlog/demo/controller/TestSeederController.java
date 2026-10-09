@@ -11,6 +11,8 @@ import com.healthlog.demo.repository.StepRepository;
 import com.healthlog.demo.repository.WaterRepository;
 import com.healthlog.demo.repository.WeightRepository;
 
+import jakarta.persistence.EntityManager;
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
@@ -36,11 +38,10 @@ public class TestSeederController {
     private final SleepRepository sleepRepository;
     private final WaterRepository waterRepository;
     private final StepRepository stepRepository;
+    private final EntityManager em;
 
-    /**
-     * API tạo dữ liệu Streak tự động Ví dụ: GET
-     * /api/test-seeder/streak?profileId=53&scenario=7_DAYS
-     */
+    // API: /api/test-seeder/streak?profileId=53&scenario=7_DAYS
+    // 自動生成された連続データを削除してから、指定された日数の連続データを作成する。RESET_MISSING_* シナリオでは、4日目の記録を欠落させる。
     @GetMapping("/streak")
     @Transactional
     public ResponseEntity<Map<String, Object>> generateStreakData(@RequestParam Long profileId,
@@ -67,15 +68,30 @@ public class TestSeederController {
         // シナリオに応じて日数を計算する。
         int days = switch (scenario) {
         case "1_DAY" -> 1;
+        case "2_DAYS" -> 2;
+        case "3_DAYS" -> 3;
+        case "4_DAYS" -> 4;
+        case "5_DAYS" -> 5;
         case "6_DAYS" -> 6;
         case "7_DAYS" -> 7;
+        case "8_DAYS" -> 8;
+        case "9_DAYS" -> 9;
+        case "10_DAYS" -> 10;
+        case "12_DAYS" -> 12;
+        case "13_DAYS" -> 13;
         case "14_DAYS" -> 14;
+        case "15_DAYS" -> 15;
+        case "20_DAYS" -> 20;
+        case "21_DAYS" -> 21;
         case "30_DAYS" -> 30;
         case "60_DAYS" -> 60;
         case "90_DAYS" -> 90;
         case "100_DAYS" -> 100;
         case "180_DAYS" -> 180;
+        case "366_DAYS" -> 366;
+        case "367_DAYS" -> 367;
         case "730_DAYS" -> 730;
+        case "731_DAYS" -> 731;
         case "1095_DAYS" -> 1095;
         case "500_DAYS" -> 500;
         case "1000_DAYS" -> 1000;
@@ -98,9 +114,7 @@ public class TestSeederController {
             // RESETのテスト用に4日目の記録を欠落させる。
             boolean isResetDay = (i == 3);
 
-            // =========================================================
-            // A. Weight Log
-            // =========================================================
+            // 条件に応じてWeight Logを作成する。RESETのテスト用に4日目の記録を欠落させる。
             if (!("RESET_MISSING_WEIGHT".equals(scenario) && isResetDay)) {
                 Weight weight = new Weight();
                 weight.setProfile(profile);
@@ -112,9 +126,7 @@ public class TestSeederController {
                 weightRepository.save(weight);
             }
 
-            // =========================================================
-            // B. Sleep Log
-            // =========================================================
+            // 条件に応じてSleep Logを作成する。RESETのテスト用に4日目の記録を欠落させる。
             if (!("RESET_MISSING_SLEEP".equals(scenario) && isResetDay)) {
                 Sleep sleep = new Sleep();
                 sleep.setProfile(profile);
@@ -127,18 +139,14 @@ public class TestSeederController {
                 sleepRepository.save(sleep);
             }
 
-            // =========================================================
-            // C. Water Log
-            // =========================================================
+            // 条件に応じてWater Logを作成する。RESETのテスト用に4日目の記録を欠落させる。
             if (!("RESET_MISSING_WATER".equals(scenario) && isResetDay)) {
                 createWaterLog(profile, currentDate, LocalTime.of(8, 0), 500);
                 createWaterLog(profile, currentDate, LocalTime.of(12, 0), 500);
                 createWaterLog(profile, currentDate, LocalTime.of(18, 0), 500);
             }
 
-            // =========================================================
-            // D. Step Log
-            // =========================================================
+            // ステップログは、RESETのテスト用に4日目の記録を欠落させる。
             if (!("RESET_MISSING_STEP".equals(scenario) && isResetDay)) {
                 Step step = new Step();
                 step.setProfile(profile);
@@ -147,11 +155,15 @@ public class TestSeederController {
                 step.setMemo("STREAK TEST SEEDER");
                 stepRepository.save(step);
             }
+
+            // へルパーメソッドで、created_atを指定した日付に更新する。
+            backdate("weight_logs", profileId, currentDate);
+            backdate("sleep_logs", profileId, currentDate);
+            backdate("water_logs", profileId, currentDate);
+            backdate("step_logs", profileId, currentDate);
         }
 
-        // =============================================================
-        // Response
-        // =============================================================
+        // レスポンスを返す。
         Map<String, Object> response = new HashMap<>();
         response.put("status", "SUCCESS");
         response.put("message", "Đã khởi tạo dữ liệu test thành công!");
@@ -163,9 +175,7 @@ public class TestSeederController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Water は1日に複数レコード登録可能
-     */
+    // へルパーメソッド: Water Logを作成する
     private void createWaterLog(Profile profile, LocalDate date, LocalTime time, int amount) {
 
         Water water = new Water();
@@ -176,5 +186,13 @@ public class TestSeederController {
         water.setAmountMl(amount);
         water.setMemo("STREAK TEST SEEDER");
         waterRepository.save(water);
+    }
+
+    // 処理の最後に、created_atを指定した日付に更新するためのヘルパーメソッド
+    private void backdate(String table, Long profileId, LocalDate date) {
+        em.flush();
+        em.createNativeQuery("UPDATE " + table + " SET created_at = :ts WHERE profile_id = :pid AND recorded_date = :d")
+                .setParameter("ts", date.atTime(12, 0)).setParameter("pid", profileId).setParameter("d", date)
+                .executeUpdate();
     }
 }

@@ -41,7 +41,6 @@ public interface WeightRepository extends BaseLogRepository<Weight> {
             GROUP BY DATE(w.created_at)
             ORDER BY DATE(w.created_at) DESC
             """, nativeQuery = true)
-    List<LocalDateTime> findCompleteStreakDays(
-            @Param("profileId") Long profileId,
+    List<LocalDateTime> findCompleteStreakDays(@Param("profileId") Long profileId,
             @Param("beforeDate") LocalDateTime beforeDate);
 }

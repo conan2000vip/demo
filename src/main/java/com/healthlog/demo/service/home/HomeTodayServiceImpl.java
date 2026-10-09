@@ -77,7 +77,6 @@ public class HomeTodayServiceImpl implements HomeTodayService {
         return t;
     }
 
-    @SuppressWarnings({ "unchecked", "null" })
     private void applyWeight(Map<String, Object> today, Profile profile, Long profileId, Long userId,
             DateRangerFilter range) {
         try {
@@ -158,7 +157,6 @@ public class HomeTodayServiceImpl implements HomeTodayService {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void applyWater(Map<String, Object> today, Profile profile, Long profileId, Long userId,
             DateRangerFilter range) {
         try {
@@ -191,7 +189,6 @@ public class HomeTodayServiceImpl implements HomeTodayService {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void applyStep(Map<String, Object> today, Profile profile, Long profileId, Long userId,
             DateRangerFilter range) {
         try {
