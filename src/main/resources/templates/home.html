@@ -17,7 +17,8 @@
 
   <main class="home">
     <section class="profile-card">
-      <img class="profile-card__avatar" th:src="@{/image/avatar/{name}.png(name=${currentProfile.avatar ?: 'avatar_01'})}" th:alt="${currentProfile.name}" />
+      <img class="profile-card__avatar" th:src="@{/image/avatar/{name}.png(name=${currentProfile.avatar ?: 'avatar_01'})}"
+        th:alt="${currentProfile.name}" />
       <div class="profile-card__info">
         <span class="profile-card__title-row">
           <span class="profile-card__label">現在のプロファイル</span>
@@ -29,7 +30,8 @@
         </h1>
         <div class="profile-card__facts">
           <span>身長：<span th:text="${currentProfile.height != null ? currentProfile.height : '-'}">165</span>cm</span>
-          <span>生年月日：<span th:text="${currentProfile.birthDate != null ? #temporals.format(currentProfile.birthDate, 'yyyy/MM/dd') : '-'}">1988/05/12</span></span>
+          <span>生年月日：<span
+              th:text="${currentProfile.birthDate != null ? #temporals.format(currentProfile.birthDate, 'yyyy/MM/dd') : '-'}">1988/05/12</span></span>
           <span th:if="${currentProfile.gender != null and !#strings.isEmpty(#strings.trim(currentProfile.gender))}">
             性別：<span th:text="${currentProfile.gender}">女性</span>
           </span>
@@ -44,7 +46,8 @@
           <img th:src="@{/image/scales.png}" alt="" class="goal-chip__icon" />
           <div>
             <p class="goal-chip__label">目標体重</p>
-            <p class="goal-chip__value" th:text="${goals['targetWeight'] != null ? #numbers.formatDecimal(goals['targetWeight'], 1, 1) + ' kg' : '-'}">
+            <p class="goal-chip__value"
+              th:text="${goals['targetWeight'] != null ? #numbers.formatDecimal(goals['targetWeight'], 1, 1) + ' kg' : '-'}">
               55.0 kg
             </p>
           </div>
@@ -77,7 +80,8 @@
       </div>
     </section>
     <section class="stat-grid">
-      <article th:if="${canViewWeight == true}" class="stat-card stat-card--weight stat-card--clickable" th:data-href="@{/profile/{profileId}/weight(profileId=${currentProfile.id})}" role="link" tabindex="0">
+      <article th:if="${canViewWeight == true}" class="stat-card stat-card--weight stat-card--clickable"
+        th:data-href="@{/profile/{profileId}/weight(profileId=${currentProfile.id})}" role="link" tabindex="0">
         <div class="stat-card__head">
           <div class="stat-card__title">
             <img th:src="@{/image/scales.png}" alt="" class="stat-card__icon" />
@@ -88,14 +92,17 @@
         <p class="stat-card__value">
           <span th:text="${today.weightKg != null ? #numbers.formatDecimal(today.weightKg, 1, 1) : '-'}">59.0</span>
           <span th:if="${today.weightKg != null}"> kg</span>
-          <span th:if="${today.bmi != null}" class="badge" th:classappend="${'badge--' + (today.bmiStatusCode ?: 'normal')}" th:text="${'BMI ' + #numbers.formatDecimal(today.bmi, 1, 1)}">BMI 21.7</span>
+          <span th:if="${today.bmi != null}" class="badge" th:classappend="${'badge--' + (today.bmiStatusCode ?: 'normal')}"
+            th:text="${'BMI ' + #numbers.formatDecimal(today.bmi, 1, 1)}">BMI 21.7</span>
         </p>
-        <p class="stat-card__goal-status" th:classappend="${today.weightGoalStatus == 'ACHIEVED' ? 'is-achieved' : (today.weightGoalStatus == 'NO_RECORD' or today.weightGoalStatus == 'NO_GOAL' ? 'is-empty' : 'is-progress')}"
+        <p class="stat-card__goal-status"
+          th:classappend="${today.weightGoalStatus == 'ACHIEVED' ? 'is-achieved' : (today.weightGoalStatus == 'NO_RECORD' or today.weightGoalStatus == 'NO_GOAL' ? 'is-empty' : 'is-progress')}"
           th:text="${today.weightGoalText}">
           目標体重を達成しました
         </p>
       </article>
-      <article th:if="${canViewSleep == true}" class="stat-card stat-card--sleep stat-card--clickable" th:data-href="@{/profile/{profileId}/sleep(profileId=${currentProfile.id})}" role="link" tabindex="0">
+      <article th:if="${canViewSleep == true}" class="stat-card stat-card--sleep stat-card--clickable"
+        th:data-href="@{/profile/{profileId}/sleep(profileId=${currentProfile.id})}" role="link" tabindex="0">
         <div class="stat-card__head">
           <div class="stat-card__title">
             <img th:src="@{/image/sleep.png}" alt="" class="stat-card__icon" />
@@ -107,12 +114,14 @@
           <span th:text="${today.sleepHour}">6</span>時間 <span th:text="${today.sleepMinute != null ? today.sleepMinute : 0}">50</span>分
         </p>
         <p class="stat-card__value" th:if="${today.sleepHour == null}">-</p>
-        <p class="stat-card__goal-status" th:classappend="${today.sleepGoalStatus == 'ACHIEVED' ? 'is-achieved' : (today.sleepGoalStatus == 'NO_RECORD' or today.sleepGoalStatus == 'NO_GOAL' ? 'is-empty' : 'is-progress')}"
+        <p class="stat-card__goal-status"
+          th:classappend="${today.sleepGoalStatus == 'ACHIEVED' ? 'is-achieved' : (today.sleepGoalStatus == 'NO_RECORD' or today.sleepGoalStatus == 'NO_GOAL' ? 'is-empty' : 'is-progress')}"
           th:text="${today.sleepGoalText}">
           睡眠目標を達成しました
         </p>
       </article>
-      <article class="stat-card stat-card--water stat-card--clickable" th:data-href="@{/profile/{profileId}/water(profileId=${currentProfile.id})}" role="link" tabindex="0">
+      <article class="stat-card stat-card--water stat-card--clickable" th:data-href="@{/profile/{profileId}/water(profileId=${currentProfile.id})}"
+        role="link" tabindex="0">
         <div class="stat-card__head">
           <div class="stat-card__title">
             <img th:src="@{/image/water.png}" alt="" class="stat-card__icon" />
@@ -127,12 +136,14 @@
         <div class="progress-bar" th:if="${today.waterGoalStatus != 'NO_RECORD' and today.waterGoalStatus != 'NO_GOAL'}">
           <div class="progress-bar__fill" th:style="${'width:' + (today.waterPercent > 100 ? 100 : today.waterPercent) + '%'}"></div>
         </div>
-        <p class="stat-card__goal-status" th:classappend="${today.waterGoalStatus == 'ACHIEVED' ? 'is-achieved' : (today.waterGoalStatus == 'NO_RECORD' or today.waterGoalStatus == 'NO_GOAL' ? 'is-empty' : 'is-progress')}"
+        <p class="stat-card__goal-status"
+          th:classappend="${today.waterGoalStatus == 'ACHIEVED' ? 'is-achieved' : (today.waterGoalStatus == 'NO_RECORD' or today.waterGoalStatus == 'NO_GOAL' ? 'is-empty' : 'is-progress')}"
           th:text="${today.waterGoalText}">
           水分目標を達成しました
         </p>
       </article>
-      <article class="stat-card stat-card--step stat-card--clickable" th:data-href="@{/profile/{profileId}/step(profileId=${currentProfile.id})}" role="link" tabindex="0">
+      <article class="stat-card stat-card--step stat-card--clickable" th:data-href="@{/profile/{profileId}/step(profileId=${currentProfile.id})}"
+        role="link" tabindex="0">
         <div class="stat-card__head">
           <div class="stat-card__title">
             <img th:src="@{/image/footstep.png}" alt="" class="stat-card__icon" />
@@ -145,15 +156,17 @@
           <span th:if="${today.stepCount != null}"> 歩</span>
         </p>
         <div class="progress-bar" th:if="${today.stepGoalStatus != 'NO_RECORD' and today.stepGoalStatus != 'NO_GOAL'}">
-          <div class="progress-bar__fill progress-bar__fill--green" th:style="${'width:' + (today.stepPercent > 100 ? 100 : today.stepPercent) + '%'}"></div>
+          <div class="progress-bar__fill progress-bar__fill--green"
+            th:style="${'width:' + (today.stepPercent > 100 ? 100 : today.stepPercent) + '%'}"></div>
         </div>
-        <p class="stat-card__goal-status" th:classappend="${today.stepGoalStatus == 'ACHIEVED' ? 'is-achieved' : (today.stepGoalStatus == 'NO_RECORD' or today.stepGoalStatus == 'NO_GOAL' ? 'is-empty' : 'is-progress')}"
+        <p class="stat-card__goal-status"
+          th:classappend="${today.stepGoalStatus == 'ACHIEVED' ? 'is-achieved' : (today.stepGoalStatus == 'NO_RECORD' or today.stepGoalStatus == 'NO_GOAL' ? 'is-empty' : 'is-progress')}"
           th:text="${today.stepGoalText}">
           歩数目標を達成しました
         </p>
       </article>
     </section>
-    <section class="home-integrated-chart-section">
+    <section id="homeIntegratedChartSection" class="home-integrated-chart-section">
       <div class="home-integrated-chart-header">
         <div class="home-integrated-chart-title-group">
           <h2 class="home-integrated-chart-title">
@@ -167,7 +180,8 @@
                             actionUrl=@{/profile/{profileId}/home(profileId=${currentProfile.id})},
                             clearUrl=@{/profile/{profileId}/home(profileId=${currentProfile.id})},
                             filterStartDate=${filterStartDate},
-                            filterEndDate=${filterEndDate})}"></div>
+                            filterEndDate=${filterEndDate})}">
+        </div>
       </div>
 
       <hr class="home-integrated-chart-divider" />
@@ -183,7 +197,15 @@
           <div class="home-integrated-chart-legend" id="homeIntegratedChartLegend"></div>
         </div>
         <div class="home-integrated-chart-canvas-wrapper">
-          <canvas id="homeIntegratedChartCanvas" th:data-profile-id="${currentProfile.id}" th:data-from="${chartFrom}" th:data-to="${chartTo}" aria-label="体重、睡眠、水分、歩数の統合グラフ"></canvas>
+          <canvas id="homeIntegratedChartCanvas" th:data-profile-id="${currentProfile.id}" th:data-from="${chartFrom}" th:data-to="${chartTo}"
+            aria-label="体重、睡眠、水分、歩数の統合グラフ">
+          </canvas>
+
+          <!-- Empty State -->
+          <div id="homeIntegratedChartEmpty" class="chart-empty-state" style="display: none;">
+            <div id="chartEmptyIcon" class="chart-empty-state__icon"></div>
+            <p id="chartEmptyTitle" class="chart-empty-state__title"></p>
+          </div>
         </div>
       </div>
       <template id="chartLegendItemTemplate">
@@ -218,12 +240,14 @@
       </div>
 
       <div class="family-card__grid" th:if="${!#lists.isEmpty(familyMembers)}">
-        <article class="family-member stat-card--clickable" th:each="member : ${familyMembers}" th:classappend="${member.status == 'OK' ? 'is-ok' : (member.status == 'WARN' ? 'is-warn' : 'is-danger')}"
+        <article class="family-member stat-card--clickable" th:each="member : ${familyMembers}"
+          th:classappend="${member.status == 'OK' ? 'is-ok' : (member.status == 'WARN' ? 'is-warn' : 'is-danger')}"
           th:data-href="@{/profile/{profileId}/home(profileId=${member.id})}" role="link" tabindex="0">
           <div class="family-member__identity">
             <p class="family-member__name" th:text="${member.name}">父</p>
             <span class="family-member__age">
-              （<span th:if="${member.isPrimary}">本人</span><span th:unless="${member.isPrimary}" th:text="${member.relationship ?: ''}">父</span><span th:if="${member.age != null}" th:text="'・' + ${member.age} + '歳'">・58歳</span>）
+              （<span th:if="${member.isPrimary}">本人</span><span th:unless="${member.isPrimary}" th:text="${member.relationship ?: ''}">父</span><span
+                th:if="${member.age != null}" th:text="'・' + ${member.age} + '歳'">・58歳</span>）
             </span>
           </div>
 

@@ -49,7 +49,8 @@
           <span class="summary-card__value">
             <span th:text="${stats?.latest ?: '--'}"></span> ml
           </span>
-          <span class="summary-card__sub" th:if="${stats?.latestDate != null}" th:text="'最終記録：' + ${#temporals.format(stats.latestDate, 'yyyy/MM/dd')}"></span>
+          <span class="summary-card__sub" th:if="${stats?.latestDate != null}"
+            th:text="'最終記録：' + ${#temporals.format(stats.latestDate, 'yyyy/MM/dd')}"></span>
         </div>
 
         <div class="summary-card">
@@ -57,7 +58,8 @@
           <span class="summary-card__value">
             <span th:text="${stats?.todayTotal ?: '--'}"></span> ml
           </span>
-          <span class="summary-card__sub" th:if="${stats?.todayDate != null}" th:text="${#temporals.format(stats.todayDate, 'yyyy/MM/dd')} + ' 時点'"></span>
+          <span class="summary-card__sub" th:if="${stats?.todayDate != null}"
+            th:text="${#temporals.format(stats.todayDate, 'yyyy/MM/dd')} + ' 時点'"></span>
         </div>
 
         <div class="summary-card">
@@ -117,16 +119,19 @@
                 <td class="water-table__amount">
                   <span th:text="${record.amountMl}">250</span>ml
                 </td>
-                <td class="water-table__memo memo-cell" th:text="${record.memo != null ? record.memo : ''}" th:attr="data-full-memo=${record.memo != null ? record.memo : ''}"></td>
+                <td class="water-table__memo memo-cell" th:text="${record.memo != null ? record.memo : ''}"
+                  th:attr="data-full-memo=${record.memo != null ? record.memo : ''}"></td>
                 <td class="water-table__actions">
-                  <button type="button" class="icon-btn edit-btn" aria-label="編集" th:data-id="${record.id}" th:data-date="${record.recordedDate}" th:data-drink-type="${record.drinkType}" th:data-amount="${record.amountMl}"
-                    th:data-time="${record.recordedTime}" th:data-memo="${record.memo}">
+                  <button type="button" class="icon-btn edit-btn" aria-label="編集" th:data-id="${record.id}" th:data-date="${record.recordedDate}"
+                    th:data-drink-type="${record.drinkType}" th:data-amount="${record.amountMl}" th:data-time="${record.recordedTime}"
+                    th:data-memo="${record.memo}">
                     <img th:src="@{/image/edit.png}" alt="編集" class="icon-btn-img" />
                   </button>
                   <button type="submit" class="icon-btn icon-btn--danger" aria-label="削除" th:form="'deleteForm-' + ${record.id}">
                     <img th:src="@{/image/delete.png}" alt="削除" class="icon-btn-img" />
                   </button>
-                  <form class="delete-form" method="post" th:id="'deleteForm-' + ${record.id}" th:action="@{/profile/{profileId}/water/{id}/delete(profileId=${profileId}, id=${record.id})}"
+                  <form class="delete-form" method="post" th:id="'deleteForm-' + ${record.id}"
+                    th:action="@{/profile/{profileId}/water/{id}/delete(profileId=${profileId}, id=${record.id})}"
                     th:attr="data-confirm-message='「' + ${record.recordedDate} + '」の水分記録を削除しますか？&#10;この操作は取り消せません。'">
                   </form>
                 </td>
@@ -140,7 +145,7 @@
                         ${currentPage}, ${totalPages}, ${hasPrevious}, ${hasNext})}">
         </div>
         <div class="empty-state" th:if="${#lists.isEmpty(logs) and !hasAnyLog}">
-          <i data-lucide="droplets"></i>
+          <img src="/image/water.png" alt="" class="water-page__icon-img">
           <p>まだ水分が記録されていません</p>
           <button type="button" class="btn btn--primary" id="openAddModalBtnEmpty">
             <i data-lucide="plus"></i>最初の記録をつける
