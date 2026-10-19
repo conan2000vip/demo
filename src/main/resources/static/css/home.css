@@ -892,21 +892,21 @@
 .streak-view-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 9px 16px;
-  border: 1px solid #f3d27a;
-  border-radius: 999px;
-  background: #fff8e6;
-  color: #8a5a00;
+  align-self: stretch;
+  gap: 10px;
+  padding: 14px 18px;
+  background: var(--wp-surface);
+  border: 1px solid var(--wp-border);
+  border-radius: 14px;
+  box-shadow: var(--wp-shadow);
+  color: var(--wp-text);
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
   transition:
-    background 0.15s ease,
-    border-color 0.15s ease,
-    transform 0.15s ease,
-    box-shadow 0.15s ease;
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .streak-view-btn__arrow {
@@ -916,10 +916,10 @@
 }
 
 .streak-view-btn:hover {
-  background: #fff1c7;
-  border-color: #e8bf54;
-  box-shadow: 0 4px 12px rgba(180, 130, 30, 0.12);
-  transform: translateY(-1px);
+  background: var(--wp-surface);
+  border-color: var(--wp-border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
 }
 
 .streak-view-btn:active {
@@ -927,12 +927,64 @@
 }
 
 .streak-view-btn__icon {
-  font-size: 16px;
+  display: inline-block;
+  font-size: 20px;
   line-height: 1;
+  transform-origin: 50% 90%;
+  animation: streakFlameFlicker 1.6s ease-in-out infinite;
+}
+
+@keyframes streakFlameFlicker {
+
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.35));
+  }
+
+  20% {
+    transform: scale(1.08, 1.14) rotate(-4deg);
+    filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.6));
+  }
+
+  40% {
+    transform: scale(0.96, 1.04) rotate(3deg);
+    filter: drop-shadow(0 0 3px rgba(245, 158, 11, 0.4));
+  }
+
+  60% {
+    transform: scale(1.06, 1.12) rotate(-2deg);
+    filter: drop-shadow(0 0 7px rgba(245, 158, 11, 0.65));
+  }
+
+  80% {
+    transform: scale(0.98, 1.02) rotate(2deg);
+    filter: drop-shadow(0 0 3px rgba(245, 158, 11, 0.4));
+  }
 }
 
 .streak-view-btn__text {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-right: auto;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--wp-text-muted);
+}
+
+.streak-view-btn__text strong {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--wp-text);
+}
+
+.streak-view-btn__arrow {
+  font-size: 12px;
+  font-weight: 600;
   line-height: 1;
+  color: var(--wp-primary-dark);
 }
 
 .streak-roadmap {
@@ -1403,10 +1455,8 @@
   }
 
   .streak-view-btn {
-    flex: 0 0 auto;
-    width: auto;
-    padding: 8px 10px;
-    font-size: 12px;
+    padding: 12px 14px;
+    font-size: 13px;
   }
 
   .streak-view-btn__icon,

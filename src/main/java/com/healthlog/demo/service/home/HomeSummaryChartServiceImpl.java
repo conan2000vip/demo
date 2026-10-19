@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
 
@@ -47,6 +49,7 @@ public class HomeSummaryChartServiceImpl implements HomeSummaryChartService {
         result.put("sleep", series(sleep));
         result.put("water", series(water));
         result.put("step", series(step));
+        result.put("hasEverLogged", hasEverLogged(profileId, currentUserId, charts));
         return result;
     }
 
@@ -94,5 +97,19 @@ public class HomeSummaryChartServiceImpl implements HomeSummaryChartService {
         s.put("last", last);
         s.put("diff", first != null ? last.subtract(first) : null);
         return s;
+    }
+
+    /** 選択期間に値があればtrue。なければ全期間を確認する。 */
+    private boolean hasEverLogged(Long profileId, Long currentUserId, List<Map<String, Object>> charts) {
+        if (charts.stream().anyMatch(this::hasAnyValue)) {
+            return true;
+        }
+        DateRangerFilter allTime = new DateRangerFilter(LocalDate.of(2000, 1, 1), LocalDate.now());
+        return Stream.of(Category.weight, Category.sleep, Category.water, Category.step)
+                .anyMatch(category -> hasAnyValue(chartOrEmpty(profileId, currentUserId, allTime, category)));
+    }
+
+    private boolean hasAnyValue(Map<String, Object> chart) {
+        return chart.get("values") instanceof List<?> values && values.stream().anyMatch(Objects::nonNull);
     }
 }

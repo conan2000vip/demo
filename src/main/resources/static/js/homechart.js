@@ -531,60 +531,48 @@
 
     const hasData = SERIES.some((series) => {
       const values = data?.[series.key]?.values;
-
-      return Array.isArray(values) &&
-        values.some((value) =>
-          value !== null &&
-          value !== undefined &&
-          value !== "" &&
-          Number.isFinite(Number(value))
-        );
+      return (
+        Array.isArray(values) &&
+        values.some(
+          (value) =>
+            value !== null && value !== undefined && value !== "" && Number.isFinite(Number(value)),
+        )
+      );
     });
 
-    // データがある場合
     if (hasData) {
       canvas.style.display = "block";
       emptyContainer.style.display = "none";
       return false;
     }
 
-    // データがない場合
     chartInstance?.destroy();
     chartInstance = null;
-
     canvas.style.display = "none";
     emptyContainer.style.display = "flex";
 
-    // 過去に一度でも記録したことがあるか
-    const hasEverLogged =
-      data?.hasEverLogged === true ||
-      data?.hasEverLogged === "true";
+    const hasEverLogged = [true, "true", 1, "1"].includes(data?.hasEverLogged);
+    let state;
+    if (!hasEverLogged) {
+      state = { title: "まだ記録がありません", icon: "chart-column" };
+    } else if (isDefaultRange(canvas)) {
+      state = { title: "最近7日間の記録がありません", icon: "calendar-clock" };
+    } else {
+      state = { title: "選択した期間にデータがありません", icon: "calendar-x-2" };
+    }
+    emptyTitle.textContent = state.title;
 
-    // 2つのケースでメッセージを切り替える
-    emptyTitle.textContent = hasEverLogged
-      ? "選択した期間にデータがありません"
-      : "この期間のデータはまだありません";
-
-    // アイコンを設定
     emptyIcon.replaceChildren();
     const icon = document.createElement("i");
-    icon.setAttribute(
-      "data-lucide",
-      hasEverLogged ? "calendar-x-2" : "chart-column"
-    );
+    icon.setAttribute("data-lucide", state.icon);
     emptyIcon.appendChild(icon);
-
-    if (window.lucide?.createIcons) {
-      window.lucide.createIcons({ root: emptyIcon });
-    }
-
-    console.log("[HomeChart] Empty state:", {
-      hasData,
-      hasEverLogged,
-      title: emptyTitle.textContent,
-      responseHasEverLogged: data?.hasEverLogged,
-    });
+    window.lucide?.createIcons?.({ root: emptyIcon });
 
     return true;
+  }
+
+  function isDefaultRange(canvas) {
+    const defaultRange = getQuickRange("1W");
+    return canvas.dataset.from === defaultRange.from && canvas.dataset.to === defaultRange.to;
   }
 })();

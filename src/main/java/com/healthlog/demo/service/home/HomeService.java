@@ -3,7 +3,5 @@ package com.healthlog.demo.service.home;
 import java.util.Map;
 
 public interface HomeService {
-
-    Map<String, Object> getHomeData(Long profileId, Long currentUserId);
-
+    Map<String, Object> getHomeData(Long targetProfileId, Long currentUserId, Long activeProfileId);
 }

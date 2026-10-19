@@ -29,6 +29,7 @@ public class HomeController {
     private final CurrentUserResolver currentUserResolver;
     private final HomeService homeService;
     private final HomeSummaryChartService homeSummaryChartService;
+
     @GetMapping
     public String showHomePage(@PathVariable Long profileId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -38,8 +39,12 @@ public class HomeController {
         User user = currentUserResolver.resolve(session);
         if (user == null)
             return "redirect:/auth/login";
+        Long activeProfileId = (Long) session.getAttribute("activeProfileId");
+        if (activeProfileId == null) {
+            activeProfileId = profileId;
+        }
 
-        Map<String, Object> homeData = homeService.getHomeData(profileId, user.getId());
+        Map<String, Object> homeData = homeService.getHomeData(profileId, user.getId(), activeProfileId);
         homeData.forEach(model::addAttribute);
         model.addAttribute("profileId", profileId);
         model.addAttribute("filterStartDate", startDate);

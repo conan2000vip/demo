@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" />
   <link rel="stylesheet" th:href="@{/css/common.css}" />
   <link rel="stylesheet" th:href="@{/css/home.css}" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.462.0/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.462.0/dist/umd/lucide.min.js"></script>
 </head>
 
 <body>
@@ -166,6 +166,14 @@
         </p>
       </article>
     </section>
+
+    <button type="button" id="streakViewButton" class="streak-view-btn" th:data-has-previous-streak="${hasPreviousStreak}">
+      <span class="streak-view-btn__icon">🔥</span>
+      <span class="streak-view-btn__text">現在の連続記録： <strong th:text="${currentStreak}" th:data-streak="${currentStreak}">0</strong>
+      </span>
+      <span class="streak-view-btn__arrow">›</span>
+    </button>
+
     <section id="homeIntegratedChartSection" class="home-integrated-chart-section">
       <div class="home-integrated-chart-header">
         <div class="home-integrated-chart-title-group">
@@ -218,12 +226,6 @@
     <section class="feedback-panel">
       <div class="feedback-panel__header">
         <h2><img th:src="@{/image/shield.png}" alt="" class="icon-sm" />健康フィードバック（重要度の高い順に表示）</h2>
-        <button type="button" id="streakViewButton" class="streak-view-btn" th:data-has-previous-streak="${hasPreviousStreak}">
-          <span class="streak-view-btn__icon">🔥</span>
-          <span class="streak-view-btn__text">現在の連続記録： <strong th:text="${currentStreak}" th:data-streak="${currentStreak}">0</strong>
-          </span>
-          <span class="streak-view-btn__arrow">›</span>
-        </button>
       </div>
       <div th:replace="~{commons/data-controls :: feedbackList(feedbackList=${feedbackList})}"></div>
       <p class="empty-text" th:if="${#lists.isEmpty(feedbackList)}">現在フィードバックはありません。</p>

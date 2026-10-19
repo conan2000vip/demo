@@ -39,12 +39,13 @@ public class HomeTodayServiceImpl implements HomeTodayService {
     private final StepService stepService;
 
     @Override
-    public Map<String, Object> buildToday(Long profileId, Long currentUserId) {
+    public Map<String, Object> buildToday(Long profileId, Long currentUserId, Long activeProfileId) {
         LocalDate todayDate = LocalDate.now();
         DateRangerFilter range = new DateRangerFilter(todayDate, todayDate);
         Profile profile = profileService.getProfile(currentUserId, profileId);
 
         Map<String, Object> today = createDefaults();
+        today.put("activeProfileId", activeProfileId);
         applyWeight(today, profile, profileId, currentUserId, range);
         applySleep(today, profile, profileId, currentUserId, range);
         applyWater(today, profile, profileId, currentUserId, range);
