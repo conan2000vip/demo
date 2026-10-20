@@ -30,9 +30,9 @@ public class HomeServiceImpl implements HomeService {
     private final FeedbackService feedbackService;
 
     @Override
-    public Map<String, Object> getHomeData(Long profileId, Long currentUserId) {
+    public Map<String, Object> getHomeData(Long targetProfileId, Long currentUserId) {
         LocalDate today = LocalDate.now(ZoneId.systemDefault());
-        Profile currentProfile = profileAccessValidation.validateCanViewProfile(profileId, currentUserId);
+        Profile currentProfile = profileAccessValidation.validateCanViewProfile(targetProfileId, currentUserId);
         List<Profile> profileList = profileService.getProfiles(currentUserId);
 
         List<Profile> others = profileList.stream().filter(p -> !p.getId().equals(currentProfile.getId())).toList();
@@ -42,11 +42,18 @@ public class HomeServiceImpl implements HomeService {
         data.put("currentProfile", currentProfile);
         data.put("goals", visibleGoals(currentProfile, currentUserId));
         data.put("profileList", profileList);
-        data.put("today", homeTodayService.buildToday(profileId, currentUserId));
+        data.put("today", homeTodayService.buildToday(targetProfileId, currentUserId));
+        data.put("canViewWeight",
+                profileAccessValidation.hasReadAccess(targetProfileId, currentUserId, Category.weight));
+        data.put("canViewSleep", profileAccessValidation.hasReadAccess(targetProfileId, currentUserId, Category.sleep));
+        data.put("canViewWater", profileAccessValidation.hasReadAccess(targetProfileId, currentUserId, Category.water));
+        data.put("canViewStep", profileAccessValidation.hasReadAccess(targetProfileId, currentUserId, Category.step));
+        data.put("canViewMemo", profileAccessValidation.hasReadAccess(targetProfileId, currentUserId, Category.memo));
         data.put("familyMembers", familyMembers);
         data.put("familySummary", homeFamilyService.buildFamilySummary(familyMembers));
-        data.put("feedbackList", visibleFeedback(profileId, currentUserId));
-        Optional<HomeStreakService.StreakInfo> currentStreak = homeStreakService.getCurrentStreakInfo(profileId, today);
+        data.put("feedbackList", visibleFeedback(targetProfileId, currentUserId));
+        Optional<HomeStreakService.StreakInfo> currentStreak = homeStreakService.getCurrentStreakInfo(targetProfileId,
+                today);
         if (currentStreak.isPresent()) {
             HomeStreakService.StreakInfo streak = currentStreak.get();
             data.put("currentStreak", streak.days());
@@ -55,7 +62,8 @@ public class HomeServiceImpl implements HomeService {
             data.put("currentStreak", 0);
             data.put("currentStreakStartDate", "");
         }
-        Optional<HomeStreakService.StreakBreak> brokenStreak = homeStreakService.getBrokenStreak(profileId, today);
+        Optional<HomeStreakService.StreakBreak> brokenStreak = homeStreakService.getBrokenStreak(targetProfileId,
+                today);
         data.put("hasPreviousStreak", brokenStreak.isPresent());
         if (brokenStreak.isPresent()) {
             HomeStreakService.StreakBreak streak = brokenStreak.get();

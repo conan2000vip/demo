@@ -33,8 +33,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/profile")
 @RequiredArgsConstructor
 public class ProfileController {
-    private static final List<String> AVATARS = List.of(
-            "avatar_01", "avatar_02", "avatar_03", "avatar_04", "avatar_05",
+    private static final List<String> AVATARS = List.of("avatar_01", "avatar_02", "avatar_03", "avatar_04", "avatar_05",
             "avatar_06", "avatar_07", "avatar_08", "avatar_09", "avatar_10", "avatar_11", "avatar_12");
 
     private final ProfileService profileService;
@@ -85,8 +84,8 @@ public class ProfileController {
     }
 
     @PostMapping("/{id}/verify-pin")
-    public String verifyPin(@PathVariable("id") Long id, @RequestParam("pin") String pin,
-            HttpSession session, Model model) {
+    public String verifyPin(@PathVariable("id") Long id, @RequestParam("pin") String pin, HttpSession session,
+            Model model) {
         User user = getCurrentUser(session);
         if (user == null) {
             return "redirect:/auth/login";
@@ -107,8 +106,7 @@ public class ProfileController {
 
     @PostMapping("/{id}/verify-pin/account-password")
     public String verifyPinWithAccountPassword(@PathVariable("id") Long id,
-            @RequestParam("accountPassword") String accountPassword,
-            HttpSession session, Model model) {
+            @RequestParam("accountPassword") String accountPassword, HttpSession session, Model model) {
         User user = getCurrentUser(session);
         if (user == null) {
             return "redirect:/auth/login";
@@ -282,8 +280,7 @@ public class ProfileController {
         try {
             formDto.setId(id);
             if ("REMOVE_ACCOUNT_PASSWORD".equalsIgnoreCase(pinAction)) {
-                profileService.removePinWithAccountPassword(user.getId(), id,
-                        accountPassword);
+                profileService.removePinWithAccountPassword(user.getId(), id, accountPassword);
                 redirectAttributes.addFlashAttribute("message", "PINを削除しました");
                 return "redirect:/profile/" + id + "/edit";
             }
@@ -298,8 +295,7 @@ public class ProfileController {
             }
             redirectAttributes.addFlashAttribute("message", updatedProfile.getName() + " のプロファイルを更新しました");
         } catch (BusinessException e) {
-            if (!"REMOVE".equalsIgnoreCase(pinAction)
-                    && !"REMOVE_ACCOUNT_PASSWORD".equalsIgnoreCase(pinAction)) {
+            if (!"REMOVE".equalsIgnoreCase(pinAction) && !"REMOVE_ACCOUNT_PASSWORD".equalsIgnoreCase(pinAction)) {
                 model.addAttribute("errorMessage", e.getMessage());
             }
             model.addAttribute("isFirstProfile", false);
@@ -384,8 +380,7 @@ public class ProfileController {
         if (authenticatedProfile.isPrimary()) {
             return !authenticatedProfile.getId().equals(targetProfileId);
         }
-        return !authenticatedProfile.isManagedByPrimary()
-                && authenticatedProfile.getId().equals(targetProfileId);
+        return !authenticatedProfile.isManagedByPrimary() && authenticatedProfile.getId().equals(targetProfileId);
     }
 
     private boolean canManageAllProfiles(Long userId, HttpSession session) {

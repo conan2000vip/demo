@@ -28,7 +28,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "profiles", indexes = { @Index(name = "idx_profiles_user_id", columnList = "user_id"),
-		@Index(name = "idx_profiles_user_primary", columnList = "user_id, is_primary") })
+        @Index(name = "idx_profiles_user_primary", columnList = "user_id, is_primary") })
 public class Profile implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -72,10 +72,6 @@ public class Profile implements Serializable {
     @Column(name = "is_primary", nullable = false)
     private boolean isPrimary = false;
 
-    /**
-     * Managed profiles are operated by the primary profile and do not require
-     * their own PIN. Existing secondary profiles remain managed by default.
-     */
     @Column(name = "managed_by_primary", nullable = false, columnDefinition = "boolean default true")
     private boolean managedByPrimary = true;
 
@@ -108,8 +104,7 @@ public class Profile implements Serializable {
 
     @Transient
     public int getDailySleepGoalMinutes() {
-        return dailySleepGoal == null ? 0
-                : dailySleepGoal.multiply(BigDecimal.valueOf(60)).intValue();
+        return dailySleepGoal == null ? 0 : dailySleepGoal.multiply(BigDecimal.valueOf(60)).intValue();
     }
 
     @Transient

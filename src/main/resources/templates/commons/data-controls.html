@@ -12,7 +12,7 @@
         <path d="m7 10 5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
     </button>
-    <form class="chart-range-picker__popover" id="chartRangePopover" th:action="${actionUrl}" method="get" hidden>
+    <form class="chart-range-picker__popover" id="chartRangePopover" th:action="${actionUrl + '#homeIntegratedChartSection'}" method="get" hidden>
       <div class="chart-range-picker__presets" id="chartRangeQuickBar">
         <button type="button" class="quick-btn" data-range="1D">1日</button>
         <button type="button" class="quick-btn" data-range="1W">7日</button>
@@ -33,12 +33,19 @@
       <p class="chart-range-picker__error" id="chartRangeError" role="alert" hidden></p>
       <div class="chart-range-picker__actions">
         <a class="chart-range-picker__clear" th:href="${clearUrl}" th:if="${filterStartDate != null or filterEndDate != null}">リセット</a>
-        <button type="submit" class="chart-range-picker__search"><i data-lucide="search"></i><span>検索</span></button>
+        <button type="submit" class="chart-range-picker__search"><svg class="lucide-icon" viewBox="0 0 24 24" width="16" height="16" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+            style="display: inline-block; vertical-align: middle; margin-right: 4px;">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg><span>検索</span></button>
       </div>
     </form>
   </div>
-  <section th:fragment="feedbackList(feedbackList)" class="feedback-list" id="feedbackSection" th:if="${feedbackList != null and not #lists.isEmpty(feedbackList)}">
-    <div class="feedback-card" th:each="fb, iterStat : ${feedbackList}" th:classappend="${' feedback-card--' + fb.level.cssClass + (iterStat.index >= 3 ? ' is-hidden' : '')}">
+  <section th:fragment="feedbackList(feedbackList)" class="feedback-list" id="feedbackSection"
+    th:if="${feedbackList != null and not #lists.isEmpty(feedbackList)}">
+    <div class="feedback-card" th:each="fb, iterStat : ${feedbackList}"
+      th:classappend="${' feedback-card--' + fb.level.cssClass + (iterStat.index >= 3 ? ' is-hidden' : '')}">
       <div class="feedback-card__content">
         <div class="feedback-card__title" th:text="${fb.title}">急激な体重変化があります</div>
         <div class="feedback-card__message" th:text="${fb.message}">前回比で-2.1kgの変化がありました。</div>
@@ -49,12 +56,14 @@
         <span class="feedback-card__badge" th:text="${fb.level.label}">重要</span>
       </div>
     </div>
-    <button type="button" class="feedback-list__toggle" id="feedbackToggleBtn" th:if="${feedbackList != null and #lists.size(feedbackList) > 3}" th:text="${'今日のフィードバックをすべて見る（' + #lists.size(feedbackList) + '件）'}">
+    <button type="button" class="feedback-list__toggle" id="feedbackToggleBtn" th:if="${feedbackList != null and #lists.size(feedbackList) > 3}"
+      th:text="${'今日のフィードバックをすべて見る（' + #lists.size(feedbackList) + '件）'}">
       今日のフィードバックをすべて見る
     </button>
   </section>
-  <section th:fragment="chartCard(title, canvasId, hasData, chartUrl, category, iconSrc, seriesLabel, targetText, filterAction, clearUrl, filterStartDate, filterEndDate)" class="chart-card" th:classappend="'chart-card--' + ${category}"
-    th:if="${hasData}" th:attr="data-chart-url=${chartUrl}">
+  <section
+    th:fragment="chartCard(title, canvasId, hasData, chartUrl, category, iconSrc, seriesLabel, targetText, filterAction, clearUrl, filterStartDate, filterEndDate)"
+    class="chart-card" th:classappend="'chart-card--' + ${category}" th:if="${hasData}" th:attr="data-chart-url=${chartUrl}">
     <div class="chart-card__header">
       <span class="chart-card__icon">
         <img th:src="${iconSrc}" alt="" class="chart-card__icon-img" />
@@ -82,12 +91,16 @@
       </div>
     </div>
   </section>
-  <nav th:fragment="pagination(baseUrl, startDate, endDate, currentPage, totalPages, hasPrevious, hasNext)" class="pagination" th:if="${totalPages > 1}">
-    <a th:if="${hasPrevious}" th:href="@{${baseUrl}(startDate=${startDate}, endDate=${endDate}, page=${currentPage - 1})}" class="pagination__nav">← 前へ</a>
+  <nav th:fragment="pagination(baseUrl, startDate, endDate, currentPage, totalPages, hasPrevious, hasNext)" class="pagination"
+    th:if="${totalPages > 1}">
+    <a th:if="${hasPrevious}" th:href="@{${baseUrl}(startDate=${startDate}, endDate=${endDate}, page=${currentPage - 1})}" class="pagination__nav">←
+      前へ</a>
 
-    <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:href="@{${baseUrl}(startDate=${startDate}, endDate=${endDate}, page=${i})}" th:text="${i + 1}" th:classappend="${i == currentPage} ? 'is-active'" class="pagination__page"></a>
+    <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:href="@{${baseUrl}(startDate=${startDate}, endDate=${endDate}, page=${i})}"
+      th:text="${i + 1}" th:classappend="${i == currentPage} ? 'is-active'" class="pagination__page"></a>
 
-    <a th:if="${hasNext}" th:href="@{${baseUrl}(startDate=${startDate}, endDate=${endDate}, page=${currentPage + 1})}" class="pagination__nav">次へ →</a>
+    <a th:if="${hasNext}" th:href="@{${baseUrl}(startDate=${startDate}, endDate=${endDate}, page=${currentPage + 1})}" class="pagination__nav">次へ
+      →</a>
   </nav>
 </body>
 

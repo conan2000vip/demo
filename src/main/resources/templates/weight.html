@@ -48,14 +48,16 @@
           <span class="summary-card__value">
             <span th:text="${stats != null && stats.latest != null ? stats.latest : '--'}"></span> kg
           </span>
-          <span class="summary-card__sub" th:if="${stats != null && stats.latestDate != null}" th:text="'最終記録：' + ${#temporals.format(stats.latestDate,'yyyy/MM/dd')}">
+          <span class="summary-card__sub" th:if="${stats != null && stats.latestDate != null}"
+            th:text="'最終記録：' + ${#temporals.format(stats.latestDate,'yyyy/MM/dd')}">
           </span>
         </div>
         <div class="summary-card">
           <span class="summary-card__label">現在のBMI</span>
           <span class="summary-card__value">
             <span th:text="${stats?.bmi != null ? #numbers.formatDecimal(stats.bmi, 1, 1) : '--'}">31.4</span>
-            <span th:if="${stats?.bmiStatus != null}" class="badge" th:classappend="${'badge--' + (stats.bmiStatusCode ?: 'normal')}" th:text="${stats.bmiStatus}">
+            <span th:if="${stats?.bmiStatus != null}" class="badge" th:classappend="${'badge--' + (stats.bmiStatusCode ?: 'normal')}"
+              th:text="${stats.bmiStatus}">
               肥満(2度以上)
             </span>
           </span>
@@ -115,31 +117,35 @@
                   <span class="diff-badge" data-diff-placeholder></span>
                 </td>
                 <td>
-                  <span class="badge" th:if="${record.bmi != null}" th:classappend="${'badge--' + (record.bmiStatusCode ?: 'normal')}" th:text="${#numbers.formatDecimal(record.bmi, 1, 1)}">21.2</span>
+                  <span class="badge" th:if="${record.bmi != null}" th:classappend="${'badge--' + (record.bmiStatusCode ?: 'normal')}"
+                    th:text="${#numbers.formatDecimal(record.bmi, 1, 1)}">21.2</span>
                   <span class="text-muted" th:unless="${record.bmi != null}">--</span>
                 </td>
 
-                <td class="weight-table__memo memo-cell" th:text="${record.memo != null ? record.memo : ''}" th:attr="data-full-memo=${record.memo != null ? record.memo : ''}">
+                <td class="weight-table__memo memo-cell" th:text="${record.memo != null ? record.memo : ''}"
+                  th:attr="data-full-memo=${record.memo != null ? record.memo : ''}">
                 </td>
 
                 <td class="weight-table__actions">
-                  <button type="button" class="icon-btn edit-btn" th:data-id="${record.id}" th:data-measured-at="${record.measuredAt}" th:data-weight="${record.weight}" th:data-height="${record.height}" th:data-memo="${record.memo}">
+                  <button type="button" class="icon-btn edit-btn" th:data-id="${record.id}" th:data-measured-at="${record.measuredAt}"
+                    th:data-weight="${record.weight}" th:data-height="${record.height}" th:data-memo="${record.memo}">
                     <img th:src="@{/image/edit.png}" alt="編集" class="icon-btn-img" />
                   </button>
                   <button type="submit" th:form="'deleteForm-' + ${record.id}" class="icon-btn icon-btn--danger" aria-label="削除">
                     <img th:src="@{/image/delete.png}" alt="削除" class="icon-btn-img" />
                   </button>
-                </td>
-                <form th:id="'deleteForm-' + ${record.id}" th:action="@{/profile/{profileId}/weight/{id}/delete(profileId=${profileId},id=${record.id})}" method="post" class="delete-form"
-                  th:attr="data-confirm-message='「' + ${record.recordedDate} + '」の体重記録を削除しますか？&#10;この操作は取り消せません。'">
-                </form>
+                  <form th:id="'deleteForm-' + ${record.id}"
+                    th:action="@{/profile/{profileId}/weight/{id}/delete(profileId=${profileId},id=${record.id})}" method="post" class="delete-form"
+                    th:attr="data-confirm-message='「' + ${record.recordedDate} + '」の体重記録を削除しますか？&#10;この操作は取り消せません。'">
+                  </form>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <div th:replace="~{commons/data-controls :: pagination(@{/profile/{profileId}/weight(profileId=${profileId})},${filterStartDate}, ${filterEndDate},${currentPage}, ${totalPages}, ${hasPrevious}, ${hasNext})}">
+        <div
+          th:replace="~{commons/data-controls :: pagination(@{/profile/{profileId}/weight(profileId=${profileId})},${filterStartDate}, ${filterEndDate},${currentPage}, ${totalPages}, ${hasPrevious}, ${hasNext})}">
         </div>
         <div class="empty-state" th:if="${#lists.isEmpty(logs) and !hasAnyLog}">
           <img th:src="@{/image/scales.png}" alt="" class="weight-page__icon-img" />

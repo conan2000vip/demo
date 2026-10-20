@@ -25,10 +25,6 @@ public class ProfileAccessValidation {
         this.authenticatedProfileContext = authenticatedProfileContext;
     }
 
-    /**
-     * Validates read access using the account's primary profile as the
-     * authenticated actor. The profile in the URL is only the viewed profile.
-     */
     public Profile validateAndGetProfile(Long profileId, Long currentUserId, Category category) {
         Profile profile = profileRepository.findById(profileId)
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "データが見つかりません"));
@@ -49,10 +45,8 @@ public class ProfileAccessValidation {
         }
 
         Role role = shareSettingRepository
-                .findByOwnerProfile_IdAndViewerProfile_IdAndCategory(profile.getId(), authenticatedProfileId,
-                        category)
-                .map(setting -> setting.getRole())
-                .orElse(Role.viewer);
+                .findByOwnerProfile_IdAndViewerProfile_IdAndCategory(profile.getId(), authenticatedProfileId, category)
+                .map(setting -> setting.getRole()).orElse(Role.viewer);
         if (role == Role.none) {
             throw new BusinessException(HttpStatus.FORBIDDEN, "このカテゴリは共有されていません");
         }
@@ -66,17 +60,9 @@ public class ProfileAccessValidation {
             return profile;
         }
 
-        Profile authenticatedProfile = profileRepository.findByIdAndUser_Id(authenticatedProfileId, currentUserId)
-                .orElseThrow(() -> new BusinessException(HttpStatus.FORBIDDEN, "認証プロファイルが見つかりません"));
-        if (authenticatedProfile.isPrimary() && profile.isManagedByPrimary()) {
-            return profile;
-        }
-
         Role role = shareSettingRepository
-                .findByOwnerProfile_IdAndViewerProfile_IdAndCategory(profile.getId(), authenticatedProfileId,
-                        category)
-                .map(setting -> setting.getRole())
-                .orElse(Role.viewer);
+                .findByOwnerProfile_IdAndViewerProfile_IdAndCategory(profile.getId(), authenticatedProfileId, category)
+                .map(setting -> setting.getRole()).orElse(Role.viewer);
         if (role != Role.editor) {
             throw new BusinessException(HttpStatus.FORBIDDEN, "このカテゴリを編集する権限がありません");
         }
