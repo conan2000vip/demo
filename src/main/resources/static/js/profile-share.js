@@ -3,82 +3,82 @@ let currentShareData = [];
 
 // モーダルを開き、コントローラーから設定を取得する。
 function openShareModal(profileId, currentProfileId, isCurrentPrimary) {
-    currentActiveProfileId = profileId;
-    const modal = document.getElementById('shareSettingsModal');
+  currentActiveProfileId = profileId;
+  const modal = document.getElementById('shareSettingsModal');
 
-    fetch(`/profile/${profileId}/share-settings`, {
-        method: 'GET',
-        headers: { 'Accept': 'application/json' }
+  fetch(`/profile/${profileId}/share-settings`, {
+    method: 'GET',
+    headers: { 'Accept': 'application/json' }
+  })
+    .then(response => {
+      if (!response.ok) return response.json().then(error => { throw new Error(error.message); });
+      return response.json();
     })
-        .then(response => {
-            if (!response.ok) return response.json().then(error => { throw new Error(error.message); });
-            return response.json();
-        })
-        .then(data => {
-            currentShareData = data;
-            renderShareMatrixTable(data);
-            modal.scrollTop = 0;
-            modal.classList.add('is-open');
-            const dialog = modal.querySelector('.modal');
-            dialog.scrollTop = 0;
-            modal.querySelector('.modal__close')?.focus({ preventScroll: true });
-            dialog.scrollTop = 0;
-            document.documentElement.classList.add('share-settings-open');
-            document.body.classList.add('share-settings-open');
-        })
-        .catch(err => showShareAlert(err.message));
+    .then(data => {
+      currentShareData = data;
+      renderShareMatrixTable(data);
+      modal.scrollTop = 0;
+      modal.classList.add('is-open');
+      const dialog = modal.querySelector('.modal');
+      dialog.scrollTop = 0;
+      modal.querySelector('.modal__close')?.focus({ preventScroll: true });
+      dialog.scrollTop = 0;
+      document.documentElement.classList.add('share-settings-open');
+      document.body.classList.add('share-settings-open');
+    })
+    .catch(err => showShareAlert(err.message));
 }
 
-    function showShareAlert(message, type = 'error') {
-        const main = document.querySelector('.profile-manage');
-        if (!main) return;
+function showShareAlert(message, type = 'error') {
+  const main = document.querySelector('.profile-manage');
+  if (!main) return;
 
-        main.querySelector('.share-inline-alert')?.remove();
+  main.querySelector('.share-inline-alert')?.remove();
 
-        const alert = document.createElement('div');
-        alert.className = `alert alert--${type} share-inline-alert`;
-        alert.setAttribute('role', type === 'error' ? 'alert' : 'status');
-        alert.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
+  const alert = document.createElement('div');
+  alert.className = `alert alert--${type} share-inline-alert`;
+  alert.setAttribute('role', type === 'error' ? 'alert' : 'status');
+  alert.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
 
-        const messageElement = document.createElement('span');
-        messageElement.textContent = message;
+  const messageElement = document.createElement('span');
+  messageElement.textContent = message;
 
-        const closeButton = document.createElement('button');
-        closeButton.type = 'button';
-        closeButton.className = 'alert__close';
-        closeButton.setAttribute('aria-label', '閉じる');
-        closeButton.textContent = '×';
-        closeButton.addEventListener('click', () => alert.remove());
+  const closeButton = document.createElement('button');
+  closeButton.type = 'button';
+  closeButton.className = 'alert__close';
+  closeButton.setAttribute('aria-label', '閉じる');
+  closeButton.textContent = '×';
+  closeButton.addEventListener('click', () => alert.remove());
 
-        alert.append(messageElement, closeButton);
-        main.prepend(alert);
-        window.setTimeout(() => alert.remove(), 10000);
-    }
+  alert.append(messageElement, closeButton);
+  main.prepend(alert);
+  window.setTimeout(() => alert.remove(), 10000);
+}
 
 // 5カテゴリの共有権限マトリクスを描画する。
 function renderShareMatrixTable(data) {
-    const list = document.getElementById('shareMatrixBody');
-    list.innerHTML = '';
-    const saveButton = document.getElementById('btnSaveShareSettings');
-    saveButton.disabled = data.length === 0;
+  const list = document.getElementById('shareMatrixBody');
+  list.innerHTML = '';
+  const saveButton = document.getElementById('btnSaveShareSettings');
+  saveButton.disabled = data.length === 0;
 
-    if (data.length === 0) {
-        list.innerHTML = '<p class="share-settings__empty">設定できる他のプロファイルはありません。</p>';
-        return;
-    }
+  if (data.length === 0) {
+    list.innerHTML = '<p class="share-settings__empty">設定できる他のプロファイルはありません。</p>';
+    return;
+  }
 
-    const permissionFields = [
-        ['weightRole', '体重'],
-        ['sleepRole', '睡眠'],
-        ['waterRole', '水分'],
-        ['stepRole', '歩数'],
-        ['memoRole', 'メモ']
-    ];
+  const permissionFields = [
+    ['weightRole', '体重'],
+    ['sleepRole', '睡眠'],
+    ['waterRole', '水分'],
+    ['stepRole', '歩数'],
+    ['memoRole', 'メモ']
+  ];
 
-    data.forEach((item, index) => {
-        const member = document.createElement('section');
-        member.className = 'share-settings__member';
-        member.innerHTML = `
+  data.forEach((item, index) => {
+    const member = document.createElement('section');
+    member.className = 'share-settings__member';
+    member.innerHTML = `
             <div class="share-settings__member-header">
                 <div class="share-settings__member-info">
                     <strong class="share-settings__member-name">${escapeHtml(item.targetProfileName)}</strong>
@@ -87,22 +87,22 @@ function renderShareMatrixTable(data) {
             </div>
             <div class="share-settings__permissions">
                 ${permissionFields.map(([fieldName, label]) => createRoleSelectCell(
-                    index, fieldName, item.roles[fieldName], label
-                )).join('')}
+      index, fieldName, item.roles[fieldName], label
+    )).join('')}
             </div>
         `;
-        list.appendChild(member);
-    });
+    list.appendChild(member);
+  });
 }
 
 function createRoleSelectCell(index, fieldName, currentRole, label) {
-    const selectId = `share-role-${index}-${fieldName}`;
-    return `
+  const selectId = `share-role-${index}-${fieldName}`;
+  return `
         <div class="share-settings__permission">
             <label for="${selectId}">${label}</label>
             <select id="${selectId}" class="share-settings__select"
                     onchange="onRoleChange(${index}, '${fieldName}', this.value)">
-                <option value="EDITOR" ${currentRole === 'EDITOR' ? 'selected' : ''}>閲覧と入力</option>
+                <option value="EDITOR" ${currentRole === 'EDITOR' ? 'selected' : ''}>編集者</option>
                 <option value="VIEWER" ${currentRole === 'VIEWER' ? 'selected' : ''}>閲覧者</option>
                 <option value="NONE" ${currentRole === 'NONE' ? 'selected' : ''}>閲覧不可</option>
             </select>
@@ -111,59 +111,59 @@ function createRoleSelectCell(index, fieldName, currentRole, label) {
 }
 
 function onRoleChange(index, fieldName, value) {
-    if (currentShareData[index] && currentShareData[index].roles) {
-        currentShareData[index].roles[fieldName] = value;
-    }
+  if (currentShareData[index] && currentShareData[index].roles) {
+    currentShareData[index].roles[fieldName] = value;
+  }
 }
 
 // APIへPOSTして設定を保存する。
 function saveShareSettings() {
-    if (!currentActiveProfileId || currentShareData.length === 0) return;
+  if (!currentActiveProfileId || currentShareData.length === 0) return;
 
-    const btnSave = document.getElementById('btnSaveShareSettings');
-    btnSave.disabled = true;
+  const btnSave = document.getElementById('btnSaveShareSettings');
+  btnSave.disabled = true;
 
-    fetch(`/profile/${currentActiveProfileId}/share-settings`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify(currentShareData.map(({ targetProfileId, roles }) => ({ targetProfileId, roles })))
+  fetch(`/profile/${currentActiveProfileId}/share-settings`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify(currentShareData.map(({ targetProfileId, roles }) => ({ targetProfileId, roles })))
+  })
+    .then(response => {
+      if (!response.ok) return response.json().then(error => { throw new Error(error.message); });
+      return response.json();
     })
-        .then(response => {
-            if (!response.ok) return response.json().then(error => { throw new Error(error.message); });
-            return response.json();
-        })
-        .then(savedSettings => {
-            const matchesSubmittedSettings = currentShareData.every(item => {
-                const savedItem = savedSettings.find(saved => saved.targetProfileId === item.targetProfileId);
-                return savedItem && Object.keys(item.roles).every(role => savedItem.roles[role] === item.roles[role]);
-            });
-            if (!matchesSubmittedSettings) {
-                throw new Error('共有設定を保存できませんでした。変更内容を確認して、もう一度お試しください。');
-            }
-            currentShareData = savedSettings;
-            renderShareMatrixTable(savedSettings);
-            showShareAlert('共有設定を保存しました。', 'success');
-            closeShareModal();
-        })
-        .catch(err => showShareAlert(err.message))
-        .finally(() => btnSave.disabled = false);
+    .then(savedSettings => {
+      const matchesSubmittedSettings = currentShareData.every(item => {
+        const savedItem = savedSettings.find(saved => saved.targetProfileId === item.targetProfileId);
+        return savedItem && Object.keys(item.roles).every(role => savedItem.roles[role] === item.roles[role]);
+      });
+      if (!matchesSubmittedSettings) {
+        throw new Error('共有設定を保存できませんでした。変更内容を確認して、もう一度お試しください。');
+      }
+      currentShareData = savedSettings;
+      renderShareMatrixTable(savedSettings);
+      showShareAlert('共有設定を保存しました。', 'success');
+      closeShareModal();
+    })
+    .catch(err => showShareAlert(err.message))
+    .finally(() => btnSave.disabled = false);
 }
 
 function closeShareModal() {
-    const modal = document.getElementById('shareSettingsModal');
-    if (modal) {
-        modal.classList.remove('is-open');
-    }
-    document.documentElement.classList.remove('share-settings-open');
-    document.body.classList.remove('share-settings-open');
+  const modal = document.getElementById('shareSettingsModal');
+  if (modal) {
+    modal.classList.remove('is-open');
+  }
+  document.documentElement.classList.remove('share-settings-open');
+  document.body.classList.remove('share-settings-open');
 }
 
 function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>"']/g, function (m) {
-        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
-    });
+  if (!str) return '';
+  return str.replace(/[&<>"']/g, function (m) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+  });
 }

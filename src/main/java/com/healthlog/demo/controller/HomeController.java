@@ -13,11 +13,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.healthlog.demo.constant.SessionConstants;
 import com.healthlog.demo.entity.User;
 import com.healthlog.demo.exception.BusinessException;
 import com.healthlog.demo.service.helper.CurrentUserResolver;
 import com.healthlog.demo.service.home.HomeService;
 import com.healthlog.demo.service.home.HomeSummaryChartService;
+import com.healthlog.demo.service.profile.ProfileService;
+
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 
@@ -29,6 +32,7 @@ public class HomeController {
     private final CurrentUserResolver currentUserResolver;
     private final HomeService homeService;
     private final HomeSummaryChartService homeSummaryChartService;
+    private final ProfileService profileService;
 
     @GetMapping
     public String showHomePage(@PathVariable Long profileId,
@@ -39,13 +43,14 @@ public class HomeController {
         User user = currentUserResolver.resolve(session);
         if (user == null)
             return "redirect:/auth/login";
-        Long activeProfileId = (Long) session.getAttribute("activeProfileId");
-        if (activeProfileId == null) {
-            activeProfileId = profileId;
-        }
-
-        Map<String, Object> homeData = homeService.getHomeData(profileId, user.getId(), activeProfileId);
+        // ユーザーがログインしている場合、activeProfileIdをセッションに保存する
+        profileService.switchProfile(session, user.getId(), profileId);
+        Map<String, Object> homeData = homeService.getHomeData(profileId, user.getId());
         homeData.forEach(model::addAttribute);
+
+        // セッションから認証済みプロファイルIDを取得して、モデルに追加する
+        Long authenticatedProfileId = (Long) session.getAttribute(SessionConstants.AUTHENTICATED_PROFILE_ID);
+        model.addAttribute("isOwnProfile", profileId.equals(authenticatedProfileId));
         model.addAttribute("profileId", profileId);
         model.addAttribute("filterStartDate", startDate);
         model.addAttribute("filterEndDate", endDate);

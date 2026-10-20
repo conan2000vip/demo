@@ -30,21 +30,25 @@ public class HomeServiceImpl implements HomeService {
     private final FeedbackService feedbackService;
 
     @Override
-    public Map<String, Object> getHomeData(Long targetProfileId, Long currentUserId, Long activeProfileId) {
+    public Map<String, Object> getHomeData(Long targetProfileId, Long currentUserId) {
         LocalDate today = LocalDate.now(ZoneId.systemDefault());
         Profile currentProfile = profileAccessValidation.validateCanViewProfile(targetProfileId, currentUserId);
         List<Profile> profileList = profileService.getProfiles(currentUserId);
 
         List<Profile> others = profileList.stream().filter(p -> !p.getId().equals(currentProfile.getId())).toList();
-        List<Map<String, Object>> familyMembers = homeFamilyService.buildFamilyMembers(others, currentUserId,
-                activeProfileId, today);
+        List<Map<String, Object>> familyMembers = homeFamilyService.buildFamilyMembers(others, currentUserId, today);
 
         Map<String, Object> data = new HashMap<>();
         data.put("currentProfile", currentProfile);
         data.put("goals", visibleGoals(currentProfile, currentUserId));
         data.put("profileList", profileList);
-        data.put("activeProfileId", activeProfileId);
-        data.put("today", homeTodayService.buildToday(targetProfileId, currentUserId, activeProfileId));
+        data.put("today", homeTodayService.buildToday(targetProfileId, currentUserId));
+        data.put("canViewWeight",
+                profileAccessValidation.hasReadAccess(targetProfileId, currentUserId, Category.weight));
+        data.put("canViewSleep", profileAccessValidation.hasReadAccess(targetProfileId, currentUserId, Category.sleep));
+        data.put("canViewWater", profileAccessValidation.hasReadAccess(targetProfileId, currentUserId, Category.water));
+        data.put("canViewStep", profileAccessValidation.hasReadAccess(targetProfileId, currentUserId, Category.step));
+        data.put("canViewMemo", profileAccessValidation.hasReadAccess(targetProfileId, currentUserId, Category.memo));
         data.put("familyMembers", familyMembers);
         data.put("familySummary", homeFamilyService.buildFamilySummary(familyMembers));
         data.put("feedbackList", visibleFeedback(targetProfileId, currentUserId));

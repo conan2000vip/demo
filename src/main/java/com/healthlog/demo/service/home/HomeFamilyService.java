@@ -7,8 +7,7 @@ import java.util.Map;
 import com.healthlog.demo.entity.Profile;
 
 public interface HomeFamilyService {
-    List<Map<String, Object>> buildFamilyMembers(List<Profile> profiles, Long currentUserId, Long activeProfileId,
-            LocalDate today);
+    List<Map<String, Object>> buildFamilyMembers(List<Profile> profiles, Long currentUserId, LocalDate today);
 
     Map<String, Object> buildFamilySummary(List<Map<String, Object>> familyMembers);
 }

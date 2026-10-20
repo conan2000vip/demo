@@ -16,57 +16,56 @@ import com.healthlog.demo.service.helper.ProfileAccessValidation;
 @Service
 @RequiredArgsConstructor
 public class HomeFamilyServiceImpl implements HomeFamilyService {
-
     private static final int NO_RECORD_DAYS = 3;
-
     private final ProfileAccessValidation profileAccessValidation;
     private final HomeTodayService homeTodayService;
 
     @Override
-    public List<Map<String, Object>> buildFamilyMembers(List<Profile> profiles, Long currentUserId,
-            Long activeProfileId, LocalDate today) {
+    public List<Map<String, Object>> buildFamilyMembers(List<Profile> profiles, Long currentUserId, LocalDate today) {
         List<Map<String, Object>> members = new ArrayList<>();
 
         for (Profile profile : profiles) {
             Long id = profile.getId();
 
-            System.out.println("=== DEBUG PERMISSION ===");
-            System.out.println("Owner (Thẻ gia đình): " + id + " | Viewer (Đang xem): " + activeProfileId);
-
-            // チェック：activeProfileIdがnullの場合、profileAccessValidation.hasReadAccessはnullを返す可能性があるため、activeProfileIdがnullの場合はfalseを返すようにする
-            boolean canViewWeight = profileAccessValidation.hasReadAccess(id, activeProfileId, Category.weight);
-            boolean canViewSleep = profileAccessValidation.hasReadAccess(id, activeProfileId, Category.sleep);
-            boolean canViewWater = profileAccessValidation.hasReadAccess(id, activeProfileId, Category.water);
-            boolean canViewStep = profileAccessValidation.hasReadAccess(id, activeProfileId, Category.step);
+            // 認証プロファイルから見て、各カテゴリを閲覧できるか判定する
+            boolean canViewWeight = profileAccessValidation.hasReadAccess(id, currentUserId, Category.weight);
+            boolean canViewSleep = profileAccessValidation.hasReadAccess(id, currentUserId, Category.sleep);
+            boolean canViewWater = profileAccessValidation.hasReadAccess(id, currentUserId, Category.water);
+            boolean canViewStep = profileAccessValidation.hasReadAccess(id, currentUserId, Category.step);
+            boolean canViewMemo = profileAccessValidation.hasReadAccess(id, currentUserId, Category.memo);
 
             int totalItems = (canViewWeight ? 1 : 0) + (canViewSleep ? 1 : 0) + (canViewWater ? 1 : 0)
-                    + (canViewStep ? 1 : 0);
-            Map<String, Object> t = homeTodayService.buildToday(id, currentUserId, activeProfileId);
+                    + (canViewStep ? 1 : 0) + (canViewMemo ? 1 : 0);
+            Map<String, Object> t = homeTodayService.buildToday(id, currentUserId);
 
+            // 今日の記録があるかどうかを判定する.
             boolean hasWeight = !"NO_RECORD".equals(t.get("weightGoalStatus"));
             boolean hasSleep = !"NO_RECORD".equals(t.get("sleepGoalStatus"));
             boolean hasWater = !"NO_RECORD".equals(t.get("waterGoalStatus"));
             boolean hasStep = !"NO_RECORD".equals(t.get("stepGoalStatus"));
+            boolean hasMemo = !"NO_RECORD".equals(t.get("memoGoalStatus"));
 
-            int doneItems = (hasWeight ? 1 : 0) + (hasSleep ? 1 : 0) + (hasWater ? 1 : 0) + (hasStep ? 1 : 0);
+            int doneItems = (hasWeight ? 1 : 0) + (hasSleep ? 1 : 0) + (hasWater ? 1 : 0) + (hasStep ? 1 : 0)
+                    + (hasMemo ? 1 : 0);
 
             boolean hasHistory = hasWeight || hasSleep || hasWater || hasStep;
             LocalDate latestDate = hasHistory ? today : null;
             long daysSince = hasHistory ? ChronoUnit.DAYS.between(latestDate, today) : 0;
-
             List<String> severeLabels = new ArrayList<>();
             List<String> issues = new ArrayList<>(severeLabels);
             if (hasHistory && daysSince >= NO_RECORD_DAYS) {
                 issues.add(daysSince + "日未記録");
             }
-            if (!hasWeight)
+            if (canViewWeight && !hasWeight)
                 issues.add("体重未入力");
-            if (!hasSleep)
+            if (canViewSleep && !hasSleep)
                 issues.add("睡眠未入力");
-            if (!hasWater)
+            if (canViewWater && !hasWater)
                 issues.add("水分未入力");
-            if (!hasStep)
+            if (canViewStep && !hasStep)
                 issues.add("歩数未入力");
+            if (canViewMemo && !hasMemo)
+                issues.add("メモ未入力");
 
             String status;
             String statusLabel;

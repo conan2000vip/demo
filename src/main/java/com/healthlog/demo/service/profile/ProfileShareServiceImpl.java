@@ -29,34 +29,35 @@ public class ProfileShareServiceImpl implements ProfileShareService {
     @Override
     @Transactional(readOnly = true)
     public List<ProfileShareSettingDto.Item> getShareSettings(Long currentUserId, Long activeProfileId) {
+        // 1. 現在のユーザーが所有するプロファイルを取得し、アクセス権限を検証する。
         Profile activeProfile = validateProfileOwnership(currentUserId, activeProfileId);
         List<Profile> familyProfiles = profileRepository.findByUser_Id(currentUserId);
-        List<ProfileShareSetting> existingSettings = profileShareSettingRepository.findByOwnerProfile_Id(activeProfile.getId());
+        List<ProfileShareSetting> existingSettings = profileShareSettingRepository
+                .findByOwnerProfile_Id(activeProfile.getId());
 
-        return familyProfiles.stream()
-                .filter(target -> !Objects.equals(target.getId(), activeProfileId))
+        // 2. 家族メンバーのプロファイルから、現在のプロファイルを除外する。
+        return familyProfiles.stream().filter(target -> !Objects.equals(target.getId(), activeProfileId))
                 .map(target -> {
-            ProfileShareSettingDto.Item item = new ProfileShareSettingDto.Item();
-            item.setTargetProfileId(target.getId());
-            item.setTargetProfileName(target.getName());
-            item.setRelationship(target.getRelationship());
+                    ProfileShareSettingDto.Item item = new ProfileShareSettingDto.Item();
+                    item.setTargetProfileId(target.getId());
+                    item.setTargetProfileName(target.getName());
+                    item.setRelationship(target.getRelationship());
 
-            // 未設定のカテゴリは初期状態として閲覧可能にする。
-            ProfileShareSettingDto.CategoryRole roles = new ProfileShareSettingDto.CategoryRole();
-            roles.setWeightRole(getRoleForCategory(existingSettings, target.getId(), Category.weight));
-            roles.setSleepRole(getRoleForCategory(existingSettings, target.getId(), Category.sleep));
-            roles.setWaterRole(getRoleForCategory(existingSettings, target.getId(), Category.water));
-            roles.setStepRole(getRoleForCategory(existingSettings, target.getId(), Category.step));
-            roles.setMemoRole(getRoleForCategory(existingSettings, target.getId(), Category.memo));
-            item.setRoles(roles);
-            return item;
-        }).toList();
+                    // 未設定のカテゴリは初期状態として閲覧可能にする。
+                    ProfileShareSettingDto.CategoryRole roles = new ProfileShareSettingDto.CategoryRole();
+                    roles.setWeightRole(getRoleForCategory(existingSettings, target.getId(), Category.weight));
+                    roles.setSleepRole(getRoleForCategory(existingSettings, target.getId(), Category.sleep));
+                    roles.setWaterRole(getRoleForCategory(existingSettings, target.getId(), Category.water));
+                    roles.setStepRole(getRoleForCategory(existingSettings, target.getId(), Category.step));
+                    roles.setMemoRole(getRoleForCategory(existingSettings, target.getId(), Category.memo));
+                    item.setRoles(roles);
+                    return item;
+                }).toList();
     }
 
     @Override
     @Transactional
-    public void updateShareSettings(Long currentUserId, Long activeProfileId,
-            List<ProfileShareSettingDto.Item> items) {
+    public void updateShareSettings(Long currentUserId, Long activeProfileId, List<ProfileShareSettingDto.Item> items) {
         Profile activeProfile = validateProfileOwnership(currentUserId, activeProfileId);
 
         for (ProfileShareSettingDto.Item item : items) {
@@ -86,10 +87,9 @@ public class ProfileShareServiceImpl implements ProfileShareService {
 
     private ShareRole getRoleForCategory(List<ProfileShareSetting> settings, Long viewerProfileId, Category category) {
         return settings.stream()
-                .filter(s -> Objects.equals(s.getViewerProfile().getId(), viewerProfileId) && s.getCategory() == category)
-                .findFirst()
-                .map(s -> mapToDtoRole(s.getRole()))
-                .orElse(ShareRole.VIEWER);
+                .filter(s -> Objects.equals(s.getViewerProfile().getId(), viewerProfileId)
+                        && s.getCategory() == category)
+                .findFirst().map(s -> mapToDtoRole(s.getRole())).orElse(ShareRole.VIEWER);
     }
 
     private void saveOrUpdateCategory(Profile owner, Profile viewer, Category category, ShareRole dtoRole) {
@@ -104,20 +104,22 @@ public class ProfileShareServiceImpl implements ProfileShareService {
     }
 
     private ShareRole mapToDtoRole(Role entityRole) {
-        if (entityRole == null) return ShareRole.NONE;
+        if (entityRole == null)
+            return ShareRole.NONE;
         return switch (entityRole) {
-            case editor -> ShareRole.EDITOR;
-            case none -> ShareRole.NONE;
-            default -> ShareRole.VIEWER;
+        case editor -> ShareRole.EDITOR;
+        case none -> ShareRole.NONE;
+        default -> ShareRole.VIEWER;
         };
     }
 
     private Role mapToEntityRole(ShareRole dtoRole) {
-        if (dtoRole == null) return Role.none;
+        if (dtoRole == null)
+            return Role.none;
         return switch (dtoRole) {
-            case EDITOR -> Role.editor;
-            case NONE -> Role.none;
-            default -> Role.viewer;
+        case EDITOR -> Role.editor;
+        case NONE -> Role.none;
+        default -> Role.viewer;
         };
     }
 }

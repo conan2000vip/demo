@@ -12,4 +12,5 @@ public final class SessionConstants {
     public static final String LOGIN_USER = "LOGIN_USER";
     public static final String RESET_EMAIL = "RESET_EMAIL";
     public static final String IS_RESET_FLOW = "IS_RESET_FLOW";
+    public static final String IS_LOGIN_FLOW = "IS_LOGIN_FLOW";
 }
