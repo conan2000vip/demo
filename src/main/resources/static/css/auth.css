@@ -477,7 +477,6 @@ body {
     border-radius: var(--radius-sm);
     outline: none;
     transition: border-color .15s, box-shadow .15s;
-    -moz-appearance: textfield;
 }
 
 .otp-box::-webkit-outer-spin-button,

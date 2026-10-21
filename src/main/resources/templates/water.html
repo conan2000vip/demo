@@ -26,9 +26,19 @@
             <p th:text="${currentProfile != null ? currentProfile.name + ' の水分記録' : 'ゲスト の水分記録'}"></p>
           </div>
         </div>
-        <button type="button" class="btn btn--primary" id="openAddModalBtn">
-          <i data-lucide="plus"></i>記録する
-        </button>
+        <div th:fragment="headerActions(currentType, filterStartDate, filterEndDate)" class="header-actions">
+          <button type="button" class="btn btn--primary" id="openCsvExportModalBtn" data-csv-open>
+            <i data-lucide="file-text"></i>CSV出力
+          </button>
+          <div th:replace="~{commons/csv-export-modal :: csvExportModal(
+                 @{/profile/{profileId}/export/csv(profileId=${profileId})},
+                 @{/profile/{profileId}/export/csv/preview(profileId=${profileId})},
+                 ${currentType}, ${filterStartDate}, ${filterEndDate})}">
+          </div>
+          <button type="button" class="btn btn--primary" id="openAddModalBtn">
+            <i data-lucide="plus"></i>記録する
+          </button>
+        </div>
       </div>
       <div class="alert alert--error" th:if="${error}" id="errorAlert" data-auto-hide="true">
         <i data-lucide="alert-circle"></i><span th:text="${error}"></span>

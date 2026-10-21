@@ -26,9 +26,19 @@
             <p th:text="${currentProfile != null ? currentProfile.name + ' の睡眠記録' : 'ゲスト の睡眠記録'}"></p>
           </div>
         </div>
-        <button type="button" class="btn btn--primary" id="openAddModalBtn">
-          <i data-lucide="plus"></i>記録する
-        </button>
+        <div th:fragment="headerActions(currentType, filterStartDate, filterEndDate)" class="header-actions">
+          <button type="button" class="btn btn--primary" id="openCsvExportModalBtn" data-csv-open>
+            <i data-lucide="file-text"></i>CSV出力
+          </button>
+          <div th:replace="~{commons/csv-export-modal :: csvExportModal(
+                @{/profile/{profileId}/export/csv(profileId=${profileId})},
+                @{/profile/{profileId}/export/csv/preview(profileId=${profileId})},
+                ${currentType}, ${filterStartDate}, ${filterEndDate})}">
+          </div>
+          <button type="button" class="btn btn--primary" id="openAddModalBtn">
+            <i data-lucide="plus"></i>記録する
+          </button>
+        </div>
       </div>
       <div class="alert alert--error" th:if="${error}" id="errorAlert" data-auto-hide="true">
         <i data-lucide="alert-circle"></i><span th:text="${error}"></span>
@@ -49,12 +59,14 @@
           <span class="summary-card__value">
             <span th:text="${stats != null && stats.latest != null ? (stats.latest / 60 + '時間' + stats.latest % 60 + '分') : '--'}"></span>
           </span>
-          <span class="summary-card__sub" th:if="${stats != null && stats.latestDate != null}" th:text="'最終記録：' + ${#temporals.format(stats.latestDate, 'yyyy/MM/dd')}"></span>
+          <span class="summary-card__sub" th:if="${stats != null && stats.latestDate != null}"
+            th:text="'最終記録：' + ${#temporals.format(stats.latestDate, 'yyyy/MM/dd')}"></span>
         </div>
         <div class="summary-card">
           <span class="summary-card__label" th:text="${stats?.isCustomRange} ? '期間平均' : '今月平均'">今月平均</span>
           <span class="summary-card__value">
-            <span th:text="${stats != null && stats.monthlyAverage != null ? (stats.monthlyAverage / 60 + '時間' + stats.monthlyAverage % 60 + '分') : '--'}"></span>
+            <span
+              th:text="${stats != null && stats.monthlyAverage != null ? (stats.monthlyAverage / 60 + '時間' + stats.monthlyAverage % 60 + '分') : '--'}"></span>
           </span>
           <span class="summary-card__sub" th:text="${stats?.isCustomRange} ? '対象期間の1日平均' : '今月の1日平均'"></span>
         </div>
@@ -63,14 +75,16 @@
           <span class="summary-card__value">
             <span th:text="${stats != null && stats.shortest != null ? (stats.shortest / 60 + '時間' + stats.shortest % 60 + '分') : '--'}"></span>
           </span>
-          <span class="summary-card__sub" th:if="${stats != null && stats.shortestDate != null}" th:text="'記録日：' + ${#temporals.format(stats.shortestDate, 'yyyy/MM/dd')}"></span>
+          <span class="summary-card__sub" th:if="${stats != null && stats.shortestDate != null}"
+            th:text="'記録日：' + ${#temporals.format(stats.shortestDate, 'yyyy/MM/dd')}"></span>
         </div>
         <div class="summary-card">
           <span class="summary-card__label" th:text="${stats?.isCustomRange} ? '期間内最長' : '今月最長'">今月最長</span>
           <span class="summary-card__value">
             <span th:text="${stats != null && stats.longest != null ? (stats.longest / 60 + '時間' + stats.longest % 60 + '分') : '--'}"></span>
           </span>
-          <span class="summary-card__sub" th:if="${stats != null && stats.longestDate != null}" th:text="'記録日：' + ${#temporals.format(stats.longestDate, 'yyyy/MM/dd')}"></span>
+          <span class="summary-card__sub" th:if="${stats != null && stats.longestDate != null}"
+            th:text="'記録日：' + ${#temporals.format(stats.longestDate, 'yyyy/MM/dd')}"></span>
         </div>
       </div>
       <div th:replace="~{commons/data-controls :: chartCard(
@@ -105,7 +119,8 @@
               <tr th:each="record : ${logs}" th:data-date="${record.recordedDate}" th:data-value="${record.sleepMinutes}">
                 <td th:text="${record.recordedDate}">2026-07-14</td>
                 <td>
-                  <span class="badge" th:classappend="${record.sleepType != null && record.sleepType.name() == 'NAP' ? 'badge--warning' : 'badge--normal'}"
+                  <span class="badge"
+                    th:classappend="${record.sleepType != null && record.sleepType.name() == 'NAP' ? 'badge--warning' : 'badge--normal'}"
                     th:text="${record.sleepType != null && record.sleepType.name() == 'NAP' ? '昼寝' : '夜間'}">夜間</span>
                 </td>
                 <td th:text="${record.startTime}">23:00</td>
@@ -115,14 +130,16 @@
                 </td>
                 <td class="sleep-table__memo memo-cell" th:text="${record.memo != null ? record.memo : ''}"></td>
                 <td class="sleep-table__actions">
-                  <button type="button" class="icon-btn edit-btn" aria-label="編集" th:data-id="${record.id}" th:data-date="${record.recordedDate}" th:data-start-time="${record.startTime}" th:data-end-time="${record.endTime}"
+                  <button type="button" class="icon-btn edit-btn" aria-label="編集" th:data-id="${record.id}" th:data-date="${record.recordedDate}"
+                    th:data-start-time="${record.startTime}" th:data-end-time="${record.endTime}"
                     th:data-sleep-type="${record.sleepType != null ? record.sleepType.name() : 'NIGHT'}" th:data-memo="${record.memo}">
                     <img th:src="@{/image/edit.png}" alt="編集" class="icon-btn-img" />
                   </button>
                   <button type="submit" class="icon-btn icon-btn--danger" aria-label="削除" th:form="'deleteForm-' + ${record.id}">
                     <img th:src="@{/image/delete.png}" alt="削除" class="icon-btn-img" />
                   </button>
-                  <form class="delete-form" method="post" th:id="'deleteForm-' + ${record.id}" th:action="@{/profile/{profileId}/sleep/{id}/delete(profileId=${profileId}, id=${record.id})}"
+                  <form class="delete-form" method="post" th:id="'deleteForm-' + ${record.id}"
+                    th:action="@{/profile/{profileId}/sleep/{id}/delete(profileId=${profileId}, id=${record.id})}"
                     th:attr="data-confirm-message='「' + ${record.recordedDate} + '」の睡眠記録を削除しますか？&#10;この操作は取り消せません。'">
                   </form>
                 </td>

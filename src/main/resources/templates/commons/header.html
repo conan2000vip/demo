@@ -3,12 +3,15 @@
 
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" th:href="@{/css/common.css}" />
 </head>
 
 <body>
   <header th:fragment="header(activePage)" class="app-header">
     <div class="app-header__inner">
-      <a th:href="${currentProfile != null} ? @{/profile/{id}/home(id=${currentProfile.id})} : 'javascript:void(0)'" class="app-header__brand" th:style="${currentProfile == null} ? 'cursor: default;' : ''">
+      <a th:href="${currentProfile != null} ? @{/profile/{id}/home(id=${currentProfile.id})} : 'javascript:void(0)'" class="app-header__brand"
+        th:style="${currentProfile == null} ? 'cursor: default;' : ''">
         <span class="app-header__logo-icon">
           <img th:src="@{/image/logo.png}" alt="HealthLog Logo" class="app-header__logo-img" />
         </span>
@@ -16,7 +19,8 @@
       </a>
 
       <button type="button" class="app-header__nav-toggle" id="menuToggle" aria-label="メニュー" aria-expanded="false" aria-controls="appNavigation">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
           <line x1="3" y1="6" x2="21" y2="6"></line>
           <line x1="3" y1="12" x2="21" y2="12"></line>
           <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -24,27 +28,33 @@
       </button>
       <nav class="app-header__nav" id="appNavigation">
         <th:block th:if="${currentProfile != null}">
-          <a th:href="@{/profile/{id}/home(id=${currentProfile.id})}" class="app-header__nav-item" th:classappend="${activePage == 'home'} ? ' is-active' : ''">
+          <a th:href="@{/profile/{id}/home(id=${currentProfile.id})}" class="app-header__nav-item"
+            th:classappend="${activePage == 'home'} ? ' is-active' : ''">
             <img th:src="@{/image/home.png}" alt="" class="app-header__nav-icon" />
             <span>Home</span>
           </a>
-          <a th:if="${canViewWeight == true}" th:href="@{/profile/{id}/weight(id=${currentProfile.id})}" class="app-header__nav-item" th:classappend="${activePage == 'weight'} ? ' is-active' : ''">
+          <a th:if="${canViewWeight == true}" th:href="@{/profile/{id}/weight(id=${currentProfile.id})}" class="app-header__nav-item"
+            th:classappend="${activePage == 'weight'} ? ' is-active' : ''">
             <img th:src="@{/image/scales.png}" alt="" class="app-header__nav-icon" />
             <span>体重</span>
           </a>
-          <a th:if="${canViewSleep == true}" th:href="@{/profile/{id}/sleep(id=${currentProfile.id})}" class="app-header__nav-item" th:classappend="${activePage == 'sleep'} ? ' is-active' : ''">
+          <a th:if="${canViewSleep == true}" th:href="@{/profile/{id}/sleep(id=${currentProfile.id})}" class="app-header__nav-item"
+            th:classappend="${activePage == 'sleep'} ? ' is-active' : ''">
             <img th:src="@{/image/sleep.png}" alt="" class="app-header__nav-icon" />
             <span>睡眠</span>
           </a>
-          <a th:if="${canViewWater == true}" th:href="@{/profile/{id}/water(id=${currentProfile.id})}" class="app-header__nav-item" th:classappend="${activePage == 'water'} ? ' is-active' : ''">
+          <a th:if="${canViewWater == true}" th:href="@{/profile/{id}/water(id=${currentProfile.id})}" class="app-header__nav-item"
+            th:classappend="${activePage == 'water'} ? ' is-active' : ''">
             <img th:src="@{/image/water.png}" alt="" class="app-header__nav-icon" />
             <span>水分</span>
           </a>
-          <a th:if="${canViewStep == true}" th:href="@{/profile/{id}/step(id=${currentProfile.id})}" class="app-header__nav-item" th:classappend="${activePage == 'step'} ? ' is-active' : ''">
+          <a th:if="${canViewStep == true}" th:href="@{/profile/{id}/step(id=${currentProfile.id})}" class="app-header__nav-item"
+            th:classappend="${activePage == 'step'} ? ' is-active' : ''">
             <img th:src="@{/image/footstep.png}" alt="" class="app-header__nav-icon" />
             <span>歩数</span>
           </a>
-          <a th:if="${canViewMemo == true}" th:href="@{/profile/{id}/memo(id=${currentProfile.id})}" class="app-header__nav-item" th:classappend="${activePage == 'memo'} ? ' is-active' : ''">
+          <a th:if="${canViewMemo == true}" th:href="@{/profile/{id}/memo(id=${currentProfile.id})}" class="app-header__nav-item"
+            th:classappend="${activePage == 'memo'} ? ' is-active' : ''">
             <img th:src="@{/image/notes.png}" alt="" class="app-header__nav-icon" />
             <span>健康メモ</span>
           </a>
@@ -86,11 +96,13 @@
       </nav>
       <div class="app-header__right">
         <div class="app-header__user-wrap">
-          <button type="button" class="app-header__user" id="userMenuToggle" aria-haspopup="true" aria-expanded="false" th:style="${currentProfile == null} ? 'pointer-events: none;' : ''">
+          <button type="button" class="app-header__user" id="userMenuToggle" aria-haspopup="true" aria-expanded="false"
+            th:style="${currentProfile == null} ? 'pointer-events: none;' : ''">
             <img class="app-header__avatar" th:src="@{/image/avatar/{name}.png(name=${currentProfile?.avatar ?: 'avatar_01'})}" alt="Avatar" />
             <span class="app-header__user-info">
               <span class="app-header__user-name" th:text="${currentProfile?.name ?: 'ゲスト'}">ゲスト</span>
-              <span class="app-header__user-badge" th:text="${currentProfile != null ? (currentProfile.isPrimary ? '本人' : currentProfile.relationship) : 'ゲスト'}">ゲスト</span>
+              <span class="app-header__user-badge"
+                th:text="${currentProfile != null ? (currentProfile.isPrimary ? '本人' : currentProfile.relationship) : 'ゲスト'}">ゲスト</span>
             </span>
             <img th:src="@{/image/chevron-down.png}" alt="" class="app-header__chevron" />
           </button>

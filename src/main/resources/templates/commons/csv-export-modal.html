@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV出力</title>
+  <link rel="stylesheet" th:href="@{/css/common.css}" />
+</head>
+
+<body>
+  <div th:fragment="csvExportModal(exportUrl, previewUrl, currentType, filterStartDate, filterEndDate)" class="modal-overlay" id="csvExportOverlay"
+    th:attr="data-export-url=${exportUrl}, data-preview-url=${previewUrl}, data-current-type=${currentType}, data-filter-start=${filterStartDate}, data-filter-end=${filterEndDate}">
+
+    <div class="modal csv-modal" role="dialog" aria-modal="true" aria-labelledby="csvExportTitle">
+      <!-- ヘッダー -->
+      <div class="modal__header">
+        <div class="csv-modal__title">
+          <span class="csv-modal__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+              <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+              <path d="M8 13h2M14 13h2M8 17h2M14 17h2" />
+            </svg>
+          </span>
+          <div>
+            <h2 id="csvExportTitle">CSV出力</h2>
+            <p class="csv-modal__sub">指定した期間のデータをCSVファイルで出力できます。</p>
+          </div>
+        </div>
+        <button type="button" class="modal__close" id="csvExportClose" aria-label="閉じる">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- フォーム -->
+      <form class="csv-export-form" id="csvExportForm">
+        <div class="modal__body">
+          <div class="csv-modal__layout">
+            <div class="csv-modal__main">
+              <!-- 期間を選択 -->
+              <section class="csv-modal__panel">
+                <h3 class="csv-modal__panel-title">期間を選択</h3>
+                <div class="csv-range-options">
+                  <label><input type="radio" name="range" value="1W" checked /><span>7日</span></label>
+                  <label><input type="radio" name="range" value="1M" /><span>1ヶ月</span></label>
+                  <label><input type="radio" name="range" value="3M" /><span>3ヶ月</span></label>
+                  <label><input type="radio" name="range" value="6M" /><span>6ヶ月</span></label>
+                  <label><input type="radio" name="range" value="1Y" /><span>1年</span></label>
+                </div>
+
+                <div class="csv-modal__dates">
+                  <input type="date" name="startDate" id="csvStartDate" th:max="${T(java.time.LocalDate).now()}" required aria-label="開始日" />
+                  <span class="filter-bar__sep">〜</span>
+                  <input type="date" name="endDate" id="csvEndDate" th:max="${T(java.time.LocalDate).now()}" required aria-label="終了日" />
+                </div>
+                <p class="field-error" id="csvExportError" role="alert"></p>
+              </section>
+
+              <!--出力するデータを選択（4画面すべてのデータを選択可能） -->
+              <section class="csv-modal__panel csv-modal__panel--data">
+                <h3 class="csv-modal__panel-title">出力するデータを選択</h3>
+                <div class="csv-modal__checks">
+                  <label class="csv-modal__check">
+                    <input type="checkbox" name="types" value="weight" data-label="体重" th:checked="${currentType == 'weight'}" />
+                    <span>体重（kg）</span>
+                  </label>
+                  <label class="csv-modal__check">
+                    <input type="checkbox" name="types" value="sleep" data-label="睡眠" th:checked="${currentType == 'sleep'}" />
+                    <span>睡眠</span>
+                  </label>
+                  <label class="csv-modal__check">
+                    <input type="checkbox" name="types" value="water" data-label="水分" th:checked="${currentType == 'water'}" />
+                    <span>水分</span>
+                  </label>
+                  <label class="csv-modal__check">
+                    <input type="checkbox" name="types" value="steps" data-label="歩数" th:checked="${currentType == 'steps'}" />
+                    <span>歩数</span>
+                  </label>
+                </div>
+                <p class="field-error" id="csvTypesError" role="alert"></p>
+                <p class="csv-modal__note">※複数のデータ項目を選択した場合は、データ項目ごとにCSVファイルを出力する。</p>
+              </section>
+            </div>
+
+            <!-- プレビュー -->
+            <aside class="csv-modal__preview" aria-label="CSVプレビュー">
+              <!-- 複数選択時のみ表示。データ項目（= CSVファイル）ごとにプレビューを切り替える。既存の .quick-btn を再利用 -->
+              <div class="csv-modal__tabs" id="csvPreviewTabs" hidden></div>
+
+              <div class="csv-modal__file">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                  stroke-linejoin="round" aria-hidden="true">
+                  <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+                  <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+                  <path d="M8 13h2M14 13h2M8 17h2M14 17h2" />
+                </svg>
+                <span id="csvFileName">—</span>
+              </div>
+
+              <div class="data-table-scroll">
+                <table>
+                  <!-- 列見出しは表示中のデータ項目に応じて、プレビューJSONの columns から JS が描画する -->
+                  <thead id="csvPreviewHead"></thead>
+                  <tbody id="csvPreviewBody">
+                    <tr>
+                      <td class="csv-modal__empty">期間とデータを選択するとプレビューが表示されます。</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="csv-modal__info">
+                <h4>CSVファイルの内容</h4>
+                <ul>
+                  <li>選択した期間のデータが出力されます。</li>
+                  <li>出力項目（表示中のファイル）：<span id="csvColumnsText">—</span></li>
+                  <li>データは1日ごとに1行で整理されます。</li>
+                  <li>ファイルは「.csv形式」でダウンロードされ、ExcelやGoogleスプレッドシートで開いてご利用いただけます。</li>
+                </ul>
+              </div>
+            </aside>
+          </div>
+        </div>
+
+        <!-- フッター -->
+        <div class="modal__footer">
+          <button type="button" class="btn btn--ghost" id="csvExportCancel">キャンセル</button>
+          <button type="submit" class="btn btn--primary">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3v12m0 0 4-4m-4 4-4-4M4 21h16" />
+            </svg>
+            <span>CSVをダウンロード</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script th:src="@{/js/common.js}"></script>
+</body>
+
+</html>
