@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   initDeleteConfirm();
   initAjaxPagination();
+initCsvExportModal();
 });
 
 function initAlertAutoDismiss() {
