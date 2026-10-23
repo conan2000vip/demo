@@ -37,25 +37,31 @@ public class ProfileModelAdvice {
             }
         }
 
-        if (user == null) return;
+        if (user == null)
+            return;
 
         model.addAttribute("profileList", profileService.getProfiles(user.getId()));
         Profile currentProfile = profileService.resolveCurrentProfile(session, user.getId());
         model.addAttribute("currentProfile", currentProfile);
-        model.addAttribute("canViewWeight",
-                currentProfile != null && profileAccessValidation.hasReadAccess(
-                        currentProfile.getId(), user.getId(), Category.weight));
-        model.addAttribute("canViewSleep",
-                currentProfile != null && profileAccessValidation.hasReadAccess(
-                        currentProfile.getId(), user.getId(), Category.sleep));
-        model.addAttribute("canViewWater",
-                currentProfile != null && profileAccessValidation.hasReadAccess(
-                        currentProfile.getId(), user.getId(), Category.water));
-        model.addAttribute("canViewStep",
-                currentProfile != null && profileAccessValidation.hasReadAccess(
-                        currentProfile.getId(), user.getId(), Category.step));
-        model.addAttribute("canViewMemo",
-                currentProfile != null && profileAccessValidation.hasReadAccess(
-                        currentProfile.getId(), user.getId(), Category.memo));
+        model.addAttribute("canViewWeight", currentProfile != null
+                && profileAccessValidation.hasReadAccess(currentProfile.getId(), user.getId(), Category.weight));
+        model.addAttribute("canViewSleep", currentProfile != null
+                && profileAccessValidation.hasReadAccess(currentProfile.getId(), user.getId(), Category.sleep));
+        model.addAttribute("canViewWater", currentProfile != null
+                && profileAccessValidation.hasReadAccess(currentProfile.getId(), user.getId(), Category.water));
+        model.addAttribute("canViewStep", currentProfile != null
+                && profileAccessValidation.hasReadAccess(currentProfile.getId(), user.getId(), Category.step));
+        model.addAttribute("canViewMemo", currentProfile != null
+                && profileAccessValidation.hasReadAccess(currentProfile.getId(), user.getId(), Category.memo));
+        model.addAttribute("canEditWeight", currentProfile != null
+                && profileAccessValidation.hasEditAccess(currentProfile.getId(), user.getId(), Category.weight));
+        model.addAttribute("canEditSleep", currentProfile != null
+                && profileAccessValidation.hasEditAccess(currentProfile.getId(), user.getId(), Category.sleep));
+        model.addAttribute("canEditWater", currentProfile != null
+                && profileAccessValidation.hasEditAccess(currentProfile.getId(), user.getId(), Category.water));
+        model.addAttribute("canEditStep", currentProfile != null
+                && profileAccessValidation.hasEditAccess(currentProfile.getId(), user.getId(), Category.step));
+        model.addAttribute("canEditMemo", currentProfile != null
+                && profileAccessValidation.hasEditAccess(currentProfile.getId(), user.getId(), Category.memo));
     }
 }

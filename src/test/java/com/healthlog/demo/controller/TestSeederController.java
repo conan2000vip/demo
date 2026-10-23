@@ -67,6 +67,7 @@ public class TestSeederController {
 
         // シナリオに応じて日数を計算する。
         int days = switch (scenario) {
+        case "0_DAY" -> 0;
         case "1_DAY" -> 1;
         case "2_DAYS" -> 2;
         case "3_DAYS" -> 3;

@@ -66,19 +66,23 @@
                 <h3 class="csv-modal__panel-title">出力するデータを選択</h3>
                 <div class="csv-modal__checks">
                   <label class="csv-modal__check">
-                    <input type="checkbox" name="types" value="weight" data-label="体重" th:checked="${currentType == 'weight'}" />
+                    <input type="checkbox" name="types" value="weight" data-label="体重" th:checked="${currentType == 'weight'}"
+                      th:disabled="${canViewWeight != true}" />
                     <span>体重（kg）</span>
                   </label>
                   <label class="csv-modal__check">
-                    <input type="checkbox" name="types" value="sleep" data-label="睡眠" th:checked="${currentType == 'sleep'}" />
+                    <input type="checkbox" name="types" value="sleep" data-label="睡眠" th:checked="${currentType == 'sleep'}"
+                      th:disabled="${canViewSleep != true}" />
                     <span>睡眠</span>
                   </label>
                   <label class="csv-modal__check">
-                    <input type="checkbox" name="types" value="water" data-label="水分" th:checked="${currentType == 'water'}" />
+                    <input type="checkbox" name="types" value="water" data-label="水分" th:checked="${currentType == 'water'}"
+                      th:disabled="${canViewWater != true}" />
                     <span>水分</span>
                   </label>
                   <label class="csv-modal__check">
-                    <input type="checkbox" name="types" value="steps" data-label="歩数" th:checked="${currentType == 'steps'}" />
+                    <input type="checkbox" name="types" value="steps" data-label="歩数" th:checked="${currentType == 'steps'}"
+                      th:disabled="${canViewSteps != true}" />
                     <span>歩数</span>
                   </label>
                 </div>

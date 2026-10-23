@@ -60,6 +60,12 @@ public class ProfileAccessValidation {
             return profile;
         }
 
+        Profile authenticatedProfile = profileRepository.findByIdAndUser_Id(authenticatedProfileId, currentUserId)
+                .orElseThrow(() -> new BusinessException(HttpStatus.FORBIDDEN, "認証プロファイルが見つかりません"));
+        if (authenticatedProfile.isPrimary() && profile.isManagedByPrimary()) {
+            return profile;
+        }
+
         Role role = shareSettingRepository
                 .findByOwnerProfile_IdAndViewerProfile_IdAndCategory(profile.getId(), authenticatedProfileId, category)
                 .map(setting -> setting.getRole()).orElse(Role.viewer);
@@ -77,6 +83,15 @@ public class ProfileAccessValidation {
     public boolean hasReadAccess(Long profileId, Long currentUserId, Category category) {
         try {
             validateAndGetProfile(profileId, currentUserId, category);
+            return true;
+        } catch (BusinessException exception) {
+            return false;
+        }
+    }
+
+    public boolean hasEditAccess(Long profileId, Long currentUserId, Category category) {
+        try {
+            validateAndGetEditableProfile(profileId, currentUserId, category);
             return true;
         } catch (BusinessException exception) {
             return false;

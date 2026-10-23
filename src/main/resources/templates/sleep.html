@@ -35,7 +35,7 @@
                 @{/profile/{profileId}/export/csv/preview(profileId=${profileId})},
                 ${currentType}, ${filterStartDate}, ${filterEndDate})}">
           </div>
-          <button type="button" class="btn btn--primary" id="openAddModalBtn">
+          <button th:if="${canEditSleep}" type="button" class="btn btn--primary" id="openAddModalBtn">
             <i data-lucide="plus"></i>記録する
           </button>
         </div>
@@ -112,7 +112,7 @@
                 <th>起床</th>
                 <th>睡眠時間</th>
                 <th>メモ</th>
-                <th class="sleep-table__actions-col"></th>
+                <th th:if="${canEditSleep}" class="sleep-table__actions-col"></th>
               </tr>
             </thead>
             <tbody>
@@ -129,7 +129,7 @@
                   <span th:text="${record.sleepMinutes != null ? (record.sleepMinutes / 60 + 'h' + record.sleepMinutes % 60 + 'm') : '--'}"></span>
                 </td>
                 <td class="sleep-table__memo memo-cell" th:text="${record.memo != null ? record.memo : ''}"></td>
-                <td class="sleep-table__actions">
+                <td th:if="${canEditSleep}" class="sleep-table__actions">
                   <button type="button" class="icon-btn edit-btn" aria-label="編集" th:data-id="${record.id}" th:data-date="${record.recordedDate}"
                     th:data-start-time="${record.startTime}" th:data-end-time="${record.endTime}"
                     th:data-sleep-type="${record.sleepType != null ? record.sleepType.name() : 'NIGHT'}" th:data-memo="${record.memo}">
@@ -155,14 +155,14 @@
         <div class="empty-state" th:if="${#lists.isEmpty(logs) and !hasAnyLog}">
           <img th:src="@{/image/sleep.png}" alt="" class="sleep-page__icon-img" />
           <p>まだ睡眠が記録されていません</p>
-          <button type="button" class="btn btn--primary" id="openAddModalBtnEmpty">
+          <button th:if="${canEditSleep}" type="button" class="btn btn--primary" id="openAddModalBtnEmpty">
             <i data-lucide="plus"></i>最初の記録をつける
           </button>
         </div>
         <div class="empty-state" th:if="${#lists.isEmpty(logs) and hasAnyLog}">
           <i data-lucide="calendar-days"></i>
           <p>選択した期間に記録がありません</p>
-          <button type="button" class="btn btn--primary" id="openAddModalBtnFiltered" th:data-date="${filterStartDate}">
+          <button th:if="${canEditSleep}" type="button" class="btn btn--primary" id="openAddModalBtnFiltered" th:data-date="${filterStartDate}">
             <i data-lucide="plus"></i>この期間の記録を追加する
           </button>
         </div>

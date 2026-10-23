@@ -35,7 +35,7 @@
                  @{/profile/{profileId}/export/csv/preview(profileId=${profileId})},
                  ${currentType}, ${filterStartDate}, ${filterEndDate})}">
           </div>
-          <button type="button" class="btn btn--primary" id="openAddModalBtn">
+          <button th:if="${canEditWater}" type="button" class="btn btn--primary" id="openAddModalBtn">
             <i data-lucide="plus"></i>記録する
           </button>
         </div>
@@ -115,7 +115,7 @@
                 <th>飲み物</th>
                 <th>量 (ml)</th>
                 <th>メモ</th>
-                <th class="water-table__actions-col"></th>
+                <th th:if="${canEditWater}" class="water-table__actions-col"></th>
               </tr>
             </thead>
             <tbody>
@@ -131,7 +131,7 @@
                 </td>
                 <td class="water-table__memo memo-cell" th:text="${record.memo != null ? record.memo : ''}"
                   th:attr="data-full-memo=${record.memo != null ? record.memo : ''}"></td>
-                <td class="water-table__actions">
+                <td th:if="${canEditWater}" class="water-table__actions">
                   <button type="button" class="icon-btn edit-btn" aria-label="編集" th:data-id="${record.id}" th:data-date="${record.recordedDate}"
                     th:data-drink-type="${record.drinkType}" th:data-amount="${record.amountMl}" th:data-time="${record.recordedTime}"
                     th:data-memo="${record.memo}">
@@ -157,14 +157,14 @@
         <div class="empty-state" th:if="${#lists.isEmpty(logs) and !hasAnyLog}">
           <img src="/image/water.png" alt="" class="water-page__icon-img">
           <p>まだ水分が記録されていません</p>
-          <button type="button" class="btn btn--primary" id="openAddModalBtnEmpty">
+          <button th:if="${canEditWater}" type="button" class="btn btn--primary" id="openAddModalBtnEmpty">
             <i data-lucide="plus"></i>最初の記録をつける
           </button>
         </div>
         <div class="empty-state" th:if="${#lists.isEmpty(logs) and hasAnyLog}">
           <i data-lucide="calendar-days"></i>
           <p>選択した期間に記録がありません</p>
-          <button type="button" class="btn btn--primary" id="openAddModalBtnFiltered" th:data-date="${filterStartDate}">
+          <button th:if="${canEditWater}" type="button" class="btn btn--primary" id="openAddModalBtnFiltered" th:data-date="${filterStartDate}">
             <i data-lucide="plus"></i>この期間の記録を追加する
           </button>
         </div>

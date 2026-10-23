@@ -138,6 +138,7 @@ textarea {
     transition: 0.2s ease;
     flex-shrink: 0;
     white-space: nowrap;
+    box-sizing: border-box;
 }
 
 .app-header__nav-item:hover {
@@ -231,7 +232,7 @@ textarea {
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: 4px;
     margin: 0;
     padding: 0;
     width: 100%;
@@ -272,12 +273,12 @@ textarea {
 }
 
 .app-header__profile-item:hover {
-    background: #f5f7f6;
+    background: #f3f4f6;
 }
 
 .app-header__profile-item.is-current {
-    background: #eefcf5;
-    border: 1px solid #8de0ad;
+    background: var(--wp-primary-light);
+    border: none;
 }
 
 .app-header__profile-check {
@@ -316,7 +317,7 @@ textarea {
 }
 
 .app-header__manage-link:hover {
-    background: rgb(223, 255, 255);
+    background: #f3f4f6;
 }
 
 .app-header__dropdown-divider {
@@ -998,7 +999,7 @@ textarea {
     position: fixed;
     inset: auto;
     z-index: 20;
-    width: min(340px, calc(100vw - 32px));
+    width: min(360px, calc(100vw - 32px));
     box-sizing: border-box;
     padding: 16px;
     border: 1px solid #dbe3ed;
@@ -1014,8 +1015,8 @@ textarea {
 
 .chart-range-picker__presets {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 6px;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 4px;
 }
 
 .chart-range-picker__presets .quick-btn {
@@ -2026,6 +2027,11 @@ textarea {
   font-weight: 600;
   color: var(--wp-text);
   cursor: pointer;
+}
+
+.csv-modal__check:has(input:disabled) {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .csv-range-options input,

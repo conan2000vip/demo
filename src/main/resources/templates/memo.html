@@ -26,7 +26,7 @@
             <p th:text="${currentProfile != null ? currentProfile.name + ' のメモ記録' : 'ゲスト のメモ記録'}"></p>
           </div>
         </div>
-        <button type="button" class="btn btn--primary" id="openAddModalBtn"><i data-lucide="plus"></i>記録する</button>
+        <button th:if="${canEditMemo}" type="button" class="btn btn--primary" id="openAddModalBtn"><i data-lucide="plus"></i>記録する</button>
       </div>
       <div class="alert alert--error" th:if="${error}" id="errorAlert" data-auto-hide="true">
         <i data-lucide="alert-circle"></i><span th:text="${error}"></span>
@@ -56,7 +56,7 @@
                   <th>日付</th>
                   <th>タイトル</th>
                   <th>メモ</th>
-                  <th class="memo-table__actions-col"></th>
+                  <th th:if="${canEditMemo}" class="memo-table__actions-col"></th>
                 </tr>
               </thead>
               <tbody>
@@ -64,8 +64,9 @@
                   <td th:text="${#temporals.format(record.recordedDate, 'yyyy-MM-dd')}"></td>
                   <td class="memo-table__title" th:text="${record.title}"></td>
                   <td class="memo-table__memo memo-cell" th:text="${record.content}" th:attr="data-full-memo=${record.content}"></td>
-                  <td class="memo-table__actions">
-                    <button type="button" class="icon-btn edit-btn" aria-label="編集" th:data-id="${record.id}" th:data-date="${record.recordedDate}" th:data-title="${record.title}" th:data-content="${record.content}">
+                  <td th:if="${canEditMemo}" class="memo-table__actions">
+                    <button type="button" class="icon-btn edit-btn" aria-label="編集" th:data-id="${record.id}" th:data-date="${record.recordedDate}"
+                      th:data-title="${record.title}" th:data-content="${record.content}">
                       <img th:src="@{/image/edit.png}" alt="編集" class="icon-btn-img" />
                     </button>
 
@@ -73,8 +74,10 @@
                       <img th:src="@{/image/delete.png}" alt="削除" class="icon-btn-img" />
                     </button>
 
-                    <form class="delete-form" method="post" th:id="'deleteForm-' + ${record.id}" th:action="@{/profile/{profileId}/memo/{logId}/delete(profileId=${profileId}, logId=${record.id})}"
-                      th:attr="data-confirm-message='「' + ${#temporals.format(record.recordedDate, 'yyyy/MM/dd')} + '」のメモを削除しますか？&#10;この操作は取り消せません。'"></form>
+                    <form class="delete-form" method="post" th:id="'deleteForm-' + ${record.id}"
+                      th:action="@{/profile/{profileId}/memo/{logId}/delete(profileId=${profileId}, logId=${record.id})}"
+                      th:attr="data-confirm-message='「' + ${#temporals.format(record.recordedDate, 'yyyy/MM/dd')} + '」のメモを削除しますか？&#10;この操作は取り消せません。'">
+                    </form>
                   </td>
                 </tr>
               </tbody>
@@ -89,13 +92,14 @@
           <div class="empty-state" th:if="${#lists.isEmpty(logs) and !hasAnyLog}">
             <img th:src="@{/image/notes.png}" alt="" class="memo-page__icon-img" />
             <p>まだメモが記録されていません</p>
-            <button type="button" class="btn btn--primary" id="openAddModalBtnEmpty"><i data-lucide="plus"></i>最初のメモを記録する</button>
+            <button type="button" th:if="${canEditMemo}" class="btn btn--primary" id="openAddModalBtnEmpty"><i
+                data-lucide="plus"></i>最初のメモを記録する</button>
           </div>
 
           <div class="empty-state" th:if="${#lists.isEmpty(logs) and hasAnyLog}">
             <i data-lucide="calendar-days"></i>
             <p>選択した期間にメモがありません</p>
-            <button type="button" class="btn btn--primary" id="openAddModalBtnFiltered" th:data-date="${filterStartDate}">
+            <button th:if="${canEditMemo}" type="button" class="btn btn--primary" id="openAddModalBtnFiltered" th:data-date="${filterStartDate}">
               <i data-lucide="plus"></i>この期間のメモを追加する
             </button>
           </div>

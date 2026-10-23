@@ -39,6 +39,44 @@ document.addEventListener("DOMContentLoaded", () => {
   initCsvExportModal();
 });
 
+function formatIsoDate(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function todayInJapan() {
+  const text = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit'
+  }).format(new Date());
+  const [y, m, d] = text.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+// range: '1D' | '1W' | '1M' | '3M' | '6M' | '1Y'
+function getCalendarRange(range, today = todayInJapan()) {
+  const end = new Date(today);
+  const start = new Date(end);
+  if (range === '1W') start.setDate(start.getDate() - 6);
+
+  const months = { '1M': 1, '3M': 3, '6M': 6, '1Y': 12 }[range];
+  if (months) {
+    const isLastDay = new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1).getDate() === 1;
+    if (isLastDay) {
+      start.setDate(1);
+      start.setMonth(start.getMonth() - (months - 1));
+    } else {
+      const originalDay = start.getDate();
+      start.setDate(1);
+      start.setMonth(start.getMonth() - months);
+      start.setDate(Math.min(originalDay, new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate()));
+      start.setDate(start.getDate() + 1);
+    }
+  }
+  return { start: formatIsoDate(start), end: formatIsoDate(end) };
+}
+
 function initAlertAutoDismiss() {
   document.querySelectorAll(".alert").forEach((alert) => {
     window.setTimeout(() => alert.remove(), 10000);
@@ -111,28 +149,8 @@ function initChartRangePicker() {
   const error = document.getElementById("chartRangeError");
   if (!form || !toggle || !label || !startInput || !endInput) return;
 
-  function toIsoDate(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  }
-
   function getRange(range) {
-    const end = new Date();
-    end.setHours(0, 0, 0, 0);
-    const start = new Date(end);
-    if (range === "1W") start.setDate(start.getDate() - 6);
-    if (range === "1M") start.setDate(start.getDate() - 29);
-    if (range === "6M" || range === "1Y") {
-      const months = range === "6M" ? 6 : 12;
-      const originalDay = start.getDate();
-      start.setDate(1);
-      start.setMonth(start.getMonth() - months);
-      start.setDate(
-        Math.min(originalDay, new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate(),),);
-    }
-    return { start: toIsoDate(start), end: toIsoDate(end) };
+    return getCalendarRange(range);
   }
 
   function formatDate(value, includeYear = true) {
@@ -271,38 +289,8 @@ function initFilterForm() {
     return;
   form.dataset.filterInitialized = "true";
 
-  function toIsoDate(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  }
-
-  function subtractMonths(date, count) {
-    const target = new Date(date);
-    const originalDay = target.getDate();
-    target.setDate(1);
-    target.setMonth(target.getMonth() - count);
-    const daysInTargetMonth = new Date(
-      target.getFullYear(),
-      target.getMonth() + 1,
-      0,
-    ).getDate();
-    target.setDate(Math.min(originalDay, daysInTargetMonth));
-    return target;
-  }
-
   function getRange(range) {
-    const end = new Date();
-    end.setHours(0, 0, 0, 0);
-    const start = new Date(end);
-    if (range === "1W") start.setDate(start.getDate() - 6);
-    if (range === "1M") start.setTime(subtractMonths(end, 1).getTime());
-    if (range === "6M") start.setTime(subtractMonths(end, 6).getTime());
-    if (range === "1Y") start.setTime(subtractMonths(end, 12).getTime());
-    if (range === "1M" || range === "6M" || range === "1Y")
-      start.setDate(start.getDate() + 1);
-    return { start: toIsoDate(start), end: toIsoDate(end) };
+    return getCalendarRange(range);
   }
 
   function syncActiveRange() {
@@ -475,7 +463,7 @@ window.initMetricChart = function ({
     unit,
     type,
     days: 7,
-    isSearching: params.has("startDate") || params.has("endDate"),
+    isSearching: Boolean(params.get("startDate") || params.get("endDate")),
     targetValue,
     color,
     showDataLabels: true,
@@ -861,62 +849,8 @@ function initCsvExportModal() {
   let previewData = {}; // { weight: { columns, rows } | { failed: true }, ... }
   let activeType = null; // プレビューに表示中のデータ項目
 
-  function toIsoDate(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  }
-
-  // 日本の暦（Asia/Tokyo）での「今日」。ブラウザのタイムゾーン設定に左右されない
-  function todayInJapan() {
-    const text = new Intl.DateTimeFormat("en-CA", {
-      timeZone: "Asia/Tokyo",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).format(new Date()); // 例: "2026-10-21"
-    const [year, month, day] = text.split("-").map(Number);
-    return new Date(year, month - 1, day);
-  }
-
-  // 期間の計算（暦に従う。民法140条・143条の考え方）
-  //   ・7日        : 今日を含めて7日間
-  //   ・今日が月末 : 暦の月単位。1ヶ月 = 当月1日〜月末、3ヶ月 = 2ヶ月前の1日〜月末 …
-  //   ・月の途中   : Nか月前の同日の翌日〜今日（例: 10/21 の 1ヶ月 → 9/22〜10/21）
-  //                  Nか月前に同日がない月は、その月の末日を同日として扱う
-  function getRange(range, today = todayInJapan()) {
-    const end = new Date(today);
-    const start = new Date(end);
-
-    if (range === "1W") start.setDate(start.getDate() - 6);
-
-    const months = { "1M": 1, "3M": 3, "6M": 6, "1Y": 12 }[range];
-    if (months) {
-      // 明日が1日 = 今日は月末
-      const isLastDayOfMonth =
-        new Date(
-          end.getFullYear(),
-          end.getMonth(),
-          end.getDate() + 1,
-        ).getDate() === 1;
-      if (isLastDayOfMonth) {
-        start.setDate(1);
-        start.setMonth(start.getMonth() - (months - 1));
-      } else {
-        const originalDay = start.getDate();
-        start.setDate(1);
-        start.setMonth(start.getMonth() - months);
-        start.setDate(
-          Math.min(
-            originalDay,
-            new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate(),
-          ),
-        );
-        start.setDate(start.getDate() + 1);
-      }
-    }
-    return { start: toIsoDate(start), end: toIsoDate(end) };
+  function getRange(range) {
+    return getCalendarRange(range);
   }
 
   // 入力中の日付と一致するラジオを選択し、一致しなければ全て未選択にする
@@ -1034,9 +968,7 @@ function initCsvExportModal() {
     }
   }
 
-  // プレビューJSON（想定。データ項目ごとに1リクエスト）:
-  //   GET {previewUrl}?startDate=…&endDate=…&type=weight
-  //   → { columns: ["日付", "体重 (kg)", ...], rows: [["2026-04-01", "59.0", ...], ...] }
+  // 選択中のデータ項目を全て読み込む
   async function loadPreview() {
     previewData = {};
     renderPreview();
