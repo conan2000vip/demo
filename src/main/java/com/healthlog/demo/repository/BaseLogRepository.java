@@ -15,47 +15,48 @@ import com.healthlog.demo.entity.BaseLog;
 @NoRepositoryBean
 public interface BaseLogRepository<T extends BaseLog> extends JpaRepository<T, Long> {
 
-        // === 1. リスト検索 - 旧4条件 ===
-        List<T> findByProfile_IdOrderByRecordedDateDesc(Long profileId);
+    // === 1. リスト検索 - 旧4条件 ===
+    List<T> findByProfile_IdOrderByRecordedDateDesc(Long profileId);
 
-        List<T> findByProfile_IdAndRecordedDateBetweenOrderByRecordedDateDesc(
-                        Long profileId, LocalDate from, LocalDate to);
+    List<T> findByProfile_IdAndRecordedDateBetweenOrderByRecordedDateDesc(Long profileId, LocalDate from, LocalDate to);
 
-        List<T> findByProfile_IdAndRecordedDateGreaterThanEqualOrderByRecordedDateDesc(
-                        Long profileId, LocalDate from);
+    List<T> findByProfile_IdAndRecordedDateGreaterThanEqualOrderByRecordedDateDesc(Long profileId, LocalDate from);
 
-        List<T> findByProfile_IdAndRecordedDateLessThanEqualOrderByRecordedDateDesc(
-                        Long profileId, LocalDate to);
+    List<T> findByProfile_IdAndRecordedDateLessThanEqualOrderByRecordedDateDesc(Long profileId, LocalDate to);
 
-        // === 2. ページ検索 - 旧4条件 ===
-        Page<T> findByProfile_IdOrderByRecordedDateDesc(Long profileId, Pageable pageable);
+    // CSV出力用：期間内を日付の昇順（同日はID順）で取得
+    List<T> findByProfile_IdAndRecordedDateBetweenOrderByRecordedDateAscIdAsc(Long profileId, LocalDate from,
+            LocalDate to);
 
-        Page<T> findByProfile_IdAndRecordedDateBetweenOrderByRecordedDateDesc(
-                        Long profileId, LocalDate from, LocalDate to, Pageable pageable);
+    // === 2. ページ検索 - 旧4条件 ===
+    Page<T> findByProfile_IdOrderByRecordedDateDesc(Long profileId, Pageable pageable);
 
-        Page<T> findByProfile_IdAndRecordedDateGreaterThanEqualOrderByRecordedDateDesc(
-                        Long profileId, LocalDate from, Pageable pageable);
+    Page<T> findByProfile_IdAndRecordedDateBetweenOrderByRecordedDateDesc(Long profileId, LocalDate from, LocalDate to,
+            Pageable pageable);
 
-        Page<T> findByProfile_IdAndRecordedDateLessThanEqualOrderByRecordedDateDesc(
-                        Long profileId, LocalDate to, Pageable pageable);
+    Page<T> findByProfile_IdAndRecordedDateGreaterThanEqualOrderByRecordedDateDesc(Long profileId, LocalDate from,
+            Pageable pageable);
 
-        // === 3. データの存在確認と件数取得 ===
-        boolean existsByProfile_Id(Long profileId);
+    Page<T> findByProfile_IdAndRecordedDateLessThanEqualOrderByRecordedDateDesc(Long profileId, LocalDate to,
+            Pageable pageable);
 
-        boolean existsByProfile_IdAndRecordedDate(Long profileId, LocalDate recordedDate);
+    // === 3. データの存在確認と件数取得 ===
+    boolean existsByProfile_Id(Long profileId);
 
-        boolean existsByProfile_IdAndCreatedAtGreaterThanEqualAndCreatedAtLessThan(
-                        Long profileId, LocalDateTime from, LocalDateTime to);
+    boolean existsByProfile_IdAndRecordedDate(Long profileId, LocalDate recordedDate);
 
-        long countByProfile_IdAndRecordedDate(Long profileId, LocalDate recordedDate);
+    boolean existsByProfile_IdAndCreatedAtGreaterThanEqualAndCreatedAtLessThan(Long profileId, LocalDateTime from,
+            LocalDateTime to);
 
-        // === 4. 最新または直近のレコードを取得 ===
-        Optional<T> findTopByProfile_IdOrderByRecordedDateDesc(Long profileId);
+    long countByProfile_IdAndRecordedDate(Long profileId, LocalDate recordedDate);
 
-        Optional<T> findTopByProfile_IdAndRecordedDateLessThanOrderByRecordedDateDesc(Long profileId, LocalDate date);
+    // === 4. 最新または直近のレコードを取得 ===
+    Optional<T> findTopByProfile_IdOrderByRecordedDateDesc(Long profileId);
 
-        // === 5. レコードを削除 ===
-        void deleteByProfile_Id(Long profileId);
+    Optional<T> findTopByProfile_IdAndRecordedDateLessThanOrderByRecordedDateDesc(Long profileId, LocalDate date);
 
-        void deleteByIdAndProfile_Id(Long id, Long profileId);
+    // === 5. レコードを削除 ===
+    void deleteByProfile_Id(Long profileId);
+
+    void deleteByIdAndProfile_Id(Long id, Long profileId);
 }

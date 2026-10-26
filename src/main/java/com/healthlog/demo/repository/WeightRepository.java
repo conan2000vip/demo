@@ -18,6 +18,7 @@ public interface WeightRepository extends BaseLogRepository<Weight> {
     // 1日の体重記録をすべて取得（朝・夜の詳細表示用）
     List<Weight> findByProfile_IdAndRecordedDateOrderByIdDesc(Long profileId, LocalDate recordedDate);
 
+    // 体重・睡眠・水分・歩数のすべての記録がある日を取得
     @Query(value = """
             SELECT MAX(w.created_at)
             FROM weight_logs w

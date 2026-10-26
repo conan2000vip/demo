@@ -37,7 +37,7 @@ public class ProfileShareServiceImpl implements ProfileShareService {
 
         // 2. 家族メンバーのプロファイルから、現在のプロファイルを除外する。
         return familyProfiles.stream().filter(target -> !Objects.equals(target.getId(), activeProfileId))
-                .map(target -> {
+                .filter(target -> !(activeProfile.isManagedByPrimary() && target.isPrimary())).map(target -> {
                     ProfileShareSettingDto.Item item = new ProfileShareSettingDto.Item();
                     item.setTargetProfileId(target.getId());
                     item.setTargetProfileName(target.getName());
@@ -68,6 +68,9 @@ public class ProfileShareServiceImpl implements ProfileShareService {
 
             Profile viewerProfile = profileRepository.findByIdAndUser_Id(item.getTargetProfileId(), currentUserId)
                     .orElseThrow(() -> new BusinessException(HttpStatus.FORBIDDEN, "アクセス権限がありません"));
+            if (activeProfile.isManagedByPrimary() && viewerProfile.isPrimary()) {
+                continue;
+            }
             ProfileShareSettingDto.CategoryRole roles = item.getRoles();
 
             // 5つのデータ項目について共有設定を一括登録または更新する。

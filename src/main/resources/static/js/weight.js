@@ -13,6 +13,7 @@ function initChart() {
     unit: "kg",
     type: "line",
     targetValue: targetWeight,
+    beginAtZero: false,
     valueFormatter: (value) => String(value)
   });
 }

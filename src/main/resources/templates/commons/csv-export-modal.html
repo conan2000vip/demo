@@ -82,12 +82,15 @@
                   </label>
                   <label class="csv-modal__check">
                     <input type="checkbox" name="types" value="steps" data-label="歩数" th:checked="${currentType == 'steps'}"
-                      th:disabled="${canViewSteps != true}" />
+                      th:disabled="${canViewStep != true}" />
                     <span>歩数</span>
                   </label>
                 </div>
                 <p class="field-error" id="csvTypesError" role="alert"></p>
                 <p class="csv-modal__note">※複数のデータ項目を選択した場合は、データ項目ごとにCSVファイルを出力する。</p>
+                <p class="csv-modal__note" th:if="${canViewWeight != true or canViewSleep != true or canViewWater != true or canViewStep != true}">
+                  ※グレーの項目は、共有されていないため出力できません。
+                </p>
               </section>
             </div>
 

@@ -32,10 +32,9 @@ public class HomeFamilyServiceImpl implements HomeFamilyService {
             boolean canViewSleep = profileAccessValidation.hasReadAccess(id, currentUserId, Category.sleep);
             boolean canViewWater = profileAccessValidation.hasReadAccess(id, currentUserId, Category.water);
             boolean canViewStep = profileAccessValidation.hasReadAccess(id, currentUserId, Category.step);
-            boolean canViewMemo = profileAccessValidation.hasReadAccess(id, currentUserId, Category.memo);
 
             int totalItems = (canViewWeight ? 1 : 0) + (canViewSleep ? 1 : 0) + (canViewWater ? 1 : 0)
-                    + (canViewStep ? 1 : 0) + (canViewMemo ? 1 : 0);
+                    + (canViewStep ? 1 : 0);
             Map<String, Object> t = homeTodayService.buildToday(id, currentUserId);
 
             // 今日の記録があるかどうかを判定する.
@@ -43,10 +42,8 @@ public class HomeFamilyServiceImpl implements HomeFamilyService {
             boolean hasSleep = !"NO_RECORD".equals(t.get("sleepGoalStatus"));
             boolean hasWater = !"NO_RECORD".equals(t.get("waterGoalStatus"));
             boolean hasStep = !"NO_RECORD".equals(t.get("stepGoalStatus"));
-            boolean hasMemo = !"NO_RECORD".equals(t.get("memoGoalStatus"));
 
-            int doneItems = (hasWeight ? 1 : 0) + (hasSleep ? 1 : 0) + (hasWater ? 1 : 0) + (hasStep ? 1 : 0)
-                    + (hasMemo ? 1 : 0);
+            int doneItems = (hasWeight ? 1 : 0) + (hasSleep ? 1 : 0) + (hasWater ? 1 : 0) + (hasStep ? 1 : 0);
 
             boolean hasHistory = hasWeight || hasSleep || hasWater || hasStep;
             LocalDate latestDate = hasHistory ? today : null;
@@ -64,8 +61,6 @@ public class HomeFamilyServiceImpl implements HomeFamilyService {
                 issues.add("水分未入力");
             if (canViewStep && !hasStep)
                 issues.add("歩数未入力");
-            if (canViewMemo && !hasMemo)
-                issues.add("メモ未入力");
 
             String status;
             String statusLabel;

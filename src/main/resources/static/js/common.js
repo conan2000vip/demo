@@ -454,6 +454,7 @@ window.initMetricChart = function ({
   type,
   targetValue = null,
   color = null,
+  beginAtZero = false,
   valueFormatter,
 }) {
   const params = new URLSearchParams(window.location.search);
@@ -466,6 +467,7 @@ window.initMetricChart = function ({
     isSearching: Boolean(params.get("startDate") || params.get("endDate")),
     targetValue,
     color,
+    beginAtZero,
     showDataLabels: true,
     ...(valueFormatter ? { valueFormatter } : {}),
   });
@@ -492,14 +494,13 @@ window.HealthChart = (() => {
   function create({
     canvasId,
     data,
-    unit = "",
     type = "bar",
     days = defaultDays,
     isSearching = false,
     targetValue = null,
     color = null,
     showDataLabels = false,
-    labelColor = "#1e293b",
+    beginAtZero = false,
     valueFormatter = (v) => String(v),
   }) {
     const canvas = document.getElementById(canvasId);
@@ -602,8 +603,8 @@ window.HealthChart = (() => {
           y: {
             grid: { display: true, color: "#f1f5f9", drawTicks: false },
             border: { display: true, color: "#94a3b8", width: 1.5 },
-            beginAtZero: false,
-            suggestedMin: yMin,
+            beginAtZero,
+            suggestedMin: beginAtZero ? undefined : yMin,
             suggestedMax: yMax,
             ticks: { padding: 10, color: "#475569", font: { weight: "bold" } },
           },
