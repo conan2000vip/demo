@@ -1459,7 +1459,12 @@ textarea {
 
 .modal__close:hover,
 .alert__close:hover {
-  transform: rotate(90deg);
+  transform: translateY(-2px);
+}
+
+.modal__close:active,
+.alert__close:active {
+  transform: translateY(0) scale(0.97);
 }
 
 .btn i,

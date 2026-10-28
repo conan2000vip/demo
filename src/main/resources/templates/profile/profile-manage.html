@@ -26,9 +26,10 @@
         <h1 class="profile-manage__title">プロファイル管理</h1>
         <p class="profile-manage__subtitle">ご家族のプロファイル作成・編集およびデータ共有設定を行えます。</p>
       </div>
-      <a th:if="${canManageAllProfiles == true}" th:href="@{/profile/new}" class="btn btn--primary">
-        + 新規プロファイル追加
-      </a>
+      <div class="header-actions">
+        <a th:if="${canManageAllProfiles == true}" th:href="@{/profile/new}" class="btn btn--primary">
+          <i data-lucide="plus"></i>新規プロファイル追加</a>
+      </div>
     </div>
     <div class="profile-manage__list">
       <div th:each="p : ${profiles}" class="profile-manage__card"
@@ -97,7 +98,7 @@
     </div>
   </div>
   <div th:replace="~{commons/confirm-modal :: deleteModal}"></div>
-
+  <script src="https://unpkg.com/lucide@latest"></script>
   <script th:src="@{/js/common.js}"></script>
   <script th:src="@{/js/profile-share.js}"></script>
 </body>

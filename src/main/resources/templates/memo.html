@@ -26,7 +26,9 @@
             <p th:text="${currentProfile != null ? currentProfile.name + ' のメモ記録' : 'ゲスト のメモ記録'}"></p>
           </div>
         </div>
-        <button th:if="${canEditMemo}" type="button" class="btn btn--primary" id="openAddModalBtn"><i data-lucide="plus"></i>記録する</button>
+        <div class="header-actions">
+          <button th:if="${canEditMemo}" type="button" class="btn btn--primary" id="openAddModalBtn"><i data-lucide="plus"></i>記録する</button>
+        </div>
       </div>
       <div class="alert alert--error" th:if="${error}" id="errorAlert" data-auto-hide="true">
         <i data-lucide="alert-circle"></i><span th:text="${error}"></span>
