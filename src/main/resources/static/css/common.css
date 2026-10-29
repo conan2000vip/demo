@@ -355,7 +355,7 @@ textarea {
 .app-header__user-badge,
 .app-header__profile-relation {
     font-size: 13px;
-    color: #8d96a0;
+    color: #667085;
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -578,7 +578,7 @@ textarea {
 
 .feedback-card {
     --lv-title: #1f2937;
-    --lv-badge: #64748b;
+    --lv-badge: #6b7280;
 
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -612,7 +612,7 @@ textarea {
     width: 100%;
     font-size: 13px;
     line-height: 1.6;
-    color: #6b7280;
+    color: #4b5563;
     word-break: normal;
     overflow-wrap: break-word;
 }
@@ -629,7 +629,7 @@ textarea {
 
 .feedback-card__time {
     font-size: 12px;
-    color: #9ca3af;
+    color: #4b5563;
     white-space: nowrap;
 }
 
@@ -1835,10 +1835,6 @@ textarea {
         gap: 8px;
         margin: 0;
         padding: 0;
-    }
-
-    .feedback-card__time {
-        font-size: 11px;
     }
 
     .feedback-card__badge {

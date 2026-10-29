@@ -12,7 +12,7 @@
 <body>
   <div class="select-container">
     <div class="select-bg">
-      <img th:src="@{/image/background.jpg}" alt="Background">
+      <img th:src="@{/image/background.webp}" alt="" fetchpriority="low">
       <div class="select-bg__overlay"></div>
     </div>
 
@@ -22,7 +22,8 @@
       <p class="select-subtitle">記録を確認するプロファイルを選んでください</p>
 
       <div class="profile-list">
-        <a th:each="profile : ${profiles}" th:href="@{/profile/{id}/select(id=${profile.id})}" th:attr="data-profile-id=${profile.id}" class="profile-card">
+        <a th:each="profile : ${profiles}" th:href="@{/profile/{id}/select(id=${profile.id})}" th:attr="data-profile-id=${profile.id}"
+          class="profile-card">
           <img class="profile-avatar" th:src="@{/image/avatar/{name}.png(name=${profile.avatar ?: 'avatar_01'})}" th:alt="${profile.name}" />
           <div class="profile-info">
             <div class="profile-name-row">
@@ -41,7 +42,8 @@
 
     </div>
   </div>
-  <div id="selectPinModal" class="pin-modal" th:hidden="${pinRequired != true}" th:attr="data-profile-id=${pinProfileId}" role="dialog" aria-modal="true" aria-labelledby="selectPinTitle">
+  <div id="selectPinModal" class="pin-modal" th:hidden="${pinRequired != true}" th:attr="data-profile-id=${pinProfileId}" role="dialog"
+    aria-modal="true" aria-labelledby="selectPinTitle">
     <div class="pin-modal__backdrop"></div>
     <div class="pin-modal__card profile-pin-unlock-card">
       <div id="selectPinView" class="pin-modal__view">
@@ -60,7 +62,8 @@
         <form th:action="@{/profile/{id}/verify-pin(id=${pinProfileId})}" method="post">
           <label class="sr-only" for="selectPinInput">4桁のPIN</label>
           <div class="pin-digit-inputs" role="group" aria-label="4桁のPIN">
-            <input class="pin-digit-input" type="password" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="PIN 1桁目" required>
+            <input class="pin-digit-input" type="password" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="PIN 1桁目"
+              required>
             <input class="pin-digit-input" type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="PIN 2桁目" required>
             <input class="pin-digit-input" type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="PIN 3桁目" required>
             <input class="pin-digit-input" type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="PIN 4桁目" required>

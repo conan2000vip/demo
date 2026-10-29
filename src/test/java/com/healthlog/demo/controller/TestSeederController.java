@@ -66,6 +66,7 @@ public class TestSeederController {
         System.out.println("=== STREAK TEST SEEDER: OLD DATA DELETED ===");
 
         // シナリオに応じて日数を計算する。
+        scenario = scenario.trim().toUpperCase();
         int days = switch (scenario) {
         case "0_DAY" -> 0;
         case "1_DAY" -> 1;
