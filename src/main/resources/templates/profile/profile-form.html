@@ -37,8 +37,8 @@
         <img th:src="@{/image/warning.png}" alt="" class="alert-icon" />
         <span th:text="${errorMessage}">エラーが発生しました</span>
       </div>
-      <form th:object="${profile}" th:action="${profile.id != null} ? @{/profile/{id}/edit(id=${profile.id})} : @{/profile/new}" method="post"
-        class="profile-form">
+      <form th:object="${profile}" th:with="storedPin=${hasStoredPin != null and hasStoredPin}"
+        th:action="${profile.id != null} ? @{/profile/{id}/edit(id=${profile.id})} : @{/profile/new}" method="post" class="profile-form">
         <input type="hidden" th:field="*{id}" />
         <input type="hidden" id="pinAction" name="pinAction" value="" />
         <input type="hidden" id="accountPassword" name="accountPassword" value="" />
@@ -71,10 +71,9 @@
 
           <div class="input-row">
             <div class="input-group" th:unless="${isFirstProfile}">
-              <label for="relationship">
-                続柄 <span class="required">*</span></label>
+              <label th:attr="for=${isPrimary} ? 'relationshipDisplay' : 'relationship'">続柄 <span class="required">*</span></label>
               <th:block th:if="${isPrimary}">
-                <input type="text" value="本人" readonly />
+                <input type="text" id="relationshipDisplay" value="本人" readonly aria-label="続柄" />
                 <input type="hidden" th:field="*{relationship}" />
               </th:block>
               <th:block th:unless="${isPrimary}">
@@ -113,7 +112,7 @@
             </div>
           </div>
 
-          <div class="input-group" th:if="${!isFirstProfile}">
+          <div class="input-group">
             <input type="hidden" th:field="*{managedByPrimary}" />
             <div class="profile-security">
               <div class="profile-security-row">
@@ -130,7 +129,7 @@
                 OFFにすると、暗証番号なしで、ボタンを押すだけで画面が開きます。
               </p>
             </div>
-            <section th:if="${profile.pinEnabled and pinEditError != true}" id="pinSavedState" class="pin-setup-panel pin-saved-state"
+            <section th:if="${storedPin and pinEditError != true}" id="pinSavedState" class="pin-setup-panel pin-saved-state"
               aria-labelledby="pinSetupTitle">
               <h3 id="pinSetupTitle">PINを設定</h3>
               <p>ご本人確認のための暗証番号（4桁）を設定します。</p>
@@ -150,11 +149,11 @@
               </div>
             </section>
             <section id="pinFields" class="pin-setup-panel pin-editor"
-              th:classappend="${profile.pinEnabled and pinEditError != true} ? ' pin-editor--hidden' : ''" aria-labelledby="pinEditorTitle">
+              th:classappend="${storedPin and pinEditError != true} ? ' pin-editor--hidden' : ''" aria-labelledby="pinEditorTitle">
               <h3 id="pinEditorTitle">PINを設定</h3>
               <p>ご本人確認のための暗証番号（4桁）を設定します。</p>
               <div class="pin-fields" data-pin-fields>
-                <div class="pin-input-row" th:if="${profile.pinEnabled}" id="currentPinRow">
+                <div class="pin-input-row" th:if="${storedPin}" id="currentPinRow">
                   <span class="pin-input-row__icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" focusable="false">
                       <rect x="5" y="10" width="14" height="10" rx="2"></rect>
@@ -203,7 +202,7 @@
               <button type="submit" class="btn btn--primary btn--sm pin-save-button" id="pinSaveButton" onclick="return submitPinSetup();">
                 PINを保存
               </button>
-              <button type="button" class="btn btn--ghost btn--sm pin-cancel-button" th:if="${profile.pinEnabled}" onclick="cancelPinChange()">
+              <button type="button" class="btn btn--ghost btn--sm pin-cancel-button" th:if="${storedPin}" onclick="cancelPinChange()">
                 キャンセル
               </button>
             </section>
@@ -211,9 +210,7 @@
               aria-labelledby="pinUnlockTitle">
               <div class="pin-modal__backdrop" data-pin-modal-close></div>
               <div class="pin-modal__card profile-pin-unlock-card">
-                <button type="button" class="pin-modal__close" data-pin-modal-close aria-label="閉じる">
-                  ×
-                </button>
+                <button type="button" class="pin-modal__close" data-pin-modal-close aria-label="閉じる">×</button>
                 <div class="pin-modal__heading">
                   <span class="pin-modal__icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" focusable="false">
@@ -244,9 +241,7 @@
             <div id="accountPasswordModal" class="pin-modal" hidden role="dialog" aria-modal="true" aria-labelledby="accountPasswordTitle">
               <div class="pin-modal__backdrop" data-account-password-close></div>
               <div class="pin-modal__card profile-pin-unlock-card">
-                <button type="button" class="pin-modal__close" data-account-password-close aria-label="閉じる">
-                  ×
-                </button>
+                <button type="button" class="pin-modal__close" data-account-password-close aria-label="閉じる">×</button>
                 <div class="pin-modal__heading">
                   <span class="pin-modal__icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" focusable="false">
@@ -256,9 +251,7 @@
                   </span>
                   <div>
                     <h3 id="accountPasswordTitle">PINロックを解除</h3>
-                    <p>
-                      アカウントのパスワードを入力して、PINロックを解除してください。
-                    </p>
+                    <p>アカウントのパスワードを入力して、PINロックを解除してください。</p>
                   </div>
                 </div>
                 <input id="accountPasswordInput" type="password" autocomplete="current-password" placeholder="アカウントのパスワード" />
@@ -267,9 +260,7 @@
                 <div class="profile-pin-unlock-divider"></div>
                 <div class="profile-pin-unlock-footer">
                   <button type="button" class="pin-back-button" data-account-password-back>← 戻る</button>
-                  <button type="button" class="btn btn--primary btn--sm" id="confirmAccountPassword">
-                    ロックを解除
-                  </button>
+                  <button type="button" class="btn btn--primary btn--sm" id="confirmAccountPassword">ロックを解除</button>
                 </div>
               </div>
             </div>

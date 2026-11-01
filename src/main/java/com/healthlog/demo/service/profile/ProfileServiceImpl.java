@@ -82,6 +82,7 @@ public class ProfileServiceImpl implements ProfileService {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "プロファイルは最大" + MAX_PROFILES + "件までです");
         }
 
+        // ユーザーが存在するか確認
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "ユーザーが見つかりません"));
 
@@ -108,13 +109,13 @@ public class ProfileServiceImpl implements ProfileService {
             }
             profile.setRelationship(dto.getRelationship());
 
-            if (UNIQUE_RELATIONSHIPS.contains(dto.getRelationship()) && profileRepository
-                    .existsByUser_IdAndRelationship(userId, dto.getRelationship())) {
+            if (UNIQUE_RELATIONSHIPS.contains(dto.getRelationship())
+                    && profileRepository.existsByUser_IdAndRelationship(userId, dto.getRelationship())) {
                 throw new BusinessException(HttpStatus.BAD_REQUEST, "「" + dto.getRelationship() + "」はすでに登録されています");
             }
         }
 
-        if (dto.isPinEnabled()) {
+        if (dto.isPinEnabled() && dto.getPin() != null && !dto.getPin().isBlank()) {
             profile.setPinHash(encodePin(dto.getPin(), dto.getPinConfirmation()));
         }
 
@@ -150,16 +151,14 @@ public class ProfileServiceImpl implements ProfileService {
         dbProfile.setStepGoal(dto.getStepGoal());
         dbProfile.setDailySleepGoal(dto.getDailySleepGoal());
 
-        if (dbProfile.getPinHash() != null
-                && (dto.getCurrentPin() == null || !passwordEncoder.matches(dto.getCurrentPin(), dbProfile.getPinHash()))) {
+        if (dbProfile.getPinHash() != null && (dto.getCurrentPin() == null
+                || !passwordEncoder.matches(dto.getCurrentPin(), dbProfile.getPinHash()))) {
             if (!dto.isPinEnabled() || hasNewPin(dto)) {
                 throw new BusinessException(HttpStatus.FORBIDDEN, "現在の暗証番号が正しくありません");
             }
         }
-        if (dto.isPinEnabled() && dbProfile.getPinHash() == null && !hasNewPin(dto)) {
-            throw new BusinessException(HttpStatus.BAD_REQUEST, "新しい暗証番号を入力してください");
-        }
-        if (!dto.isPinEnabled()) {
+        boolean keepPinLock = dto.isPinEnabled() && (dbProfile.getPinHash() != null || hasNewPin(dto));
+        if (!keepPinLock) {
             dbProfile.setPinHash(null);
         } else if (hasNewPin(dto)) {
             dbProfile.setPinHash(encodePin(dto.getPin(), dto.getPinConfirmation()));
@@ -231,8 +230,8 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     @Transactional
-    public void updatePin(Long userId, Long profileId, String action, String currentPin,
-            String newPin, String confirmation) {
+    public void updatePin(Long userId, Long profileId, String action, String currentPin, String newPin,
+            String confirmation) {
         Profile profile = getProfile(userId, profileId);
         String normalizedAction = action == null ? "" : action.toUpperCase();
         if (profile.getPinHash() != null

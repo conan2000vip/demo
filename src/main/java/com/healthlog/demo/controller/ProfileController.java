@@ -67,7 +67,7 @@ public class ProfileController {
     }
 
     @GetMapping("/{id}/select")
-    public String selectProfile(@PathVariable("id") Long id, HttpSession session, Model model) {
+    public String selectProfile(@PathVariable Long id, HttpSession session, Model model) {
         User user = getCurrentUser(session);
         if (user == null) {
             return "redirect:/auth/login";
@@ -84,8 +84,7 @@ public class ProfileController {
     }
 
     @PostMapping("/{id}/verify-pin")
-    public String verifyPin(@PathVariable("id") Long id, @RequestParam("pin") String pin, HttpSession session,
-            Model model) {
+    public String verifyPin(@PathVariable Long id, @RequestParam String pin, HttpSession session, Model model) {
         User user = getCurrentUser(session);
         if (user == null) {
             return "redirect:/auth/login";
@@ -105,8 +104,8 @@ public class ProfileController {
     }
 
     @PostMapping("/{id}/verify-pin/account-password")
-    public String verifyPinWithAccountPassword(@PathVariable("id") Long id,
-            @RequestParam("accountPassword") String accountPassword, HttpSession session, Model model) {
+    public String verifyPinWithAccountPassword(@PathVariable Long id, @RequestParam String accountPassword,
+            HttpSession session, Model model) {
         User user = getCurrentUser(session);
         if (user == null) {
             return "redirect:/auth/login";
@@ -139,6 +138,9 @@ public class ProfileController {
         if (user == null) {
             return "redirect:/auth/login";
         }
+        if (!profileService.hasAnyProfile(user.getId())) {
+            return "redirect:/profile/new";
+        }
         model.addAttribute("profiles", profileService.getProfiles(user.getId()));
         model.addAttribute("currentProfile", profileService.resolveCurrentProfile(session, user.getId()));
         addProfileManagementPermissions(model, user.getId(), session);
@@ -148,7 +150,7 @@ public class ProfileController {
 
     // === 3. ヘッダーからプロファイルを切り替える処理 ===
     @PostMapping("/switch/{id}")
-    public String switchProfile(@PathVariable("id") Long id, HttpSession session,
+    public String switchProfile(@PathVariable Long id, HttpSession session,
             @RequestHeader(value = "Referer", required = false) String referer, RedirectAttributes redirectAttributes) {
         User user = getCurrentUser(session);
         if (user == null) {
@@ -171,7 +173,8 @@ public class ProfileController {
         if (user == null) {
             return "redirect:/auth/login";
         }
-        if (!canManageAllProfiles(user.getId(), session)) {
+        boolean isFirstProfile = !profileService.hasAnyProfile(user.getId());
+        if (!isFirstProfile && !canManageAllProfiles(user.getId(), session)) {
             return "redirect:/profile/profile-manage";
         }
         model.addAttribute("profile", new ProfileFormDto());
@@ -190,12 +193,11 @@ public class ProfileController {
             return "redirect:/auth/login";
         }
 
-        if (!canManageAllProfiles(user.getId(), session)) {
+        boolean isFirstProfile = !profileService.hasAnyProfile(user.getId());
+        if (!isFirstProfile && !canManageAllProfiles(user.getId(), session)) {
             redirectAttributes.addFlashAttribute("error", "新しいプロファイルを作成する権限がありません");
             return "redirect:/profile/profile-manage";
         }
-
-        boolean isFirstProfile = !profileService.hasAnyProfile(user.getId());
         if (bindingResult.hasErrors()) {
             model.addAttribute("isFirstProfile", isFirstProfile);
             model.addAttribute("isPrimary", false);
@@ -225,7 +227,7 @@ public class ProfileController {
 
     // === 5. ProfileFormDtoを使用したプロファイル編集処理 ===
     @GetMapping("/{id}/edit")
-    public String editProfileForm(@PathVariable("id") Long id, HttpSession session, Model model,
+    public String editProfileForm(@PathVariable Long id, HttpSession session, Model model,
             RedirectAttributes redirectAttributes) {
         User user = getCurrentUser(session);
         if (user == null) {
@@ -242,6 +244,7 @@ public class ProfileController {
             model.addAttribute("profile", formDto);
             model.addAttribute("isPrimary", formDto.isPrimary());
             model.addAttribute("isNewProfile", false);
+            model.addAttribute("hasStoredPin", formDto.isPinEnabled());
         } catch (BusinessException e) {
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("profiles", profileService.getProfiles(user.getId()));
@@ -254,10 +257,9 @@ public class ProfileController {
     }
 
     @PostMapping("/{id}/edit")
-    public String updateProfile(@PathVariable("id") Long id, @Valid @ModelAttribute("profile") ProfileFormDto formDto,
+    public String updateProfile(@PathVariable Long id, @Valid @ModelAttribute("profile") ProfileFormDto formDto,
             BindingResult bindingResult, HttpSession session, Model model, RedirectAttributes redirectAttributes,
-            @RequestParam(value = "pinAction", required = false) String pinAction,
-            @RequestParam(value = "accountPassword", required = false) String accountPassword) {
+            @RequestParam String pinAction, @RequestParam String accountPassword) {
         User user = getCurrentUser(session);
         if (user == null) {
             return "redirect:/auth/login";
@@ -269,6 +271,7 @@ public class ProfileController {
         }
 
         if (bindingResult.hasErrors()) {
+            model.addAttribute("hasStoredPin", profileService.hasPin(user.getId(), id));
             model.addAttribute("isFirstProfile", false);
             model.addAttribute("isPrimary", formDto.isPrimary());
             model.addAttribute("isNewProfile", false);
@@ -295,6 +298,7 @@ public class ProfileController {
             }
             redirectAttributes.addFlashAttribute("message", updatedProfile.getName() + " のプロファイルを更新しました");
         } catch (BusinessException e) {
+            model.addAttribute("hasStoredPin", profileService.hasPin(user.getId(), id));
             if (!"REMOVE".equalsIgnoreCase(pinAction) && !"REMOVE_ACCOUNT_PASSWORD".equalsIgnoreCase(pinAction)) {
                 model.addAttribute("errorMessage", e.getMessage());
             }
@@ -322,7 +326,7 @@ public class ProfileController {
 
     // === 6. プロファイル削除処理 ===
     @PostMapping("/delete")
-    public String deleteProfile(@RequestParam("profileId") Long profileId, HttpSession session,
+    public String deleteProfile(@RequestParam Long profileId, HttpSession session,
             RedirectAttributes redirectAttributes) {
         User user = getCurrentUser(session);
         if (user == null) {

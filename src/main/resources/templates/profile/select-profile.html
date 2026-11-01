@@ -60,7 +60,6 @@
           </div>
         </div>
         <form th:action="@{/profile/{id}/verify-pin(id=${pinProfileId})}" method="post">
-          <label class="sr-only" for="selectPinInput">4桁のPIN</label>
           <div class="pin-digit-inputs" role="group" aria-label="4桁のPIN">
             <input class="pin-digit-input" type="password" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="PIN 1桁目"
               required>

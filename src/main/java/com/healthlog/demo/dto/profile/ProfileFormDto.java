@@ -67,4 +67,6 @@ public class ProfileFormDto {
     private String pinConfirmation;
 
     private String currentPin;
+
+    private String accountPassword;
 }
