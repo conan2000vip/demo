@@ -74,6 +74,12 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public boolean isProfileLimitReached(Long userId) {
+        return profileRepository.countByUser_Id(userId) >= MAX_PROFILES;
+    }
+
+    @Override
     @Transactional
     public Profile create(Long userId, ProfileFormDto dto) {
         long count = profileRepository.countByUser_Id(userId);

@@ -5,6 +5,8 @@
     const pinView = document.getElementById('selectPinView');
     const passwordView = document.getElementById('selectPasswordView');
     const passwordForm = document.getElementById('selectAccountPasswordForm');
+    const passwordInput = document.getElementById('selectAccountPassword');
+    const confirmPasswordButton = document.getElementById('selectConfirmAccountPassword');
     const pinInput = document.getElementById('selectPinInput');
     const pinDigits = Array.from(document.querySelectorAll('.pin-digit-input'));
     const pinError = document.getElementById('selectPinError');
@@ -27,7 +29,7 @@
     function showPasswordModal() {
         if (pinView) pinView.hidden = true;
         if (passwordView) passwordView.hidden = false;
-        document.getElementById('selectAccountPassword')?.focus();
+        passwordInput?.focus();
     }
 
     document.querySelectorAll('.profile-card[data-profile-id]').forEach((card) => {
@@ -43,8 +45,32 @@
         showPasswordModal();
     });
 
-    document.querySelector('[data-account-password-close]')?.addEventListener('click', () => {
-        showPinModal();
+    document.querySelectorAll('[data-account-password-close]').forEach((button) => {
+        button.addEventListener('click', () => {
+            showPinModal();
+        });
+    });
+
+    const submitAccountPassword = () => {
+        const password = passwordInput?.value.trim() || '';
+        if (!password) {
+            if (passwordError) passwordError.textContent = 'アカウントのパスワードを入力してください。';
+            passwordInput?.focus();
+            return;
+        }
+        if (passwordInput) passwordInput.value = password;
+        passwordForm?.submit();
+    };
+
+    confirmPasswordButton?.addEventListener('click', submitAccountPassword);
+    passwordInput?.addEventListener('input', () => {
+        if (passwordError) passwordError.textContent = '';
+    });
+    passwordInput?.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            submitAccountPassword();
+        }
     });
 
     if (pinInput) {

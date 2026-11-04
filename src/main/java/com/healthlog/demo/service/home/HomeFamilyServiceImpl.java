@@ -6,9 +6,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import com.healthlog.demo.entity.Profile;
+import com.healthlog.demo.repository.SleepRepository;
+import com.healthlog.demo.repository.StepRepository;
+import com.healthlog.demo.repository.WaterRepository;
+import com.healthlog.demo.repository.WeightRepository;
 import lombok.RequiredArgsConstructor;
 import com.healthlog.demo.entity.ProfileShareSetting.Category;
 import com.healthlog.demo.service.helper.ProfileAccessValidation;
@@ -19,6 +24,10 @@ public class HomeFamilyServiceImpl implements HomeFamilyService {
     private static final int NO_RECORD_DAYS = 3;
     private final ProfileAccessValidation profileAccessValidation;
     private final HomeTodayService homeTodayService;
+    private final WeightRepository weightRepository;
+    private final SleepRepository sleepRepository;
+    private final WaterRepository waterRepository;
+    private final StepRepository stepRepository;
 
     @Override
     public List<Map<String, Object>> buildFamilyMembers(List<Profile> profiles, Long currentUserId, LocalDate today) {
@@ -43,10 +52,11 @@ public class HomeFamilyServiceImpl implements HomeFamilyService {
             boolean hasWater = !"NO_RECORD".equals(t.get("waterGoalStatus"));
             boolean hasStep = !"NO_RECORD".equals(t.get("stepGoalStatus"));
 
-            int doneItems = (hasWeight ? 1 : 0) + (hasSleep ? 1 : 0) + (hasWater ? 1 : 0) + (hasStep ? 1 : 0);
+            int doneItems = (canViewWeight && hasWeight ? 1 : 0) + (canViewSleep && hasSleep ? 1 : 0)
+                    + (canViewWater && hasWater ? 1 : 0) + (canViewStep && hasStep ? 1 : 0);
 
-            boolean hasHistory = hasWeight || hasSleep || hasWater || hasStep;
-            LocalDate latestDate = hasHistory ? today : null;
+            LocalDate latestDate = latestVisibleRecordDate(id, canViewWeight, canViewSleep, canViewWater, canViewStep);
+            boolean hasHistory = latestDate != null;
             long daysSince = hasHistory ? ChronoUnit.DAYS.between(latestDate, today) : 0;
             List<String> severeLabels = new ArrayList<>();
             List<String> issues = new ArrayList<>(severeLabels);
@@ -85,12 +95,28 @@ public class HomeFamilyServiceImpl implements HomeFamilyService {
             m.put("statusLabel", statusLabel);
             m.put("doneItems", doneItems);
             m.put("totalItems", totalItems);
-            m.put("updatedTime", "-");
+            m.put("updatedTime", latestDate != null ? latestDate.toString() : "-");
             m.put("relationship", profile.getRelationship());
             m.put("isPrimary", profile.isPrimary());
             members.add(m);
         }
         return members;
+    }
+
+    private LocalDate latestVisibleRecordDate(Long profileId, boolean canViewWeight, boolean canViewSleep,
+            boolean canViewWater, boolean canViewStep) {
+        return java.util.stream.Stream.of(
+                canViewWeight ? weightRepository.findTopByProfile_IdOrderByRecordedDateDesc(profileId)
+                        .map(log -> log.getRecordedDate()) : Optional.<LocalDate>empty(),
+                canViewSleep ? sleepRepository.findTopByProfile_IdOrderByRecordedDateDesc(profileId)
+                        .map(log -> log.getRecordedDate()) : Optional.<LocalDate>empty(),
+                canViewWater ? waterRepository.findTopByProfile_IdOrderByRecordedDateDesc(profileId)
+                        .map(log -> log.getRecordedDate()) : Optional.<LocalDate>empty(),
+                canViewStep ? stepRepository.findTopByProfile_IdOrderByRecordedDateDesc(profileId)
+                        .map(log -> log.getRecordedDate()) : Optional.<LocalDate>empty())
+                .flatMap(Optional::stream)
+                .max(LocalDate::compareTo)
+                .orElse(null);
     }
 
     @Override

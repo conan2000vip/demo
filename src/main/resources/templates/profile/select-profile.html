@@ -77,6 +77,7 @@
         </div>
       </div>
       <div id="selectPasswordView" class="pin-modal__view" hidden>
+        <button type="button" class="pin-modal__close" data-account-password-close aria-label="閉じる">×</button>
         <div class="pin-modal__heading">
           <span class="pin-modal__icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" focusable="false">
@@ -91,14 +92,14 @@
         </div>
         <form id="selectAccountPasswordForm" method="post">
           <label class="sr-only" for="selectAccountPassword">アカウントのパスワード</label>
-          <input id="selectAccountPassword" name="accountPassword" type="password" autocomplete="current-password" placeholder="アカウントのパスワード" required>
+          <input id="selectAccountPassword" name="accountPassword" type="password" autocomplete="current-password" placeholder="アカウントのパスワード">
           <p id="selectAccountPasswordError" class="pin-modal__error" role="alert" th:text="${accountPasswordErrorMessage}"></p>
-          <a class="pin-forgot-link" th:href="@{/auth/forgot-password(returnTo=${'/profile/' + pinProfileId + '/edit'})}">パスワードを忘れた場合</a>
+          <a class="pin-forgot-link" th:href="@{/auth/forgot-password(returnTo=${'/profile/' + pinProfileId + '/select'})}">パスワードを忘れた場合</a>
         </form>
         <div class="profile-pin-unlock-divider"></div>
         <div class="profile-pin-unlock-footer">
           <button type="button" class="pin-back-button" data-account-password-close>← 戻る</button>
-          <button type="submit" class="btn btn--primary btn--sm" form="selectAccountPasswordForm">PINを解除する</button>
+          <button type="button" class="btn btn--primary btn--sm" id="selectConfirmAccountPassword">ロックを解除</button>
         </div>
       </div>
     </div>

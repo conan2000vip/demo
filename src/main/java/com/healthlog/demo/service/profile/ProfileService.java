@@ -16,6 +16,8 @@ public interface ProfileService {
 
     boolean hasAnyProfile(Long userId);
 
+    boolean isProfileLimitReached(Long userId);
+
     Profile create(Long userId, ProfileFormDto formDto);
 
     Profile update(Long userId, ProfileFormDto formDto);

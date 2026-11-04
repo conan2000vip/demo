@@ -27,8 +27,10 @@
         <p class="profile-manage__subtitle">ご家族のプロファイル作成・編集およびデータ共有設定を行えます。</p>
       </div>
       <div class="header-actions">
-        <a th:if="${canManageAllProfiles == true}" th:href="@{/profile/new}" class="btn btn--primary">
+        <a th:if="${canManageAllProfiles == true and profileLimitReached != true}" th:href="@{/profile/new}" class="btn btn--primary">
           <i data-lucide="plus"></i>新規プロファイル追加</a>
+        <span th:if="${canManageAllProfiles == true and profileLimitReached == true}" class="profile-manage__limit-message"
+          role="status">プロファイルは最大10件まで作成できます</span>
       </div>
     </div>
     <div class="profile-manage__list">

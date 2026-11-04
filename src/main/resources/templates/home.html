@@ -118,7 +118,8 @@
           睡眠目標を達成しました
         </p>
       </article>
-      <article class="stat-card stat-card--water stat-card--clickable" th:data-href="@{/profile/{profileId}/water(profileId=${currentProfile.id})}"
+      <article th:if="${canViewWater == true}" class="stat-card stat-card--water stat-card--clickable"
+        th:data-href="@{/profile/{profileId}/water(profileId=${currentProfile.id})}"
         role="link" tabindex="0">
         <div class="stat-card__head">
           <div class="stat-card__title">

@@ -141,10 +141,12 @@ public class ProfileController {
         if (!profileService.hasAnyProfile(user.getId())) {
             return "redirect:/profile/new";
         }
-        model.addAttribute("profiles", profileService.getProfiles(user.getId()));
+        List<Profile> profiles = profileService.getProfiles(user.getId());
+        model.addAttribute("profiles", profiles);
         model.addAttribute("currentProfile", profileService.resolveCurrentProfile(session, user.getId()));
         addProfileManagementPermissions(model, user.getId(), session);
         model.addAttribute("canManageAllProfiles", canManageAllProfiles(user.getId(), session));
+        model.addAttribute("profileLimitReached", profileService.isProfileLimitReached(user.getId()));
         return "profile/profile-manage";
     }
 
@@ -175,6 +177,9 @@ public class ProfileController {
         }
         boolean isFirstProfile = !profileService.hasAnyProfile(user.getId());
         if (!isFirstProfile && !canManageAllProfiles(user.getId(), session)) {
+            return "redirect:/profile/profile-manage";
+        }
+        if (!isFirstProfile && profileService.isProfileLimitReached(user.getId())) {
             return "redirect:/profile/profile-manage";
         }
         model.addAttribute("profile", new ProfileFormDto());
