@@ -75,11 +75,17 @@
 
     if (pinInput) {
         const pinForm = pinInput.form;
-        const submitPin = () => {
+        const validatePin = () => {
             pinInput.value = pinDigits.map((digit) => digit.value).join('');
-            if (pinInput.value.length !== 4 || isSubmittingPin) {
-                return;
+            if (pinInput.value.length !== 4) {
+                if (pinError) pinError.textContent = '4桁のPINを入力してください。';
+                pinDigits.find((digit) => !digit.value)?.focus();
+                return false;
             }
+            return true;
+        };
+        const submitPin = () => {
+            if (!validatePin() || isSubmittingPin) return;
             isSubmittingPin = true;
             pinForm?.requestSubmit();
         };
@@ -95,6 +101,11 @@
                 }
             });
             input.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    submitPin();
+                    return;
+                }
                 if (event.key === 'Backspace' && !input.value && pinDigits[index - 1]) {
                     pinDigits[index - 1].focus();
                 }
@@ -115,11 +126,8 @@
             });
         });
         pinForm?.addEventListener('submit', (event) => {
-            pinInput.value = pinDigits.map((digit) => digit.value).join('');
-            if (pinInput.value.length !== 4) {
+            if (!validatePin()) {
                 event.preventDefault();
-                if (pinError) pinError.textContent = '4桁のPINを入力してください。';
-                pinDigits.find((digit) => !digit.value)?.focus();
             }
         });
     }

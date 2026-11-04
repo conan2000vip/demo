@@ -62,10 +62,10 @@
         <form th:action="@{/profile/{id}/verify-pin(id=${pinProfileId})}" method="post">
           <div class="pin-digit-inputs" role="group" aria-label="4桁のPIN">
             <input class="pin-digit-input" type="password" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="PIN 1桁目"
-              required>
-            <input class="pin-digit-input" type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="PIN 2桁目" required>
-            <input class="pin-digit-input" type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="PIN 3桁目" required>
-            <input class="pin-digit-input" type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="PIN 4桁目" required>
+              >
+            <input class="pin-digit-input" type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="PIN 2桁目">
+            <input class="pin-digit-input" type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="PIN 3桁目">
+            <input class="pin-digit-input" type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="PIN 4桁目">
           </div>
           <input id="selectPinInput" name="pin" type="hidden">
           <p id="selectPinError" class="pin-modal__error" role="alert" th:text="${pinErrorMessage}"></p>

@@ -52,7 +52,6 @@
                   <label><input type="radio" name="range" value="6M" /><span>6ヶ月</span></label>
                   <label><input type="radio" name="range" value="1Y" /><span>1年</span></label>
                 </div>
-
                 <div class="csv-modal__dates">
                   <input type="date" name="startDate" id="csvStartDate" th:max="${T(java.time.LocalDate).now()}" required aria-label="開始日" />
                   <span class="filter-bar__sep">〜</span>
@@ -124,7 +123,8 @@
               <div class="csv-modal__info">
                 <h4>CSVファイルの内容</h4>
                 <ul>
-                  <li>選択した期間のデータが出力されます。</li>
+                  <li>期間ボタンを選択した場合、終了日は今日、開始日は今日から指定期間をさかのぼった日になります。</li>
+                  <li id="csvSelectedPeriod" aria-live="polite"></li>
                   <li>出力項目（表示中のファイル）：<span id="csvColumnsText">—</span></li>
                   <li>データは1日ごとに1行で整理されます。</li>
                   <li>ファイルは「.csv形式」でダウンロードされ、ExcelやGoogleスプレッドシートで開いてご利用いただけます。</li>

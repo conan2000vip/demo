@@ -832,6 +832,7 @@ function initCsvExportModal() {
   const form = document.getElementById("csvExportForm");
   const startInput = document.getElementById("csvStartDate");
   const endInput = document.getElementById("csvEndDate");
+  const selectedPeriod = document.getElementById("csvSelectedPeriod");
   const rangeOptions = overlay.querySelectorAll('input[name="range"]');
   const typeOptions = overlay.querySelectorAll('input[name="types"]');
   const error = document.getElementById("csvExportError");
@@ -877,6 +878,23 @@ function initCsvExportModal() {
   function showError(box, message) {
     box.textContent = message || "";
     box.classList.toggle("show", Boolean(message));
+  }
+
+  function formatCsvDate(value) {
+    const [year, month, day] = value.split("-");
+    return `${year}/${month}/${day}`;
+  }
+
+  function formatSelectedPeriod() {
+    if (!selectedPeriod) return;
+    if (!startInput.value || !endInput.value) {
+      selectedPeriod.textContent = "";
+      return;
+    }
+    const selectedRange = overlay.querySelector('input[name="range"]:checked');
+    const label = selectedRange ? "選択期間" : "指定期間";
+    selectedPeriod.textContent =
+      `${label}：${formatCsvDate(startInput.value)} 〜 ${formatCsvDate(endInput.value)} のデータを出力します。`;
   }
 
   // 1ファイル = 1データ項目。ファイル名は {type}_report_{開始日}_{終了日}.csv
@@ -1022,6 +1040,7 @@ function initCsvExportModal() {
       endInput.value = defaultRange.end;
     }
     syncRangeOptions();
+    formatSelectedPeriod();
 
     // 開くたびに、開いた画面のデータだけをチェックし直す
     const currentType = overlay.dataset.currentType;
@@ -1086,6 +1105,7 @@ function initCsvExportModal() {
       const range = getRange(radio.value);
       startInput.value = range.start;
       endInput.value = range.end;
+      formatSelectedPeriod();
       showError(error, "");
       loadPreview();
     });
@@ -1094,6 +1114,7 @@ function initCsvExportModal() {
   [startInput, endInput].forEach((input) => {
     input.addEventListener("change", () => {
       syncRangeOptions();
+      formatSelectedPeriod();
       showError(error, "");
       loadPreview();
     });

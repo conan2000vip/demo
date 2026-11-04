@@ -131,8 +131,12 @@ public class CsvExportServiceImpl implements CsvExportService {
     private CsvTable stepTable(Long profileId, LocalDate start, LocalDate end) {
         List<List<String>> rows = stepRepository
                 .findByProfile_IdAndRecordedDateBetweenOrderByRecordedDateAscIdAsc(profileId, start, end).stream()
-                .map(s -> List.of(str(s.getRecordedDate()), str(s.getSteps()), text(s.getMemo()))).toList();
-        return new CsvTable(List.of("日付", "歩数", "メモ"), rows);
+                .map(s -> List.of(str(s.getRecordedDate()),
+                        str(s.getSteps()),
+                        s.getUpdatedAt() == null ? "" : s.getUpdatedAt().format(TIME),
+                        text(s.getMemo())))
+                .toList();
+        return new CsvTable(List.of("日付", "歩数", "最終更新", "メモ"), rows);
     }
 
     private static String bmi(BigDecimal weight, BigDecimal height) {
