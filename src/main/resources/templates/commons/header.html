@@ -100,7 +100,7 @@
             th:style="${currentProfile == null} ? 'pointer-events: none;' : ''">
             <img class="app-header__avatar" th:src="@{/image/avatar/{name}.png(name=${currentProfile?.avatar ?: 'avatar_01'})}" alt="Avatar" />
             <span class="app-header__user-info">
-              <span class="app-header__user-name" th:text="${currentProfile?.name ?: 'ゲスト'}">ゲスト</span>
+              <span class="app-header__user-name profile-display-name" th:text="${currentProfile?.name ?: 'ゲスト'}">ゲスト</span>
               <span class="app-header__user-badge"
                 th:text="${currentProfile != null ? (currentProfile.isPrimary ? '本人' : currentProfile.relationship) : 'ゲスト'}">ゲスト</span>
             </span>
@@ -114,7 +114,7 @@
                   <button type="submit" class="app-header__profile-item" th:classappend="${p.id == currentProfile.id} ? 'is-current'">
                     <img class="app-header__avatar" th:src="@{/image/avatar/{name}.png(name=${p.avatar ?: 'avatar_01'})}" alt="Avatar" />
                     <span class="app-header__profile-name-wrap">
-                      <span class="app-header__profile-name" th:text="${p.name}">山田 太郎</span>
+                      <span class="app-header__profile-name profile-display-name" th:text="${p.name}">山田 太郎</span>
                       <span class="app-header__profile-relation" th:text="${p.isPrimary} ? '本人' : ${p.relationship}">本人</span>
                     </span>
                     <span class="app-header__profile-check">

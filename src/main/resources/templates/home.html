@@ -23,16 +23,18 @@
           <span class="profile-card__badge" th:if="${isOwnProfile}">自分</span>
         </span>
         <h1 class="profile-card__name">
-          <span th:text="${currentProfile.name}">母</span>
-          <span class="profile-card__meta">（ <span th:text="${currentProfile.birthDate != null ? currentProfile.age : '-'}">35</span>歳） </span>
+          <span class="profile-display-name" th:text="${currentProfile.name}">母</span>
         </h1>
-        <div class="profile-card__facts">
-          <span>身長：<span th:text="${currentProfile.height != null ? currentProfile.height : '-'}">165</span>cm</span>
+        <div class="profile-card__birth">
           <span>生年月日：<span
               th:text="${currentProfile.birthDate != null ? #temporals.format(currentProfile.birthDate, 'yyyy/MM/dd') : '-'}">1988/05/12</span></span>
+          <span class="profile-card__meta">（<span th:text="${currentProfile.birthDate != null ? currentProfile.age : '-'}">35</span>歳）</span>
+        </div>
+        <div class="profile-card__facts">
           <span th:if="${currentProfile.gender != null and !#strings.isEmpty(#strings.trim(currentProfile.gender))}">
             性別：<span th:text="${currentProfile.gender}">女性</span>
           </span>
+          <span>身長：<span th:text="${currentProfile.height != null ? currentProfile.height : '-'}">165</span>cm</span>
           <span>
             <img th:src="@{/image/profile.png}" alt="" class="icon-sm" />続柄：
             <span th:text="${currentProfile.primary ? '本人' : currentProfile.relationship}">母</span>
@@ -245,7 +247,7 @@
           th:classappend="${member.status == 'OK' ? 'is-ok' : (member.status == 'WARN' ? 'is-warn' : 'is-danger')}"
           th:data-href="@{/profile/{profileId}/home(profileId=${member.id})}" role="link" tabindex="0">
           <div class="family-member__identity">
-            <p class="family-member__name" th:text="${member.name}">父</p>
+            <p class="family-member__name profile-display-name" th:text="${member.name}">父</p>
             <span class="family-member__age">
               （<span th:if="${member.isPrimary}">本人</span><span th:unless="${member.isPrimary}" th:text="${member.relationship ?: ''}">父</span><span
                 th:if="${member.age != null}" th:text="'・' + ${member.age} + '歳'">・58歳</span>）

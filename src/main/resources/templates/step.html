@@ -22,7 +22,7 @@
           </span>
           <div>
             <h1>歩数管理</h1>
-            <p th:text="${currentProfile != null ? currentProfile.name + ' の歩数記録' : 'ゲスト の歩数記録'}"></p>
+            <p><span class="profile-display-name" th:text="${currentProfile != null ? currentProfile.name : 'ゲスト'}"></span> の歩数記録</p>
           </div>
         </div>
         <div th:fragment="headerActions(currentType, filterStartDate, filterEndDate)" class="header-actions">
@@ -143,7 +143,7 @@
                   </button>
                   <form class="delete-form" method="post" th:id="'deleteForm-' + ${record.id}"
                     th:action="@{/profile/{profileId}/step/{logId}/delete(profileId=${profileId}, logId=${record.id})}"
-                    th:attr="data-confirm-message='「' + ${record.recordedDate} + '」の歩数記録を削除しますか？&#10;この操作は取り消せません。'">
+                    th:attr="data-confirm-message='「' + ${record.recordedDate} + '」の歩数記録を削除しますか？'">
                   </form>
                 </td>
               </tr>

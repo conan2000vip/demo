@@ -71,6 +71,7 @@
 .profile-manage__card {
   position: relative;
   display: flex;
+  min-width: 0;
   align-items: center;
   gap: 14px;
   background: #fff;
@@ -123,13 +124,16 @@
 
 .profile-manage__info {
   flex: 1;
+  min-width: 0;
 }
 
 .profile-manage__name-row {
   display: flex;
   align-items: center;
+  min-width: 0;
   gap: 8px;
   margin-bottom: 2px;
+  overflow: hidden;
 }
 
 .profile-manage__limit-message {
@@ -139,6 +143,7 @@
 }
 
 .profile-manage__name {
+  min-width: 0;
   font-size: 1rem;
   font-weight: 700;
   color: #1a1a1a;
@@ -302,11 +307,8 @@ body.share-settings-open {
 
 .share-settings__member-name {
   min-width: 0;
-  overflow: hidden;
   color: #1f2937;
   font-size: 15px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .share-settings__relationship {
@@ -1112,6 +1114,7 @@ body.share-settings-open {
 .profile-card {
   display: flex;
   align-items: center;
+  min-width: 0;
   gap: 14px;
   background: #fff;
   border-radius: 14px;
@@ -1144,17 +1147,21 @@ body.share-settings-open {
 
 .profile-info {
   flex: 1;
+  min-width: 0;
   text-align: left;
 }
 
 .profile-name-row {
   display: flex;
   align-items: center;
+  min-width: 0;
   gap: 8px;
   margin-bottom: 2px;
+  overflow: hidden;
 }
 
 .profile-name {
+  min-width: 0;
   font-size: 16px;
   font-weight: 700;
   color: #1a1a1a;
@@ -1470,10 +1477,7 @@ body.share-settings-open {
   .profile-manage__name {
     flex: 0 1 auto;
     min-width: 0;
-    overflow: hidden;
     font-size: 0.88rem;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
   .profile-manage__name-row .badge {

@@ -21,7 +21,7 @@
           </span>
           <div>
             <h1>メモ管理</h1>
-            <p th:text="${currentProfile != null ? currentProfile.name + ' のメモ記録' : 'ゲスト のメモ記録'}"></p>
+            <p><span class="profile-display-name" th:text="${currentProfile != null ? currentProfile.name : 'ゲスト'}"></span> のメモ記録</p>
           </div>
         </div>
         <div class="header-actions">
@@ -76,7 +76,7 @@
 
                     <form class="delete-form" method="post" th:id="'deleteForm-' + ${record.id}"
                       th:action="@{/profile/{profileId}/memo/{logId}/delete(profileId=${profileId}, logId=${record.id})}"
-                      th:attr="data-confirm-message='「' + ${#temporals.format(record.recordedDate, 'yyyy/MM/dd')} + '」のメモを削除しますか？&#10;この操作は取り消せません。'">
+                      th:attr="data-confirm-message='「' + ${#temporals.format(record.recordedDate, 'yyyy/MM/dd')} + '」のメモを削除しますか？'">
                     </form>
                   </td>
                 </tr>

@@ -404,14 +404,30 @@ function initDeleteConfirm() {
   const closeBtn = document.getElementById("closeDeleteModalBtn");
   const cancelBtn = document.getElementById("cancelDeleteBtn");
   const confirmBtn = document.getElementById("confirmDeleteBtn");
+  const titleEl = overlay.querySelector("#deleteModalTitle");
   const messageEl = overlay.querySelector(".modal__message");
 
   let pendingForm = null;
 
-  function openDeleteModal(form, customMessage) {
+  function openDeleteModal(form, customMessage, customTitle) {
     pendingForm = form;
-    if (messageEl && customMessage) {
-      messageEl.textContent = customMessage;
+    if (titleEl) {
+      titleEl.textContent = customTitle || "記録を削除";
+    }
+    if (messageEl) {
+      if (form.dataset.confirmName) {
+        messageEl.replaceChildren(
+          document.createTextNode("「"),
+          Object.assign(document.createElement("span"), {
+            className: "profile-display-name",
+            textContent: form.dataset.confirmName,
+            title: form.dataset.confirmName,
+          }),
+          document.createTextNode("」のプロファイルを削除しますか？"),
+        );
+      } else if (customMessage) {
+        messageEl.textContent = customMessage;
+      }
     }
     overlay.classList.add("is-open");
   }
@@ -425,7 +441,11 @@ function initDeleteConfirm() {
     const form = event.target;
     if (!form.classList || !form.classList.contains("delete-form")) return;
     event.preventDefault();
-    openDeleteModal(form, form.dataset.confirmMessage || null);
+    openDeleteModal(
+      form,
+      form.dataset.confirmMessage || null,
+      form.dataset.confirmTitle || null,
+    );
   });
 
   confirmBtn?.addEventListener("click", () => {

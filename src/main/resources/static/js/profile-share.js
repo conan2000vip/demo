@@ -81,7 +81,7 @@ function renderShareMatrixTable(data) {
     member.innerHTML = `
             <div class="share-settings__member-header">
                 <div class="share-settings__member-info">
-                    <strong class="share-settings__member-name">${escapeHtml(item.targetProfileName)}</strong>
+                    <strong class="share-settings__member-name profile-display-name">${escapeHtml(item.targetProfileName)}</strong>
                     <span class="share-settings__relationship">${escapeHtml(item.relationship)}</span>
                 </div>
             </div>

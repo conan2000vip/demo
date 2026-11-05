@@ -20,6 +20,7 @@
     --wp-radius-sm: 8px;
     --wp-shadow: 0 4px 16px rgba(27, 55, 47, 0.055);
     --wp-shadow-lg: 0 20px 50px rgba(27, 55, 47, 0.14);
+    --profile-name-max-width: 250px;
     --wp-font: "Noto Sans JP", "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif;
     --wp-font-weight-normal: 400;
     --wp-font-weight-medium: 500;
@@ -42,6 +43,16 @@ textarea {
     font-family: inherit;
 }
 
+.profile-display-name {
+    display: inline-block;
+    max-width: var(--profile-name-max-width);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+}
+
 .app-header {
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(12px);
@@ -59,6 +70,7 @@ textarea {
     display: flex;
     align-items: center;
     gap: 16px;
+    box-sizing: border-box;
 }
 
 .app-header__brand {
@@ -112,6 +124,8 @@ textarea {
 }
 
 .app-header__nav {
+    flex: 1 1 auto;
+    min-width: 0;
     display: flex;
     align-items: center;
     gap: 4px;
@@ -156,7 +170,8 @@ textarea {
     display: flex;
     align-items: center;
     gap: 14px;
-    flex-shrink: 0;
+    flex: 0 0 auto;
+    margin-left: auto;
 }
 
 .app-header__user-wrap {
@@ -166,14 +181,18 @@ textarea {
 .app-header__user {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 6px;
+    min-width: 0;
+    width: auto;
+    flex: 0 0 auto;
     background: #ffffff;
     border: 1px solid #e5e7eb;
-    height: 56px;
-    padding: 8px 14px;
+    height: 48px;
+    padding: 6px 8px;
     border-radius: 18px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     transition: 0.2s;
+    box-sizing: border-box;
 }
 
 .app-header__user:hover {
@@ -215,14 +234,15 @@ textarea {
     font-size: 0.92rem;
     font-weight: 700;
     color: #1a1a1a;
-    white-space: normal;
-    word-break: keep-all;
-    overflow-wrap: normal;
+    min-width: 0;
+    width: 100%;
 }
 
 .app-header__profile-name-wrap {
-    flex: 1;
+    flex: 0 1 auto;
     min-width: 0;
+    max-width: var(--profile-name-max-width);
+    width: auto;
     display: flex;
     flex-direction: column;
     gap: 1px;
@@ -336,11 +356,7 @@ textarea {
 }
 
 .app-header__user-info {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    display: none;
 }
 
 .app-header__user-name {
@@ -397,6 +413,8 @@ textarea {
     padding: 8px 10px;
     border-radius: 8px;
     transition: 0.2s;
+    flex: 0 0 auto;
+    white-space: nowrap;
 }
 
 .app-header__logout:hover {
@@ -486,11 +504,8 @@ textarea {
     }
 
     .app-header__user {
-        max-width: none;
-    }
-
-    .app-header__user-info {
-        display: none;
+        width: auto;
+        flex: 0 0 auto;
     }
 }
 
@@ -507,6 +522,13 @@ textarea {
     animation: alert-in 0.2s ease-out;
     position: relative;
     z-index: 1;
+}
+
+.alert > span {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    white-space: normal;
 }
 
 .alert-icon {
@@ -2230,5 +2252,98 @@ textarea {
   display: flex !important;
   align-items: center !important;
   gap: 8px !important;
-  margin-left: auto !important;
+  flex: 0 0 auto;
+  min-width: max-content;
+}
+
+.weight-page__header,
+.sleep-page__header,
+.water-page__header,
+.step-page__header,
+.memo-page__header {
+  min-width: 0;
+}
+
+.weight-page__heading,
+.sleep-page__heading,
+.water-page__heading,
+.step-page__heading,
+.memo-page__heading {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.weight-page__heading > div,
+.sleep-page__heading > div,
+.water-page__heading > div,
+.step-page__heading > div,
+.memo-page__heading > div {
+  min-width: 0;
+}
+
+.weight-page__heading p,
+.sleep-page__heading p,
+.water-page__heading p,
+.step-page__heading p,
+.memo-page__heading p {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-left: 0 !important;
+}
+
+@media (max-width: 768px) {
+  .weight-page__header,
+  .sleep-page__header,
+  .water-page__header,
+  .step-page__header,
+  .memo-page__header {
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .weight-page__heading,
+  .sleep-page__heading,
+  .water-page__heading,
+  .step-page__heading,
+  .memo-page__heading {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .weight-page__heading > div,
+  .sleep-page__heading > div,
+  .water-page__heading > div,
+  .step-page__heading > div,
+  .memo-page__heading > div {
+    min-width: 0;
+  }
+
+  .weight-page__heading,
+  .sleep-page__heading,
+  .water-page__heading,
+  .step-page__heading,
+  .memo-page__heading {
+    flex: 0 0 100%;
+  }
+
+  .weight-page__heading h1,
+  .sleep-page__heading h1,
+  .water-page__heading h1,
+  .step-page__heading h1,
+  .memo-page__heading h1 {
+    white-space: nowrap;
+  }
+
+  .weight-page__header .header-actions,
+  .sleep-page__header .header-actions,
+  .water-page__header .header-actions,
+  .step-page__header .header-actions,
+  .memo-page__header .header-actions {
+  margin-left: auto;
+  }
 }

@@ -44,7 +44,7 @@
         <img th:src="@{/image/avatar/{name}.png(name=${p.avatar ?: 'avatar_01'})}" alt="Avatar" class="profile-manage__avatar" />
         <div class="profile-manage__info">
           <div class="profile-manage__name-row">
-            <span class="profile-manage__name" th:text="${p.name}">山田 太郎</span>
+            <span class="profile-manage__name profile-display-name" th:text="${p.name}">山田 太郎</span>
             <span class="badge badge--primary" th:if="${p.isPrimary}">本人</span>
             <span class="badge badge--relation" th:unless="${p.isPrimary}" th:text="${p.relationship}">父</span>
             <span class="badge badge--selected" th:if="${currentProfile != null and p.id == currentProfile.id}">選択中</span>
@@ -69,7 +69,7 @@
           <form
             th:if="${(canManageAllProfiles == true and !p.isPrimary) or (canManageCurrentProfile == true and currentProfile != null and currentProfile.id == p.id and !p.isPrimary and !p.managedByPrimary)}"
             th:id="'deleteForm-' + ${p.id}" th:action="@{/profile/delete}" method="post" class="delete-form"
-            th:attr="data-confirm-message='「' + ${p.name} + '」のプロファイルを削除しますか？&#10;この操作は取り消せません。'">
+            th:attr="data-confirm-title='プロファイルを削除',data-confirm-name=${p.name},data-confirm-message='プロファイルを削除しますか？'">
             <input type="hidden" name="profileId" th:value="${p.id}" />
             <button type="submit" class="icon-btn icon-btn--danger" data-tooltip="削除">
               <img th:src="@{/image/delete.png}" alt="削除" class="icon-btn-img" />

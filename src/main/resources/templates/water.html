@@ -21,7 +21,7 @@
           </span>
           <div>
             <h1>水分管理</h1>
-            <p th:text="${currentProfile != null ? currentProfile.name + ' の水分記録' : 'ゲスト の水分記録'}"></p>
+            <p><span class="profile-display-name" th:text="${currentProfile != null ? currentProfile.name : 'ゲスト'}"></span> の水分記録</p>
           </div>
         </div>
         <div th:fragment="headerActions(currentType, filterStartDate, filterEndDate)" class="header-actions">
@@ -140,7 +140,7 @@
                   </button>
                   <form class="delete-form" method="post" th:id="'deleteForm-' + ${record.id}"
                     th:action="@{/profile/{profileId}/water/{id}/delete(profileId=${profileId}, id=${record.id})}"
-                    th:attr="data-confirm-message='「' + ${record.recordedDate} + '」の水分記録を削除しますか？&#10;この操作は取り消せません。'">
+                    th:attr="data-confirm-message='「' + ${record.recordedDate} + '」の水分記録を削除しますか？'">
                   </form>
                 </td>
               </tr>
