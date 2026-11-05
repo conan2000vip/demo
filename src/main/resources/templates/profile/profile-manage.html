@@ -52,7 +52,7 @@
 
           <div class="profile-manage__meta">
             <span th:text="${#temporals.format(p.birthDate, 'yyyy-MM-dd')}">1980-01-01</span>
-            <span>（身長: <th:block th:text="${p.height}">170</th:block> cm）</span>
+            <span>（<th:block th:text="${p.age}">46</th:block>歳）</span>
           </div>
         </div>
         <div class="profile-manage__actions">

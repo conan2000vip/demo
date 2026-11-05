@@ -44,9 +44,10 @@
   </div>
   <div id="selectPinModal" class="pin-modal" th:hidden="${pinRequired != true}" th:attr="data-profile-id=${pinProfileId}" role="dialog"
     aria-modal="true" aria-labelledby="selectPinTitle">
-    <div class="pin-modal__backdrop"></div>
+    <div class="pin-modal__backdrop" data-select-pin-close></div>
     <div class="pin-modal__card profile-pin-unlock-card">
       <div id="selectPinView" class="pin-modal__view">
+        <button type="button" class="pin-modal__close" data-select-pin-close aria-label="閉じる">×</button>
         <div class="pin-modal__heading">
           <span class="pin-modal__icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" focusable="false">
@@ -77,7 +78,7 @@
         </div>
       </div>
       <div id="selectPasswordView" class="pin-modal__view" hidden>
-        <button type="button" class="pin-modal__close" data-account-password-close aria-label="閉じる">×</button>
+        <button type="button" class="pin-modal__close" data-select-pin-close aria-label="閉じる">×</button>
         <div class="pin-modal__heading">
           <span class="pin-modal__icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" focusable="false">

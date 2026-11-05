@@ -149,6 +149,12 @@
   color: #1a1a1a;
 }
 
+.profile-manage__name-row .badge {
+  min-width: 0;
+  height: 24px;
+  padding: 0 8px;
+}
+
 .profile-manage__admin-icon {
   width: 20px;
   height: 20px;
@@ -1048,10 +1054,17 @@ body.share-settings-open {
 .select-container {
   position: relative;
   min-height: 100vh;
+  box-sizing: border-box;
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 80px 20px 40px;
+  padding: 80px 20px calc(40px + env(safe-area-inset-bottom));
+}
+
+@supports (height: 100dvh) {
+  .select-container {
+    min-height: 100dvh;
+  }
 }
 
 .select-bg {
@@ -1123,12 +1136,22 @@ body.share-settings-open {
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
   transition:
     transform 0.2s ease,
+    background-color 0.2s ease,
     box-shadow 0.2s ease;
+  cursor: pointer;
 }
 
-.profile-card:hover {
+.profile-card:hover,
+.profile-card:focus-visible {
   transform: translateY(-2px);
+  background-color: #f8fafc;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+}
+
+.profile-card:active {
+  transform: translateY(1px);
+  background-color: #eef2f7;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.16);
 }
 
 .profile-avatar {
@@ -1167,14 +1190,22 @@ body.share-settings-open {
   color: #1a1a1a;
 }
 
+.profile-name-row .badge {
+  min-width: 0;
+  height: 24px;
+  padding: 0 9px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
 .badge--primary {
   background: #d1fae5;
-  color: #059669;
+  color: #047857;
 }
 
 .badge--relation {
   background: #f1f5f9;
-  color: #64748b;
+  color: #475569;
 }
 
 .badge--selected {
@@ -1553,7 +1584,7 @@ body.share-settings-open {
 
 @media (max-width: 600px) {
   .select-container {
-    padding: 60px 16px 32px;
+    padding: 60px 16px calc(32px + env(safe-area-inset-bottom));
   }
 
   .select-title {

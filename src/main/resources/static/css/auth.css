@@ -34,10 +34,17 @@ body {
 
 .auth-page {
     min-height: 100vh;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 40px 20px;
+    padding: 40px 20px calc(40px + env(safe-area-inset-bottom));
+}
+
+@supports (height: 100dvh) {
+    .auth-page {
+        min-height: 100dvh;
+    }
 }
 
 .auth-card {
@@ -440,6 +447,11 @@ body {
 }
 
 @media (max-width: 780px) {
+    .auth-page {
+        align-items: flex-start;
+        padding: 24px 16px calc(32px + env(safe-area-inset-bottom));
+    }
+
     .auth-card {
         grid-template-columns: 1fr;
         max-width: 420px;

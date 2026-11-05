@@ -21,6 +21,7 @@ import com.healthlog.demo.entity.Profile;
 import com.healthlog.demo.entity.Weight;
 import com.healthlog.demo.entity.ProfileShareSetting.Category;
 import com.healthlog.demo.exception.BusinessException;
+import com.healthlog.demo.repository.ProfileRepository;
 import com.healthlog.demo.repository.WeightRepository;
 import com.healthlog.demo.service.base.BaseLogService;
 import com.healthlog.demo.service.helper.ChartDataBuilder;
@@ -34,13 +35,16 @@ public class WeightServiceImpl extends BaseLogService<Weight, Weight> implements
     private static final int PAGE_SIZE = 10;
 
     private final WeightRepository weightRepository;
+    private final ProfileRepository profileRepository;
     private final BmiCalculator bmiCalculator;
     private final ChartDataBuilder chartDataBuilder;
 
-    public WeightServiceImpl(WeightRepository weightRepository, ProfileAccessValidation profileAccessValidation,
-            BmiCalculator bmiCalculator, ChartDataBuilder chartDataBuilder) {
+    public WeightServiceImpl(WeightRepository weightRepository, ProfileRepository profileRepository,
+            ProfileAccessValidation profileAccessValidation, BmiCalculator bmiCalculator,
+            ChartDataBuilder chartDataBuilder) {
         super(weightRepository, profileAccessValidation);
         this.weightRepository = weightRepository;
+        this.profileRepository = profileRepository;
         this.bmiCalculator = bmiCalculator;
         this.chartDataBuilder = chartDataBuilder;
     }
@@ -131,6 +135,9 @@ public class WeightServiceImpl extends BaseLogService<Weight, Weight> implements
         validateWeightInput(weight);
         if (weight.getHeight() == null) {
             weight.setHeight(profile.getHeight());
+        } else {
+            profile.setHeight(weight.getHeight());
+            profileRepository.save(profile);
         }
         weight.setProfile(profile);
         return weightRepository.save(weight);
@@ -144,6 +151,9 @@ public class WeightServiceImpl extends BaseLogService<Weight, Weight> implements
 
         if (input.getHeight() == null) {
             input.setHeight(log.getProfile().getHeight());
+        } else {
+            log.getProfile().setHeight(input.getHeight());
+            profileRepository.save(log.getProfile());
         }
         log.setRecordedDate(input.getRecordedDate());
         log.setMeasuredAt(input.getMeasuredAt());

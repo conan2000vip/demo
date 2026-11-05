@@ -213,8 +213,8 @@ public class ProfileController {
 
         try {
             Profile createdProfile = profileService.create(user.getId(), formDto);
-            session.setAttribute(SessionConstants.CURRENT_PROFILE_ID, createdProfile.getId());
-            if (createdProfile.isPrimary()) {
+            if (isFirstProfile) {
+                session.setAttribute(SessionConstants.CURRENT_PROFILE_ID, createdProfile.getId());
                 session.setAttribute(SessionConstants.AUTHENTICATED_PROFILE_ID, createdProfile.getId());
             }
             redirectAttributes.addFlashAttribute("message", createdProfile.getName() + " のプロファイルを作成しました");

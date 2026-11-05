@@ -26,6 +26,10 @@
         if (pinModal) pinModal.hidden = true;
     }
 
+    pinModal?.querySelectorAll('[data-select-pin-close]').forEach((element) => {
+        element.addEventListener('click', closePinModal);
+    });
+
     function showPasswordModal() {
         if (pinView) pinView.hidden = true;
         if (passwordView) passwordView.hidden = false;
