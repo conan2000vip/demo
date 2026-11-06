@@ -121,8 +121,7 @@
         </p>
       </article>
       <article th:if="${canViewWater == true}" class="stat-card stat-card--water stat-card--clickable"
-        th:data-href="@{/profile/{profileId}/water(profileId=${currentProfile.id})}"
-        role="link" tabindex="0">
+        th:data-href="@{/profile/{profileId}/water(profileId=${currentProfile.id})}" role="link" tabindex="0">
         <div class="stat-card__head">
           <div class="stat-card__title">
             <img th:src="@{/image/water.png}" alt="" class="stat-card__icon" />
@@ -143,8 +142,8 @@
           水分目標を達成しました
         </p>
       </article>
-      <article class="stat-card stat-card--step stat-card--clickable" th:data-href="@{/profile/{profileId}/step(profileId=${currentProfile.id})}"
-        role="link" tabindex="0">
+      <article th:if="${canViewStep == true}" class="stat-card stat-card--step stat-card--clickable"
+        th:data-href="@{/profile/{profileId}/step(profileId=${currentProfile.id})}" role="link" tabindex="0">
         <div class="stat-card__head">
           <div class="stat-card__title">
             <img th:src="@{/image/footstep.png}" alt="" class="stat-card__icon" />

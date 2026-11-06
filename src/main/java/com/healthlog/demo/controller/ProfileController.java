@@ -161,6 +161,12 @@ public class ProfileController {
         try {
             Profile profile = profileService.getProfile(user.getId(), id);
             profileService.switchProfile(session, user.getId(), id);
+            // 入口画面で選択したプロファイルを認証済みとして保持する。
+            // ヘッダー切替では現在表示するプロファイルだけを変更する
+            String redirectUrl = buildRedirectUrl(referer, id);
+            if (redirectUrl.equals("/profile/" + id + "/home")) {
+                session.setAttribute(SessionConstants.PROFILE_SWITCH_TARGET_ID, id);
+            }
             redirectAttributes.addFlashAttribute("message", profile.getName() + " プロファイルを切り替えました");
         } catch (BusinessException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
