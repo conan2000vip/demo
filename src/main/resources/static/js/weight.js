@@ -171,8 +171,8 @@ function initModal() {
       return false;
     }
     const num = parseFloat(value);
-    if (Number.isNaN(num) || num < 1.0 || num > 1000.0) {
-      showError("weight", "正しい体重を入力してください (1〜1000kg)");
+    if (Number.isNaN(num) || num < 1.0 || num > 700.0) {
+      showError("weight", "正しい体重を入力してください (1〜700kg)");
       isWeightWarned = false;
       return false;
     }

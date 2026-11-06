@@ -60,7 +60,7 @@
           </a>
           <a th:href="@{/profile/profile-manage}" class="app-header__nav-item" th:classappend="${activePage == 'profile'} ? ' is-active' : ''">
             <img th:src="@{/image/profile.png}" alt="" class="app-header__nav-icon" />
-            <span>プロファイル</span>
+            <span>プロファイル管理</span>
           </a>
         </th:block>
         <th:block th:if="${currentProfile == null}">
@@ -90,7 +90,7 @@
           </span>
           <span class="app-header__nav-item is-active" style="cursor: not-allowed;">
             <img th:src="@{/image/profile.png}" alt="" class="app-header__nav-icon" />
-            <span>プロファイル</span>
+            <span>プロファイル管理</span>
           </span>
         </th:block>
       </nav>
@@ -135,7 +135,7 @@
 
         <div class="app-header__divider"></div>
         <form th:action="@{/auth/logout}" method="post" class="app-header__logout-form">
-          <button type="submit" class="app-header__logout">
+          <button type="submit" class="app-header__logout" aria-label="ログアウト" title="ログアウト">
             <img th:src="@{/image/logout.png}" alt="" class="app-header__nav-icon" />
             <span>ログアウト</span>
           </button>

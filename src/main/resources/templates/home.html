@@ -79,6 +79,7 @@
         </div>
       </div>
     </section>
+    <!-- ステータスカード -->
     <section class="stat-grid">
       <article th:if="${canViewWeight == true}" class="stat-card stat-card--weight stat-card--clickable"
         th:data-href="@{/profile/{profileId}/weight(profileId=${currentProfile.id})}" role="link" tabindex="0">

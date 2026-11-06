@@ -1792,6 +1792,17 @@ textarea {
         display: none;
     }
 
+    .app-header__logout {
+        width: 40px;
+        height: 40px;
+        padding: 8px;
+        justify-content: center;
+    }
+
+    .app-header__logout span {
+        display: none;
+    }
+
     .app-header__user {
         height: 40px;
         padding: 6px 8px;
@@ -1831,9 +1842,12 @@ textarea {
     }
 
     .app-header__dropdown {
-        right: auto;
-        left: 50%;
-        margin-left: -110px;
+        position: fixed;
+        top: calc(var(--app-header-height) + 12px);
+        right: 12px;
+        left: auto;
+        width: 280px;
+        margin-left: 0;
     }
 
     .feedback-card {
