@@ -5,7 +5,6 @@ import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +26,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CsvExportServiceImpl implements CsvExportService {
 
-    private static final long MAX_DAYS = 366;
     private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm");
 
     private final ProfileAccessValidation profileAccessValidation;
@@ -45,7 +43,7 @@ public class CsvExportServiceImpl implements CsvExportService {
         if (start.isAfter(end)) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "終了日は開始日以降の日付を指定してください");
         }
-        if (ChronoUnit.DAYS.between(start, end) > MAX_DAYS) {
+        if (start.isBefore(end.minusYears(1))) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "出力できる期間は最大1年です");
         }
         // データ項目ごとに閲覧権限を検証する（"steps" は Category.step に対応）。

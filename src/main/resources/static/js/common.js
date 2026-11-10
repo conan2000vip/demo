@@ -54,13 +54,33 @@ function todayInJapan() {
   return new Date(y, m - 1, d);
 }
 
+function oneYearBefore(date) {
+  const previousYear = date.getFullYear() - 1;
+  const lastDayOfMonth = new Date(
+    previousYear,
+    date.getMonth() + 1,
+    0,
+  ).getDate();
+  const result = new Date(date);
+  result.setFullYear(
+    previousYear,
+    date.getMonth(),
+    Math.min(date.getDate(), lastDayOfMonth),
+  );
+  return result;
+}
+
 // range: '1D' | '1W' | '1M' | '3M' | '6M' | '1Y'
 function getCalendarRange(range, today = todayInJapan()) {
   const end = new Date(today);
   const start = new Date(end);
   if (range === '1W') start.setDate(start.getDate() - 6);
 
-  const months = { '1M': 1, '3M': 3, '6M': 6, '1Y': 12 }[range];
+  if (range === '1Y') {
+    return { start: formatIsoDate(oneYearBefore(end)), end: formatIsoDate(end) };
+  }
+
+  const months = { '1M': 1, '3M': 3, '6M': 6 }[range];
   if (months) {
     const isLastDay = new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1).getDate() === 1;
     if (isLastDay) {
@@ -864,6 +884,7 @@ function initCsvExportModal() {
   const columnsText = document.getElementById("csvColumnsText");
   const closeBtn = document.getElementById("csvExportClose");
   const cancelBtn = document.getElementById("csvExportCancel");
+  const submitBtn = form.querySelector('button[type="submit"]');
   const exportUrl = overlay.dataset.exportUrl || "";
   const previewUrl = overlay.dataset.previewUrl || "";
 
@@ -875,13 +896,23 @@ function initCsvExportModal() {
     return getCalendarRange(range);
   }
 
-  // 入力中の日付と一致するラジオを選択し、一致しなければ全て未選択にする
-  function syncRangeOptions() {
+  // 入力した日付が期間ボタンと一致しない場合は指定期間を選択する
+  function syncRangeOptions(useCustom = false) {
+    let matched = false;
     rangeOptions.forEach((radio) => {
+      if (radio.value === "CUSTOM") {
+        radio.checked = false;
+        return;
+      }
       const range = getRange(radio.value);
       radio.checked =
         startInput.value === range.start && endInput.value === range.end;
+      matched = matched || radio.checked;
     });
+    const customRange = overlay.querySelector(
+      'input[name="range"][value="CUSTOM"]',
+    );
+    if (customRange) customRange.checked = useCustom || !matched;
   }
 
   function selectedTypes() {
@@ -900,6 +931,26 @@ function initCsvExportModal() {
     box.classList.toggle("show", Boolean(message));
   }
 
+  function exceedsOneYear(startDate, endDate) {
+    const [year, month, day] = endDate.split("-").map(Number);
+    const earliestStart = oneYearBefore(new Date(year, month - 1, day));
+    return startDate < formatIsoDate(earliestStart);
+  }
+
+  function validateDateRange() {
+    let message = "";
+    if (startInput.value && endInput.value) {
+      if (startInput.value > endInput.value) {
+        message = "終了日は開始日以降の日付を指定してください。";
+      } else if (exceedsOneYear(startInput.value, endInput.value)) {
+        message = "エクスポート期間は最大1年間まで指定できます。";
+      }
+    }
+    showError(error, message);
+    if (submitBtn) submitBtn.disabled = Boolean(message);
+    return !message;
+  }
+
   function formatCsvDate(value) {
     const [year, month, day] = value.split("-");
     return `${year}/${month}/${day}`;
@@ -912,7 +963,8 @@ function initCsvExportModal() {
       return;
     }
     const selectedRange = overlay.querySelector('input[name="range"]:checked');
-    const label = selectedRange ? "選択期間" : "指定期間";
+    const label =
+      selectedRange?.value === "CUSTOM" ? "指定期間" : "選択期間";
     selectedPeriod.textContent =
       `${label}：${formatCsvDate(startInput.value)} 〜 ${formatCsvDate(endInput.value)} のデータを出力します。`;
   }
@@ -1012,6 +1064,12 @@ function initCsvExportModal() {
     previewData = {};
     renderPreview();
 
+    if (!validateDateRange()) {
+      previewRequestId++;
+      showPreviewMessage("期間の指定を確認してください。");
+      return;
+    }
+
     const types = selectedTypes();
     if (!previewUrl || !types.length || !startInput.value || !endInput.value)
       return;
@@ -1071,6 +1129,7 @@ function initCsvExportModal() {
 
     showError(error, "");
     showError(typesError, "");
+    validateDateRange();
     overlay.classList.add("is-open");
     loadPreview();
   }
@@ -1122,6 +1181,11 @@ function initCsvExportModal() {
   rangeOptions.forEach((radio) => {
     radio.addEventListener("change", () => {
       if (!radio.checked) return;
+      if (radio.value === "CUSTOM") {
+        formatSelectedPeriod();
+        loadPreview();
+        return;
+      }
       const range = getRange(radio.value);
       startInput.value = range.start;
       endInput.value = range.end;
@@ -1133,9 +1197,8 @@ function initCsvExportModal() {
 
   [startInput, endInput].forEach((input) => {
     input.addEventListener("change", () => {
-      syncRangeOptions();
+      syncRangeOptions(true);
       formatSelectedPeriod();
-      showError(error, "");
       loadPreview();
     });
   });
@@ -1165,10 +1228,7 @@ function initCsvExportModal() {
       showError(error, "開始日と終了日を指定してください。");
       return;
     }
-    if (startInput.value > endInput.value) {
-      showError(error, "終了日は開始日以降の日付を指定してください。");
-      return;
-    }
+    if (!validateDateRange()) return;
     const types = selectedTypes();
     if (!types.length) {
       showError(typesError, "出力するデータを1つ以上選択してください。");

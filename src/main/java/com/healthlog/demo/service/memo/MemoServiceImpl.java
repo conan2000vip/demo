@@ -79,7 +79,7 @@ public class MemoServiceImpl extends BaseLogService<Memo, Memo> implements MemoS
 
     @Override
     public Memo update(Long profileId, Long currentUserId, Long logId, Memo input) {
-        validateAndGetProfile(profileId, currentUserId);
+        validateAndGetEditableProfile(profileId, currentUserId);
         Memo existing = findEntityByIdAndProfile(logId, profileId);
         normalizeInput(input);
         validateMemo(input);

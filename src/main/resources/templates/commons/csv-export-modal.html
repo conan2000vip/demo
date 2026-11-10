@@ -51,12 +51,14 @@
                   <label><input type="radio" name="range" value="3M" /><span>3ヶ月</span></label>
                   <label><input type="radio" name="range" value="6M" /><span>6ヶ月</span></label>
                   <label><input type="radio" name="range" value="1Y" /><span>1年</span></label>
+                  <label><input type="radio" name="range" value="CUSTOM" /><span>指定期間</span></label>
                 </div>
                 <div class="csv-modal__dates">
                   <input type="date" name="startDate" id="csvStartDate" th:max="${T(java.time.LocalDate).now()}" required aria-label="開始日" />
                   <span class="filter-bar__sep">〜</span>
                   <input type="date" name="endDate" id="csvEndDate" th:max="${T(java.time.LocalDate).now()}" required aria-label="終了日" />
                 </div>
+                <p class="csv-modal__note">指定期間は開始日と終了日を入力して設定できます。</p>
                 <p class="field-error" id="csvExportError" role="alert"></p>
               </section>
 

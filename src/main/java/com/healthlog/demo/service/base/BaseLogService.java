@@ -100,7 +100,7 @@ public abstract class BaseLogService<T extends BaseLog, DTO> {
     // === 5. レコードを安全に削除 ===
     @Transactional
     public void deleteLog(Long id, Long profileId, Long currentUserId) {
-        validateAndGetProfile(profileId, currentUserId);
+        validateAndGetEditableProfile(profileId, currentUserId);
         findEntityByIdAndProfile(id, profileId); // レコードの存在とプロファイルの一致を確認する。
         repository.deleteByIdAndProfile_Id(id, profileId);
     }
