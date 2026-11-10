@@ -43,6 +43,7 @@ public class CsvExportServiceImpl implements CsvExportService {
         if (start.isAfter(end)) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "終了日は開始日以降の日付を指定してください");
         }
+        // 1年を超える期間の出力は不可とする。
         if (start.isBefore(end.minusYears(1))) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "出力できる期間は最大1年です");
         }
@@ -129,10 +130,8 @@ public class CsvExportServiceImpl implements CsvExportService {
     private CsvTable stepTable(Long profileId, LocalDate start, LocalDate end) {
         List<List<String>> rows = stepRepository
                 .findByProfile_IdAndRecordedDateBetweenOrderByRecordedDateAscIdAsc(profileId, start, end).stream()
-                .map(s -> List.of(str(s.getRecordedDate()),
-                        str(s.getSteps()),
-                        s.getUpdatedAt() == null ? "" : s.getUpdatedAt().format(TIME),
-                        text(s.getMemo())))
+                .map(s -> List.of(str(s.getRecordedDate()), str(s.getSteps()),
+                        s.getUpdatedAt() == null ? "" : s.getUpdatedAt().format(TIME), text(s.getMemo())))
                 .toList();
         return new CsvTable(List.of("日付", "歩数", "最終更新", "メモ"), rows);
     }

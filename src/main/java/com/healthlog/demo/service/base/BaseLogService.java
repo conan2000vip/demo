@@ -29,6 +29,7 @@ public abstract class BaseLogService<T extends BaseLog, DTO> {
 
     // 抽象メソッド：各サービスでエンティティからDTOへの変換を実装する。
     protected abstract DTO mapToDto(T entity);
+
     protected abstract Category category();
 
     // === 1. プロファイルの認証・認可（IDOR対策） ===
@@ -43,8 +44,7 @@ public abstract class BaseLogService<T extends BaseLog, DTO> {
     // === 2. 安全に1件のレコード詳細を取得 ===
     @Transactional(readOnly = true)
     public T findEntityByIdAndProfile(Long id, Long profileId) {
-        return repository.findById(id)
-                .filter(log -> log.getProfile().getId().equals(profileId))
+        return repository.findById(id).filter(log -> log.getProfile().getId().equals(profileId))
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "データが見つかりません"));
     }
 
@@ -69,19 +69,21 @@ public abstract class BaseLogService<T extends BaseLog, DTO> {
     }
 
     @Transactional(readOnly = true)
-    public Page<DTO> getLogsPaged(
-            Long profileId, Long currentUserId, DateRangerFilter dateRange, Pageable pageable) {
+    public Page<DTO> getLogsPaged(Long profileId, Long currentUserId, DateRangerFilter dateRange, Pageable pageable) {
         validateAndGetProfile(profileId, currentUserId);
         LocalDate from = dateRange != null ? dateRange.getFrom() : null;
         LocalDate to = dateRange != null ? dateRange.getTo() : null;
 
         Page<T> logs;
         if (from != null && to != null) {
-            logs = repository.findByProfile_IdAndRecordedDateBetweenOrderByRecordedDateDesc(profileId, from, to, pageable);
+            logs = repository.findByProfile_IdAndRecordedDateBetweenOrderByRecordedDateDesc(profileId, from, to,
+                    pageable);
         } else if (from != null) {
-            logs = repository.findByProfile_IdAndRecordedDateGreaterThanEqualOrderByRecordedDateDesc(profileId, from, pageable);
+            logs = repository.findByProfile_IdAndRecordedDateGreaterThanEqualOrderByRecordedDateDesc(profileId, from,
+                    pageable);
         } else if (to != null) {
-            logs = repository.findByProfile_IdAndRecordedDateLessThanEqualOrderByRecordedDateDesc(profileId, to, pageable);
+            logs = repository.findByProfile_IdAndRecordedDateLessThanEqualOrderByRecordedDateDesc(profileId, to,
+                    pageable);
         } else {
             logs = repository.findByProfile_IdOrderByRecordedDateDesc(profileId, pageable);
         }
@@ -92,14 +94,13 @@ public abstract class BaseLogService<T extends BaseLog, DTO> {
     @Transactional(readOnly = true)
     public DTO getLatestLog(Long profileId, Long currentUserId) {
         validateAndGetProfile(profileId, currentUserId);
-        return repository.findTopByProfile_IdOrderByRecordedDateDesc(profileId)
-                .map(this::mapToDto)
-                .orElse(null);
+        return repository.findTopByProfile_IdOrderByRecordedDateDesc(profileId).map(this::mapToDto).orElse(null);
     }
 
     // === 5. レコードを安全に削除 ===
     @Transactional
     public void deleteLog(Long id, Long profileId, Long currentUserId) {
+        // プロファイルの編集権限を確認する。
         validateAndGetEditableProfile(profileId, currentUserId);
         findEntityByIdAndProfile(id, profileId); // レコードの存在とプロファイルの一致を確認する。
         repository.deleteByIdAndProfile_Id(id, profileId);
