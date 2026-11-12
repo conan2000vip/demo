@@ -53,7 +53,9 @@ public class HomeController {
 
         // 認証済みプロファイルIDをセッションから取得
         Long authenticatedProfileId = (Long) session.getAttribute(SessionConstants.AUTHENTICATED_PROFILE_ID);
-        if (!isProfileSwitch && profileService.hasPin(user.getId(), profileId)
+        Long currentProfileId = (Long) session.getAttribute(SessionConstants.CURRENT_PROFILE_ID);
+        boolean isCurrentProfile = profileId.equals(currentProfileId);
+        if (!isProfileSwitch && !isCurrentProfile && profileService.hasPin(user.getId(), profileId)
                 && !profileId.equals(authenticatedProfileId)) {
             return "redirect:/profile/" + profileId + "/select";
         }

@@ -14,6 +14,14 @@
     const profileId = pinModal?.dataset.profileId;
     let isSubmittingPin = false;
 
+    function resetPinInputs() {
+        resetPinModalDigits(pinDigits, pinInput);
+    }
+
+    function clearPasswordInput() {
+        if (passwordInput) passwordInput.value = '';
+    }
+
     function showPinModal() {
         if (!pinModal) return;
         pinModal.hidden = false;
@@ -24,6 +32,11 @@
 
     function closePinModal() {
         if (pinModal) pinModal.hidden = true;
+        resetPinInputs();
+        clearPasswordInput();
+        if (pinError) pinError.textContent = '';
+        if (passwordError) passwordError.textContent = '';
+        isSubmittingPin = false;
     }
 
     pinModal?.querySelectorAll('[data-select-pin-close]').forEach((element) => {
@@ -31,9 +44,19 @@
     });
 
     function showPasswordModal() {
+        resetPinInputs();
+        if (pinError) pinError.textContent = '';
         if (pinView) pinView.hidden = true;
         if (passwordView) passwordView.hidden = false;
         passwordInput?.focus();
+    }
+
+    function backToPinModal() {
+        resetPinInputs();
+        clearPasswordInput();
+        if (pinError) pinError.textContent = '';
+        if (passwordError) passwordError.textContent = '';
+        showPinModal();
     }
 
     document.querySelectorAll('.profile-card[data-profile-id]').forEach((card) => {
@@ -51,12 +74,12 @@
 
     document.querySelectorAll('[data-account-password-close]').forEach((button) => {
         button.addEventListener('click', () => {
-            showPinModal();
+            backToPinModal();
         });
     });
 
     const submitAccountPassword = () => {
-        const password = passwordInput?.value.trim() || '';
+        const password = passwordInput?.value || '';
         if (!password) {
             if (passwordError) passwordError.textContent = 'アカウントのパスワードを入力してください。';
             passwordInput?.focus();

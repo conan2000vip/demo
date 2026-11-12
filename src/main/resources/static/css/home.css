@@ -1865,3 +1865,9 @@
   color: #1e293b;
   margin: 0;
 }
+
+.chart-empty-state__description {
+  font-size: 13px;
+  color: #64748b;
+  margin: 8px 0 0;
+}

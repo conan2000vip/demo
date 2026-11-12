@@ -1,4 +1,11 @@
 // 共通画面処理（common.js）
+function resetPinModalDigits(digits, hiddenInput) {
+  digits.forEach((digit) => {
+    digit.value = "";
+  });
+  if (hiddenInput) hiddenInput.value = "";
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   // Lucideアイコンを画面に描画する。
   if (window.lucide) {

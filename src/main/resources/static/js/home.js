@@ -34,6 +34,16 @@ function initFeedbackToggle() {
 function initClickableCards() {
     document.querySelectorAll(".stat-card--clickable").forEach((card) => {
         const open = () => {
+            const switchAction = card.dataset.switchAction;
+            if (switchAction) {
+                const form = document.createElement("form");
+                form.method = "post";
+                form.action = switchAction;
+                document.body.append(form);
+                form.submit();
+                return;
+            }
+
             const href = card.dataset.href;
             if (href) {
                 window.location.href = href;

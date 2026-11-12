@@ -11,6 +11,10 @@ import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 
 import com.healthlog.demo.dto.common.DateRangerFilter;
+import com.healthlog.demo.repository.SleepRepository;
+import com.healthlog.demo.repository.StepRepository;
+import com.healthlog.demo.repository.WaterRepository;
+import com.healthlog.demo.repository.WeightRepository;
 import com.healthlog.demo.service.sleep.SleepService;
 import com.healthlog.demo.service.step.StepService;
 import com.healthlog.demo.service.water.WaterService;
@@ -28,10 +32,15 @@ public class HomeSummaryChartServiceImpl implements HomeSummaryChartService {
     private final SleepService sleepService;
     private final WaterService waterService;
     private final StepService stepService;
+    private final WeightRepository weightRepository;
+    private final SleepRepository sleepRepository;
+    private final WaterRepository waterRepository;
+    private final StepRepository stepRepository;
     private final ProfileAccessValidation profileAccessValidation;
 
     @Override
     public Map<String, Object> getSummaryChartData(Long profileId, Long currentUserId, LocalDate from, LocalDate to) {
+        profileAccessValidation.validateCanViewProfile(profileId, currentUserId);
         DateRangerFilter range = new DateRangerFilter(from, to);
 
         Map<String, Object> weight = chartOrEmpty(profileId, currentUserId, range, Category.weight);
@@ -43,14 +52,51 @@ public class HomeSummaryChartServiceImpl implements HomeSummaryChartService {
         result.put("from", from);
         result.put("to", to);
         List<Map<String, Object>> charts = List.of(weight, sleep, water, step);
-        result.put("chartMode", firstAvailable("chartMode", charts));
+        result.put("chartMode", firstAvailableChartMode(charts, from, to));
         result.put("labels", firstAvailable("labels", charts));
         result.put("weight", series(weight));
         result.put("sleep", series(sleep));
         result.put("water", series(water));
         result.put("step", series(step));
         result.put("hasEverLogged", hasEverLogged(profileId, currentUserId, charts));
+        result.put("hasUnsharedData", hasUnsharedData(profileId, currentUserId));
         return result;
+    }
+
+    private String firstAvailableChartMode(List<Map<String, Object>> charts, LocalDate from, LocalDate to) {
+        for (Map<String, Object> chart : charts) {
+            Object chartMode = chart.get("chartMode");
+            if (chartMode instanceof String mode && !mode.isBlank() && !"EMPTY".equals(mode)) {
+                return mode;
+            }
+        }
+        if (from == null || to == null || from.equals(to)) {
+            return "DAY";
+        }
+        long days = java.time.temporal.ChronoUnit.DAYS.between(from, to) + 1;
+        if (days <= 7) {
+            return "DAY";
+        }
+        if (days <= 31) {
+            return "WEEK";
+        }
+        if (days <= 730) {
+            return "MONTH";
+        }
+        return "YEAR";
+    }
+
+    @Override
+    public boolean hasUnsharedData(Long profileId, Long currentUserId) {
+        profileAccessValidation.validateCanViewProfile(profileId, currentUserId);
+        return (!profileAccessValidation.hasReadAccess(profileId, currentUserId, Category.weight)
+                    && weightRepository.existsByProfile_Id(profileId))
+                || (!profileAccessValidation.hasReadAccess(profileId, currentUserId, Category.sleep)
+                    && sleepRepository.existsByProfile_Id(profileId))
+                || (!profileAccessValidation.hasReadAccess(profileId, currentUserId, Category.water)
+                    && waterRepository.existsByProfile_Id(profileId))
+                || (!profileAccessValidation.hasReadAccess(profileId, currentUserId, Category.step)
+                    && stepRepository.existsByProfile_Id(profileId));
     }
 
     private Map<String, Object> chartOrEmpty(Long profileId, Long currentUserId, DateRangerFilter range,

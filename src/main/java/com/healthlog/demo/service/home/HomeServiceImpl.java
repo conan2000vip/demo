@@ -43,15 +43,21 @@ public class HomeServiceImpl implements HomeService {
         data.put("goals", visibleGoals(currentProfile, currentUserId));
         data.put("profileList", profileList);
         data.put("today", homeTodayService.buildToday(targetProfileId, currentUserId));
-        data.put("canViewWeight",
-                profileAccessValidation.hasReadAccess(targetProfileId, currentUserId, Category.weight));
-        data.put("canViewSleep", profileAccessValidation.hasReadAccess(targetProfileId, currentUserId, Category.sleep));
-        data.put("canViewWater", profileAccessValidation.hasReadAccess(targetProfileId, currentUserId, Category.water));
-        data.put("canViewStep", profileAccessValidation.hasReadAccess(targetProfileId, currentUserId, Category.step));
+        boolean canViewWeight = profileAccessValidation.hasReadAccess(targetProfileId, currentUserId, Category.weight);
+        boolean canViewSleep = profileAccessValidation.hasReadAccess(targetProfileId, currentUserId, Category.sleep);
+        boolean canViewWater = profileAccessValidation.hasReadAccess(targetProfileId, currentUserId, Category.water);
+        boolean canViewStep = profileAccessValidation.hasReadAccess(targetProfileId, currentUserId, Category.step);
+        data.put("canViewWeight", canViewWeight);
+        data.put("canViewSleep", canViewSleep);
+        data.put("canViewWater", canViewWater);
+        data.put("canViewStep", canViewStep);
         data.put("canViewMemo", profileAccessValidation.hasReadAccess(targetProfileId, currentUserId, Category.memo));
         data.put("familyMembers", familyMembers);
         data.put("familySummary", homeFamilyService.buildFamilySummary(familyMembers));
-        data.put("feedbackList", visibleFeedback(targetProfileId, currentUserId));
+        List<FeedbackItem> feedbackList = visibleFeedback(targetProfileId, currentUserId);
+        data.put("feedbackList", feedbackList);
+        data.put("hasRestrictedFeedbackCategories",
+                !canViewWeight || !canViewSleep || !canViewWater || !canViewStep);
         Optional<HomeStreakService.StreakInfo> currentStreak = homeStreakService.getCurrentStreakInfo(targetProfileId,
                 today);
         if (currentStreak.isPresent()) {

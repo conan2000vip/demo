@@ -233,7 +233,7 @@
     const template = document.getElementById("chartLegendItemTemplate");
     if (!container || !template) return;
 
-    const items = SERIES.map((series) => {
+    const items = getAvailableSeries().map((series) => {
       const item = template.content.firstElementChild.cloneNode(true);
       const symbol = item.querySelector(".home-chart-legend-symbol");
       symbol.classList.add(series.key === primaryKey ? "home-chart-legend-symbol--bar" : "home-chart-legend-symbol--line");
@@ -252,6 +252,14 @@
     });
   }
 
+  function getAvailableSeries() {
+    const availableKeys = new Set(
+      Array.from(document.querySelectorAll("[data-main-metric]"))
+        .map((button) => button.dataset.mainMetric),
+    );
+    return SERIES.filter((series) => availableKeys.has(series.key));
+  }
+
   function renderChart(canvas, data) {
     const isEmpty = toggleChartEmptyState(canvas, data);
     renderLegend();
@@ -265,11 +273,11 @@
     chartInstance = null;
 
     const mode = data.chartMode || "DAY";
-    const labels = (data.labels || []).map((label) => HealthChart.formatLabel(label, mode));
+    const labels = (data.labels || []).map((label) => window.HealthChart.formatLabel(label, mode));
     const primarySeries = getSeries(primaryKey);
     const bounds = getPrimaryBounds(primaryKey, data[primaryKey]?.values || []);
     let lineBandIndex = 0;
-    const datasets = SERIES.map((series) => {
+    const datasets = getAvailableSeries().map((series) => {
       const values = data[series.key]?.values || [];
       if (series.key === primaryKey) return createBarDataset(series, values);
       return createLineDataset(series, values, bounds.min, bounds.max, lineBandIndex++);
@@ -506,6 +514,10 @@
   function init() {
     const canvas = document.getElementById("homeIntegratedChartCanvas");
     if (!canvas || !canvas.dataset.profileId || !canvas.dataset.from || !canvas.dataset.to) return;
+    const firstAvailableMetric = document.querySelector("[data-main-metric]");
+    if (firstAvailableMetric) {
+      primaryKey = firstAvailableMetric.dataset.mainMetric;
+    }
     initMainMetricSelector(canvas);
     initChartFilter(canvas);
     loadChart(canvas, canvas.dataset.from, canvas.dataset.to);
@@ -523,8 +535,9 @@
     const emptyContainer = document.getElementById("homeIntegratedChartEmpty");
     const emptyIcon = document.getElementById("chartEmptyIcon");
     const emptyTitle = document.getElementById("chartEmptyTitle");
+    const emptyDescription = document.getElementById("chartEmptyDescription");
 
-    if (!emptyContainer || !emptyIcon || !emptyTitle) {
+    if (!emptyContainer || !emptyIcon || !emptyTitle || !emptyDescription) {
       console.error("[HomeChart] Empty-state elements are missing.");
       return false;
     }
@@ -552,15 +565,32 @@
     emptyContainer.style.display = "flex";
 
     const hasEverLogged = [true, "true", 1, "1"].includes(data?.hasEverLogged);
+    const hasUnsharedData = [true, "true", 1, "1"].includes(data?.hasUnsharedData);
     let state;
-    if (!hasEverLogged) {
+    if (!hasEverLogged && hasUnsharedData) {
+      state = {
+        title: "閲覧権限がありません",
+        description: "",
+        icon: "lock-keyhole",
+      };
+    } else if (!hasEverLogged) {
       state = { title: "まだ記録がありません", icon: "chart-column" };
     } else if (isDefaultRange(canvas)) {
-      state = { title: "最近7日間の記録がありません", icon: "calendar-clock" };
+      state = {
+        title: "最近7日間の記録がありません",
+        description: hasUnsharedData ? "閲覧権限がありません" : "",
+        icon: "calendar-clock",
+      };
     } else {
-      state = { title: "選択した期間にデータがありません", icon: "calendar-x-2" };
+      state = {
+        title: "選択した期間にデータがありません",
+        description: hasUnsharedData ? "閲覧権限がありません" : "",
+        icon: "calendar-x-2",
+      };
     }
     emptyTitle.textContent = state.title;
+    emptyDescription.textContent = state.description || "";
+    emptyDescription.hidden = !state.description;
 
     emptyIcon.replaceChildren();
     const icon = document.createElement("i");

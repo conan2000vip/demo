@@ -214,6 +214,7 @@
           <div id="homeIntegratedChartEmpty" class="chart-empty-state" style="display: none;">
             <div id="chartEmptyIcon" class="chart-empty-state__icon"></div>
             <p id="chartEmptyTitle" class="chart-empty-state__title"></p>
+            <p id="chartEmptyDescription" class="chart-empty-state__description" hidden></p>
           </div>
         </div>
       </div>
@@ -229,7 +230,8 @@
         <h2><img th:src="@{/image/shield.png}" alt="" class="icon-sm" />健康フィードバック（重要度の高い順に表示）</h2>
       </div>
       <div th:replace="~{commons/data-controls :: feedbackList(feedbackList=${feedbackList})}"></div>
-      <p class="empty-text" th:if="${#lists.isEmpty(feedbackList)}">現在フィードバックはありません。</p>
+      <p class="empty-text" th:if="${#lists.isEmpty(feedbackList) and hasRestrictedFeedbackCategories != true}">現在フィードバックはありません。</p>
+      <p class="empty-text" th:if="${#lists.isEmpty(feedbackList) and hasRestrictedFeedbackCategories == true}">閲覧権限がありません</p>
     </section>
     <section class="family-card">
       <div class="family-card__header">
@@ -245,7 +247,7 @@
       <div class="family-card__grid" th:if="${!#lists.isEmpty(familyMembers)}">
         <article class="family-member stat-card--clickable" th:each="member : ${familyMembers}"
           th:classappend="${member.status == 'OK' ? 'is-ok' : (member.status == 'WARN' ? 'is-warn' : 'is-danger')}"
-          th:data-href="@{/profile/{profileId}/home(profileId=${member.id})}" role="link" tabindex="0">
+          th:data-switch-action="@{/profile/switch/{profileId}(profileId=${member.id})}" role="link" tabindex="0">
           <div class="family-member__identity">
             <p class="family-member__name profile-display-name" th:text="${member.name}">父</p>
             <span class="family-member__age">

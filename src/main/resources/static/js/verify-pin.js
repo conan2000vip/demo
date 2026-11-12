@@ -190,8 +190,10 @@
   }
 
   function resetUnlockDigits() {
-    getUnlockDigits().forEach(function (d) { d.value = ''; });
-    syncUnlockPin();
+    resetPinModalDigits(
+      getUnlockDigits(),
+      document.getElementById('unlockCurrentPin')
+    );
   }
 
   function initUnlockDigits() {
@@ -241,6 +243,14 @@
   function closePinUnlockModal() {
     const modal = document.getElementById('pinUnlockModal');
     if (modal) modal.hidden = true;
+    resetUnlockDigits();
+    clearPinRemovalFields();
+    const error = document.getElementById('unlockPinError');
+    if (error) error.textContent = '';
+    const passwordInput = document.getElementById('accountPasswordInput');
+    const passwordError = document.getElementById('accountPasswordError');
+    if (passwordInput) passwordInput.value = '';
+    if (passwordError) passwordError.textContent = '';
     const toggle = document.getElementById('pinEnabled');
     if (toggle) {
       toggle.checked = true;
@@ -253,6 +263,9 @@
     const modal = document.getElementById('accountPasswordModal');
     const input = document.getElementById('accountPasswordInput');
     if (pinModal) pinModal.hidden = true;
+    resetUnlockDigits();
+    const pinError = document.getElementById('unlockPinError');
+    if (pinError) pinError.textContent = '';
     if (modal) modal.hidden = false;
     if (input) {
       input.value = '';

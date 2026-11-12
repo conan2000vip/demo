@@ -6,4 +6,6 @@ import java.util.Map;
 public interface HomeSummaryChartService {
 
     Map<String, Object> getSummaryChartData(Long profileId, Long currentUserId, LocalDate from, LocalDate to);
+
+    boolean hasUnsharedData(Long profileId, Long currentUserId);
 }
