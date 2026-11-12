@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
 import com.healthlog.demo.dto.feedback.FeedbackItem;
 import com.healthlog.demo.dto.feedback.FeedbackLevel;
 import com.healthlog.demo.dto.feedback.FeedbackType;
+import com.healthlog.demo.entity.ProfileShareSetting.Category;
 import com.healthlog.demo.service.feedbackservice.FeedbackService;
 
 import lombok.RequiredArgsConstructor;
@@ -31,12 +33,20 @@ public class HomeFeedbackServiceImpl implements HomeFeedbackService {
     }
 
     @Override
-    public boolean collectSevereLabels(Long profileId, List<String> severeLabels) {
+    public boolean collectSevereLabels(Long profileId, List<String> severeLabels, Set<Category> visibleCategories) {
         List<FeedbackItem> all = new ArrayList<>();
-        all.addAll(feedbackService.getWeightFeedback(profileId));
-        all.addAll(feedbackService.getSleepFeedback(profileId));
-        all.addAll(feedbackService.getWaterFeedback(profileId));
-        all.addAll(feedbackService.getStepFeedback(profileId));
+        if (visibleCategories.contains(Category.weight)) {
+            all.addAll(feedbackService.getWeightFeedback(profileId));
+        }
+        if (visibleCategories.contains(Category.sleep)) {
+            all.addAll(feedbackService.getSleepFeedback(profileId));
+        }
+        if (visibleCategories.contains(Category.water)) {
+            all.addAll(feedbackService.getWaterFeedback(profileId));
+        }
+        if (visibleCategories.contains(Category.step)) {
+            all.addAll(feedbackService.getStepFeedback(profileId));
+        }
 
         List<FeedbackItem> severe = all.stream()
                 .filter(i -> i.getLevel() != null && i.getLevel().getPriority() >= FeedbackLevel.LV3.getPriority())

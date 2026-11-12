@@ -3,10 +3,12 @@ package com.healthlog.demo.service.home;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import com.healthlog.demo.entity.Profile;
@@ -24,6 +26,7 @@ public class HomeFamilyServiceImpl implements HomeFamilyService {
     private static final int NO_RECORD_DAYS = 3;
     private final ProfileAccessValidation profileAccessValidation;
     private final HomeTodayService homeTodayService;
+    private final HomeFeedbackService homeFeedbackService;
     private final WeightRepository weightRepository;
     private final SleepRepository sleepRepository;
     private final WaterRepository waterRepository;
@@ -59,6 +62,20 @@ public class HomeFamilyServiceImpl implements HomeFamilyService {
             boolean hasHistory = latestDate != null;
             long daysSince = hasHistory ? ChronoUnit.DAYS.between(latestDate, today) : 0;
             List<String> severeLabels = new ArrayList<>();
+            Set<Category> visibleCategories = EnumSet.noneOf(Category.class);
+            if (canViewWeight) {
+                visibleCategories.add(Category.weight);
+            }
+            if (canViewSleep) {
+                visibleCategories.add(Category.sleep);
+            }
+            if (canViewWater) {
+                visibleCategories.add(Category.water);
+            }
+            if (canViewStep) {
+                visibleCategories.add(Category.step);
+            }
+            boolean hasLv4Feedback = homeFeedbackService.collectSevereLabels(id, severeLabels, visibleCategories);
             List<String> issues = new ArrayList<>(severeLabels);
             if (hasHistory && daysSince >= NO_RECORD_DAYS) {
                 issues.add(daysSince + "日未記録");
@@ -81,7 +98,7 @@ public class HomeFamilyServiceImpl implements HomeFamilyService {
                 status = "OK";
                 statusLabel = "記録順調";
             } else {
-                boolean danger = daysSince >= NO_RECORD_DAYS;
+                boolean danger = hasLv4Feedback || daysSince >= NO_RECORD_DAYS;
                 status = danger ? "DANGER" : "WARN";
                 statusLabel = issues.size() == 1 ? issues.get(0) : issues.get(0) + " ほか" + (issues.size() - 1) + "件";
             }

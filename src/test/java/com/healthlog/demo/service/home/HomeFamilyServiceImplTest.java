@@ -1,6 +1,10 @@
 package com.healthlog.demo.service.home;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -42,6 +46,8 @@ class HomeFamilyServiceImplTest {
     @Mock
     private HomeTodayService homeTodayService;
     @Mock
+    private HomeFeedbackService homeFeedbackService;
+    @Mock
     private WeightRepository weightRepository;
     @Mock
     private SleepRepository sleepRepository;
@@ -54,8 +60,8 @@ class HomeFamilyServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        service = new HomeFamilyServiceImpl(profileAccessValidation, homeTodayService, weightRepository,
-                sleepRepository, waterRepository, stepRepository);
+        service = new HomeFamilyServiceImpl(profileAccessValidation, homeTodayService, homeFeedbackService,
+                weightRepository, sleepRepository, waterRepository, stepRepository);
 
         lenient().when(profileAccessValidation.hasReadAccess(PROFILE_ID, USER_ID, Category.weight)).thenReturn(true);
         lenient().when(profileAccessValidation.hasReadAccess(PROFILE_ID, USER_ID, Category.sleep)).thenReturn(true);
@@ -97,6 +103,27 @@ class HomeFamilyServiceImplTest {
         assertEquals(4, member.get("doneItems"));
         assertEquals(4, member.get("totalItems"));
         assertEquals(TODAY.toString(), member.get("updatedTime"));
+    }
+
+    @Test
+    @DisplayName("全4項目を記録済みでもLV4 feedbackがあればカードで確認が必要になる")
+    void lv4FeedbackRequiresAttentionEvenWhenAllItemsAreRecorded() {
+        when(homeTodayService.buildToday(PROFILE_ID, USER_ID)).thenReturn(todayStatuses("OK", "OK", "OK", "OK"));
+        setLatestDates(TODAY, TODAY.minusDays(1), TODAY.minusDays(2), TODAY.minusDays(3));
+        doAnswer(invocation -> {
+            @SuppressWarnings("unchecked")
+            List<String> labels = invocation.getArgument(1);
+            labels.add("体重変化大");
+            return true;
+        }).when(homeFeedbackService).collectSevereLabels(eq(PROFILE_ID), anyList(), anySet());
+
+        Map<String, Object> member = buildMember();
+
+        assertEquals("DANGER", member.get("status"));
+        assertEquals("体重変化大", member.get("statusLabel"));
+        assertEquals(4, member.get("doneItems"));
+        assertEquals(4, member.get("totalItems"));
+        assertEquals(1, service.buildFamilySummary(List.of(member)).get("attentionCount"));
     }
 
     @Test
