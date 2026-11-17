@@ -111,7 +111,6 @@ class HomeFamilyServiceImplTest {
         when(homeTodayService.buildToday(PROFILE_ID, USER_ID)).thenReturn(todayStatuses("OK", "OK", "OK", "OK"));
         setLatestDates(TODAY, TODAY.minusDays(1), TODAY.minusDays(2), TODAY.minusDays(3));
         doAnswer(invocation -> {
-            @SuppressWarnings("unchecked")
             List<String> labels = invocation.getArgument(1);
             labels.add("体重変化大");
             return true;
@@ -140,6 +139,20 @@ class HomeFamilyServiceImplTest {
     }
 
     @Test
+    @DisplayName("全4項目が未入力なら件数で表示する")
+    void allItemsMissingWithRecentHistory_usesCountLabel() {
+        when(homeTodayService.buildToday(PROFILE_ID, USER_ID))
+                .thenReturn(todayStatuses("NO_RECORD", "NO_RECORD", "NO_RECORD", "NO_RECORD"));
+        setLatestDates(TODAY.minusDays(1), TODAY.minusDays(1), TODAY.minusDays(1), TODAY.minusDays(1));
+
+        Map<String, Object> member = buildMember();
+
+        assertEquals("WARN", member.get("status"));
+        assertEquals("未入力4件", member.get("statusLabel"));
+        assertEquals(0, member.get("doneItems"));
+    }
+
+    @Test
     @DisplayName("Lần ghi gần nhất cách đúng 3 ngày thì status là DANGER")
     void latestRecordThreeDaysAgo_isDanger() {
         setLatestDates(TODAY.minusDays(3), null, null, null);
@@ -147,7 +160,7 @@ class HomeFamilyServiceImplTest {
         Map<String, Object> member = buildMember();
 
         assertEquals("DANGER", member.get("status"));
-        assertEquals("3日未記録 ほか4件", member.get("statusLabel"));
+        assertEquals("3日未記録 ほか1件", member.get("statusLabel"));
     }
 
     @Test
@@ -158,7 +171,7 @@ class HomeFamilyServiceImplTest {
         Map<String, Object> member = buildMember();
 
         assertEquals("WARN", member.get("status"));
-        assertEquals("体重未入力 ほか3件", member.get("statusLabel"));
+        assertEquals("未入力4件", member.get("statusLabel"));
     }
 
     @Test

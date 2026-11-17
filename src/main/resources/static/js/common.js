@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initAlertAutoDismiss();
   initFilterForm();
   initMemoExpand();
+  initProfileSwitchReturnTo();
 
   // パスワードの表示と非表示を切り替える。
   document.querySelectorAll(".toggle-password").forEach((btn) => {
@@ -45,6 +46,23 @@ document.addEventListener("DOMContentLoaded", () => {
   initAjaxPagination();
   initCsvExportModal();
 });
+
+function initProfileSwitchReturnTo() {
+  document.querySelectorAll('form[action*="/profile/switch/"]').forEach((form) => {
+    if (form.dataset.returnToBound) return;
+    form.dataset.returnToBound = "true";
+    form.addEventListener("submit", () => {
+      let returnTo = form.querySelector('input[name="returnTo"]');
+      if (!returnTo) {
+        returnTo = document.createElement("input");
+        returnTo.type = "hidden";
+        returnTo.name = "returnTo";
+        form.append(returnTo);
+      }
+      returnTo.value = `${window.location.pathname}${window.location.search}`;
+    });
+  });
+}
 
 function formatIsoDate(date) {
   const y = date.getFullYear();

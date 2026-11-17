@@ -10,6 +10,7 @@ public final class SessionConstants {
     // 現在表示中のプロファイルを表すCURRENT_PROFILE_IDとは分離して管理する。
     public static final String AUTHENTICATED_PROFILE_ID = "AUTHENTICATED_PROFILE_ID";
     public static final String PROFILE_SWITCH_TARGET_ID = "PROFILE_SWITCH_TARGET_ID";
+    public static final String PIN_RETURN_TO = "PIN_RETURN_TO";
     public static final String LOGIN_USER = "LOGIN_USER";
     public static final String RESET_EMAIL = "RESET_EMAIL";
     public static final String IS_RESET_FLOW = "IS_RESET_FLOW";

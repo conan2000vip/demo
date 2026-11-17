@@ -3,13 +3,44 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>エラー</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f4f8f6">
+  <title>エラー | HealthLog</title>
+  <link rel="stylesheet" th:href="@{/css/common.css}">
+  <link rel="stylesheet" th:href="@{/css/error.css}">
 </head>
 
 <body>
-  <h1>エラーが発生しました</h1>
-  <p th:text="${error}">システムエラーが発生しました。</p>
-  <a href="javascript:history.back()">前へ戻る</a>
+  <main class="error-page">
+    <section class="error-card" aria-labelledby="errorTitle">
+      <a class="error-brand" th:href="@{/auth/login}" aria-label="HealthLog ログインへ">
+        <img th:src="@{/image/logo.png}" alt="">
+        <span>HealthLog</span>
+      </a>
+
+      <div class="error-icon" aria-hidden="true">
+        <svg viewBox="0 0 48 48" fill="none">
+          <path d="M24 5.5 40 12v10.4c0 10.1-6.7 16.9-16 20.1C14.7 39.3 8 32.5 8 22.4V12l16-6.5Z"
+            stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" />
+          <path d="M24 16v9" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+          <circle cx="24" cy="31.5" r="1.8" fill="currentColor" />
+        </svg>
+      </div>
+
+      <p class="error-eyebrow">エラーコード</p>
+      <p class="error-code" th:text="${errorStatus ?: 500}">500</p>
+      <h1 id="errorTitle" th:text="${errorTitle ?: 'システムエラーが発生しました'}">システムエラーが発生しました</h1>
+      <p class="error-message" th:if="${error}" th:text="${error}">時間をおいてから、もう一度お試しください。</p>
+
+      <div class="error-actions">
+        <a class="error-button error-button--primary" th:href="@{/profile/select}"
+          onclick="if (window.history.length > 1) { window.history.back(); return false; }">
+          前の画面に戻る
+        </a>
+      </div>
+    </section>
+    <p class="error-footer">HealthLog · 家族みんなの健康を、ひとつに。</p>
+  </main>
 </body>
 
 </html>

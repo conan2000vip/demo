@@ -5,6 +5,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.ui.Model;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,27 +23,20 @@ import jakarta.servlet.http.HttpServletResponse;
 @ControllerAdvice
 public class GlobalExceptionHandler {
     private static final String ERROR_ATTRIBUTE = "error";
+    private static final String ERROR_VIEW = "error";
     private static final String MESSAGE_KEY = "message";
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     // BusinessExceptionの例外を処理するハンドラ
     @ExceptionHandler(BusinessException.class)
     public Object handleBusinessException(BusinessException ex, Model model, HttpServletRequest request,
-            HttpServletResponse response, RedirectAttributes redirectAttributes) {
+            HttpServletResponse response) {
         if (isJsonRequest(request)) {
             return ResponseEntity.status(ex.getStatus()).body(Map.of(MESSAGE_KEY, ex.getMessage()));
         }
-        // 403 Forbiddenの場合、GETリクエストであればリダイレクトする
-        if (ex.getStatus().value() == HttpStatus.FORBIDDEN.value() && "GET".equalsIgnoreCase(request.getMethod())) {
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
-            java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("/profile/(\\d+)/")
-                    .matcher(request.getRequestURI());
-            String home = matcher.find() ? "/profile/" + matcher.group(1) + "/home" : "/";
-            return "redirect:" + home;
-        }
         response.setStatus(ex.getStatus().value());
-        model.addAttribute(ERROR_ATTRIBUTE, ex.getMessage());
-        return "error/error";
+        addErrorPageAttributes(model, ex.getStatus());
+        return ERROR_VIEW;
     }
 
     // 404 Not Foundの例外を処理するハンドラ
@@ -55,20 +48,20 @@ public class GlobalExceptionHandler {
                     .body(Map.of(MESSAGE_KEY, ex.getReason() != null ? ex.getReason() : "リクエストに失敗しました。"));
         }
         response.setStatus(ex.getStatusCode().value());
-        model.addAttribute(ERROR_ATTRIBUTE, ex.getReason());
+        addErrorPageAttributes(model, ex.getStatusCode());
         return ERROR_ATTRIBUTE;
     }
 
     // 500 Internal Server Errorの例外を処理するハンドラ
     @ExceptionHandler(Exception.class)
     public Object handleException(Exception ex, Model model, HttpServletRequest request, HttpServletResponse response) {
+        logger.error("Unexpected error while processing request {} {}", request.getMethod(), request.getRequestURI(), ex);
         if (isJsonRequest(request)) {
-            logger.error("Unexpected error while processing JSON API request", ex);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of(MESSAGE_KEY, "共有設定を保存できませんでした。時間をおいて、もう一度お試しください。"));
         }
         response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        model.addAttribute(ERROR_ATTRIBUTE, "システムエラーが発生しました。");
+        addErrorPageAttributes(model, HttpStatus.INTERNAL_SERVER_ERROR);
         return ERROR_ATTRIBUTE;
     }
 
@@ -85,8 +78,30 @@ public class GlobalExceptionHandler {
             return ResponseEntity.status(status).body(Map.of(MESSAGE_KEY, message));
         }
         response.setStatus(status.value());
-        model.addAttribute(ERROR_ATTRIBUTE, message);
-        return "error/error";
+        addErrorPageAttributes(model, status);
+        return ERROR_VIEW;
+    }
+
+    private void addErrorPageAttributes(Model model, HttpStatusCode status) {
+        model.addAttribute("errorStatus", status.value());
+        model.addAttribute("errorTitle", switch (status.value()) {
+            case 400 -> "リクエストが正しくありません";
+            case 401 -> "ログインが必要です";
+            case 403 -> "閲覧権限がありません";
+            case 404 -> "ページが見つかりません";
+            case 409 -> "処理を完了できませんでした";
+            case 500 -> "システムエラーが発生しました";
+            default -> "リクエストを処理できませんでした";
+        });
+        model.addAttribute(ERROR_ATTRIBUTE, switch (status.value()) {
+            case 400 -> "入力内容を確認して、もう一度お試しください。";
+            case 401 -> "続けるにはログインしてください。";
+            case 403 -> "このページを表示する権限がありません。";
+            case 404 -> "";
+            case 409 -> "画面を更新してから、もう一度お試しください。";
+            case 500 -> "時間をおいてから、もう一度お試しください。";
+            default -> "時間をおいてから、もう一度お試しください。";
+        });
     }
 
     // 404 Not Foundの例外を処理するハンドラ

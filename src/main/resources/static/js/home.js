@@ -39,6 +39,11 @@ function initClickableCards() {
                 const form = document.createElement("form");
                 form.method = "post";
                 form.action = switchAction;
+                const returnTo = document.createElement("input");
+                returnTo.type = "hidden";
+                returnTo.name = "returnTo";
+                returnTo.value = `${window.location.pathname}${window.location.search}`;
+                form.append(returnTo);
                 document.body.append(form);
                 form.submit();
                 return;

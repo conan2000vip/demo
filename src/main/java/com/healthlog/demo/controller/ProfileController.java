@@ -80,7 +80,7 @@ public class ProfileController {
             return "profile/select-profile";
         }
         activateSelectedProfile(session, user.getId(), id);
-        return "redirect:/profile/" + id + "/home";
+        return redirectAfterProfileAuthentication(session, id);
     }
 
     @PostMapping("/{id}/verify-pin")
@@ -92,7 +92,7 @@ public class ProfileController {
         try {
             profileService.verifyPin(user.getId(), id, pin);
             activateSelectedProfile(session, user.getId(), id);
-            return "redirect:/profile/" + id + "/home";
+            return redirectAfterProfileAuthentication(session, id);
         } catch (BusinessException e) {
             model.addAttribute("profiles", profileService.getProfiles(user.getId()));
             model.addAttribute("pinProfileId", id);
@@ -113,7 +113,7 @@ public class ProfileController {
         try {
             profileService.removePinWithAccountPassword(user.getId(), id, accountPassword);
             activateSelectedProfile(session, user.getId(), id);
-            return "redirect:/profile/" + id + "/home";
+            return redirectAfterProfileAuthentication(session, id);
         } catch (BusinessException e) {
             model.addAttribute("profiles", profileService.getProfiles(user.getId()));
             model.addAttribute("pinProfileId", id);
@@ -131,6 +131,15 @@ public class ProfileController {
         session.setAttribute(SessionConstants.AUTHENTICATED_PROFILE_ID, id);
     }
 
+    private String redirectAfterProfileAuthentication(HttpSession session, Long profileId) {
+        Object returnTo = session.getAttribute(SessionConstants.PIN_RETURN_TO);
+        session.removeAttribute(SessionConstants.PIN_RETURN_TO);
+        if (returnTo instanceof String path && path.startsWith("/profile/") && !path.startsWith("//")) {
+            return "redirect:" + path;
+        }
+        return "redirect:/profile/" + profileId + "/home";
+    }
+
     // === 2. プロファイル管理画面 ===
     @GetMapping("/profile-manage")
     public String manageProfile(HttpSession session, Model model) {
@@ -138,6 +147,14 @@ public class ProfileController {
         if (user == null) {
             return "redirect:/auth/login";
         }
+        Long authenticatedProfileId = (Long) session.getAttribute(SessionConstants.AUTHENTICATED_PROFILE_ID);
+        Long currentProfileId = (Long) session.getAttribute(SessionConstants.CURRENT_PROFILE_ID);
+        if (authenticatedProfileId == null) {
+            return currentProfileId == null
+                    ? "redirect:/profile/select"
+                    : "redirect:/profile/" + currentProfileId + "/select";
+        }
+        profileService.getProfile(user.getId(), authenticatedProfileId);
         if (!profileService.hasAnyProfile(user.getId())) {
             return "redirect:/profile/new";
         }
@@ -146,6 +163,9 @@ public class ProfileController {
         model.addAttribute("currentProfile", profileService.resolveCurrentProfile(session, user.getId()));
         addProfileManagementPermissions(model, user.getId(), session);
         model.addAttribute("canManageAllProfiles", canManageAllProfiles(user.getId(), session));
+        if (!authenticatedProfileId.equals(currentProfileId)) {
+            model.addAttribute("error", "プロファイルを管理するには、認証済みプロファイルに切り替えてください。");
+        }
         model.addAttribute("profileLimitReached", profileService.isProfileLimitReached(user.getId()));
         return "profile/profile-manage";
     }
@@ -153,17 +173,19 @@ public class ProfileController {
     // === 3. ヘッダーからプロファイルを切り替える処理 ===
     @PostMapping("/switch/{id}")
     public String switchProfile(@PathVariable Long id, HttpSession session,
-            @RequestHeader(value = "Referer", required = false) String referer, RedirectAttributes redirectAttributes) {
+            @RequestHeader(value = "Referer", required = false) String referer,
+            @RequestParam(value = "returnTo", required = false) String returnTo,
+            RedirectAttributes redirectAttributes) {
         User user = getCurrentUser(session);
         if (user == null) {
             return "redirect:/auth/login";
         }
+        String redirectUrl = buildRedirectUrl(returnTo != null ? returnTo : referer, id);
         try {
             Profile profile = profileService.getProfile(user.getId(), id);
             profileService.switchProfile(session, user.getId(), id);
             // 入口画面で選択したプロファイルを認証済みとして保持する。
             // ヘッダー切替では現在表示するプロファイルだけを変更する
-            String redirectUrl = buildRedirectUrl(referer, id);
             if (redirectUrl.equals("/profile/" + id + "/home")) {
                 session.setAttribute(SessionConstants.PROFILE_SWITCH_TARGET_ID, id);
             }
@@ -171,7 +193,7 @@ public class ProfileController {
         } catch (BusinessException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
-        return "redirect:" + buildRedirectUrl(referer, id);
+        return "redirect:" + redirectUrl;
     }
 
     // === 4. ProfileFormDtoを使用した新規プロファイル作成処理 ===

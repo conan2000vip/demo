@@ -1,0 +1,210 @@
+.error-page {
+    min-height: 100vh;
+    min-height: 100svh;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: clamp(14px, 3vh, 20px);
+    padding: max(20px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+        max(20px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+}
+
+.error-card {
+    width: min(100%, 520px);
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 36px 40px 40px;
+    border: 1px solid var(--wp-border);
+    border-radius: 20px;
+    background: var(--wp-surface);
+    box-shadow: var(--wp-shadow-lg);
+    text-align: center;
+}
+
+.error-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 44px;
+    color: var(--wp-text);
+    font-size: 17px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.error-brand img {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+}
+
+.error-icon {
+    width: 72px;
+    height: 72px;
+    display: grid;
+    place-items: center;
+    margin: 30px auto 20px;
+    border-radius: 50%;
+    background: var(--wp-danger-bg);
+    color: var(--wp-danger);
+}
+
+.error-icon svg {
+    width: 40px;
+    height: 40px;
+}
+
+.error-eyebrow {
+    margin: 0 0 2px;
+    color: var(--wp-primary-dark);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+}
+
+.error-code {
+    margin: 0 0 8px;
+    color: var(--wp-primary);
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+}
+
+.error-card h1 {
+    margin: 0;
+    color: var(--wp-text);
+    font-size: clamp(22px, 5vw, 28px);
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.error-message {
+    margin: 18px 0 0;
+    color: var(--wp-text);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+}
+
+.error-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 28px;
+}
+
+.error-button {
+    min-height: 48px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 18px;
+    border: 1px solid transparent;
+    border-radius: var(--wp-radius-sm);
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.error-button:hover {
+    transform: translateY(-1px);
+}
+
+.error-button:focus-visible,
+.error-brand:focus-visible {
+    outline: 3px solid rgba(15, 118, 110, 0.28);
+    outline-offset: 3px;
+}
+
+.error-button--primary {
+    background: var(--wp-primary);
+    color: #fff;
+}
+
+.error-button--primary:hover {
+    background: var(--wp-primary-dark);
+}
+
+.error-footer {
+    margin: 0;
+    color: var(--wp-text-muted);
+    font-size: 12px;
+    text-align: center;
+}
+
+@media (max-width: 480px) {
+    .error-card {
+        padding: clamp(24px, 6vw, 30px) clamp(18px, 6vw, 24px);
+        border-radius: 16px;
+    }
+
+    .error-icon {
+        width: 64px;
+        height: 64px;
+        margin: 20px auto 16px;
+    }
+
+    .error-icon svg {
+        width: 36px;
+        height: 36px;
+    }
+
+    .error-code {
+        font-size: 36px;
+    }
+
+    .error-message {
+        margin-top: 14px;
+        font-size: 15px;
+    }
+
+    .error-actions {
+        margin-top: 22px;
+    }
+
+    .error-button {
+        width: 100%;
+    }
+
+    .error-footer {
+        max-width: 28rem;
+        font-size: 11px;
+        line-height: 1.6;
+    }
+}
+
+@media (max-height: 620px) and (min-width: 481px) {
+    .error-page {
+        justify-content: flex-start;
+    }
+
+    .error-card {
+        padding-top: 22px;
+        padding-bottom: 24px;
+    }
+
+    .error-icon {
+        margin-top: 14px;
+        margin-bottom: 12px;
+    }
+
+    .error-actions {
+        margin-top: 18px;
+    }
+}
+
+@media (max-height: 620px) and (max-width: 480px) {
+    .error-page {
+        justify-content: flex-start;
+        padding-top: max(16px, env(safe-area-inset-top));
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
+    }
+}

@@ -80,14 +80,20 @@ public class HomeFamilyServiceImpl implements HomeFamilyService {
             if (hasHistory && daysSince >= NO_RECORD_DAYS) {
                 issues.add(daysSince + "日未記録");
             }
+            List<String> missingItems = new ArrayList<>();
             if (canViewWeight && !hasWeight)
-                issues.add("体重未入力");
+                missingItems.add("体重未入力");
             if (canViewSleep && !hasSleep)
-                issues.add("睡眠未入力");
+                missingItems.add("睡眠未入力");
             if (canViewWater && !hasWater)
-                issues.add("水分未入力");
+                missingItems.add("水分未入力");
             if (canViewStep && !hasStep)
-                issues.add("歩数未入力");
+                missingItems.add("歩数未入力");
+            if (missingItems.size() == 1) {
+                issues.add(missingItems.get(0));
+            } else if (!missingItems.isEmpty()) {
+                issues.add("未入力" + missingItems.size() + "件");
+            }
 
             String status;
             String statusLabel;
