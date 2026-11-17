@@ -183,17 +183,18 @@ public class ProfileController {
         String redirectUrl = buildRedirectUrl(returnTo != null ? returnTo : referer, id);
         try {
             Profile profile = profileService.getProfile(user.getId(), id);
-            profileService.switchProfile(session, user.getId(), id);
-            // 入口画面で選択したプロファイルを認証済みとして保持する。
-            // ヘッダー切替では現在表示するプロファイルだけを変更する
-            if (redirectUrl.equals("/profile/" + id + "/home")) {
-                session.setAttribute(SessionConstants.PROFILE_SWITCH_TARGET_ID, id);
+            if (!isProfileScopedUrl(redirectUrl)) {
+                profileService.switchProfile(session, user.getId(), id);
             }
             redirectAttributes.addFlashAttribute("message", profile.getName() + " プロファイルを切り替えました");
         } catch (BusinessException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:" + redirectUrl;
+    }
+
+    private boolean isProfileScopedUrl(String url) {
+        return Pattern.compile("^/profile/\\d+(?:/.*)?(?:\\?.*)?$").matcher(url).matches();
     }
 
     // === 4. ProfileFormDtoを使用した新規プロファイル作成処理 ===

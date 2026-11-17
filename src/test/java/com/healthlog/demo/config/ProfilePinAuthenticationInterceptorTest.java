@@ -32,7 +32,7 @@ class ProfilePinAuthenticationInterceptorTest {
     }
 
     @Test
-    void protectedProfileUrlPromptsCurrentProfileRatherThanTargetProfilePin() throws Exception {
+    void protectedProfileUrlPromptsForTheProfileInTheRequestedUrl() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/profile/30/sleep");
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockHttpSession session = new MockHttpSession();
@@ -42,7 +42,7 @@ class ProfilePinAuthenticationInterceptorTest {
         boolean allowed = interceptor.preHandle(request, response, new Object());
 
         assertFalse(allowed);
-        assertEquals("/profile/45/select", response.getRedirectedUrl());
+        assertEquals("/profile/30/select", response.getRedirectedUrl());
         assertEquals("/profile/30/sleep", session.getAttribute(SessionConstants.PIN_RETURN_TO));
     }
 

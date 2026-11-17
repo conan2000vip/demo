@@ -1,6 +1,7 @@
 package com.healthlog.demo.config;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import jakarta.servlet.http.HttpSession;
 public class ProfilePinAuthenticationInterceptor implements HandlerInterceptor {
     private static final Pattern PROFILE_SELECTION_OR_PIN_ROUTE = Pattern.compile(
             "^/profile/(?:select|new|\\d+/select|\\d+/verify-pin(?:/account-password)?)$");
+    private static final Pattern PROFILE_SCOPED_ROUTE = Pattern.compile("^/profile/(\\d+)(?:/.*)?$");
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -43,10 +45,16 @@ public class ProfilePinAuthenticationInterceptor implements HandlerInterceptor {
             session.setAttribute(SessionConstants.PIN_RETURN_TO, path + (query == null ? "" : "?" + query));
         }
 
-        Long currentProfileId = (Long) session.getAttribute(SessionConstants.CURRENT_PROFILE_ID);
-        String redirectPath = currentProfileId == null
-                ? "/profile/select"
-                : "/profile/" + currentProfileId + "/select";
+        Matcher profileRoute = PROFILE_SCOPED_ROUTE.matcher(path);
+        String redirectPath;
+        if (profileRoute.matches()) {
+            redirectPath = "/profile/" + profileRoute.group(1) + "/select";
+        } else {
+            Long currentProfileId = (Long) session.getAttribute(SessionConstants.CURRENT_PROFILE_ID);
+            redirectPath = currentProfileId == null
+                    ? "/profile/select"
+                    : "/profile/" + currentProfileId + "/select";
+        }
         response.sendRedirect(request.getContextPath() + redirectPath);
         return false;
     }

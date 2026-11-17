@@ -6,6 +6,44 @@ function resetPinModalDigits(digits, hiddenInput) {
   if (hiddenInput) hiddenInput.value = "";
 }
 
+window.formSubmissionGuard = window.formSubmissionGuard || (() => {
+  const formSubmissionControls = new WeakMap();
+
+  function getSubmitControls(form) {
+    return Array.from(form.elements).filter((control) =>
+      (control instanceof HTMLButtonElement && control.type === "submit")
+      || (control instanceof HTMLInputElement && ["submit", "image"].includes(control.type)),
+    );
+  }
+
+  function begin(form) {
+    if (form.dataset.submitting === "true") return false;
+    form.dataset.submitting = "true";
+    const controls = getSubmitControls(form);
+    formSubmissionControls.set(form, controls.map((control) => [control, control.disabled]));
+    controls.forEach((control) => {
+      control.disabled = true;
+    });
+    return true;
+  }
+
+  function reset(form) {
+    form.dataset.submitting = "false";
+    (formSubmissionControls.get(form) || []).forEach(([control, wasDisabled]) => {
+      control.disabled = wasDisabled;
+    });
+    formSubmissionControls.delete(form);
+  }
+
+  function submitOnce(form) {
+    if (!begin(form)) return false;
+    form.submit();
+    return true;
+  }
+
+  return { begin, reset, submitOnce, listenerInstalled: false };
+})();
+
 document.addEventListener("DOMContentLoaded", () => {
   // Lucideアイコンを画面に描画する。
   if (window.lucide) {
@@ -45,6 +83,16 @@ document.addEventListener("DOMContentLoaded", () => {
   initDeleteConfirm();
   initAjaxPagination();
   initCsvExportModal();
+  if (!window.formSubmissionGuard.listenerInstalled) {
+    document.addEventListener("submit", (event) => {
+      const form = event.target;
+      if (!(form instanceof HTMLFormElement)
+        || form.method.toLowerCase() !== "post"
+        || event.defaultPrevented) return;
+      if (!window.formSubmissionGuard.begin(form)) event.preventDefault();
+    });
+    window.formSubmissionGuard.listenerInstalled = true;
+  }
 });
 
 function initProfileSwitchReturnTo() {
@@ -494,7 +542,7 @@ function initDeleteConfirm() {
   });
 
   confirmBtn?.addEventListener("click", () => {
-    if (pendingForm) pendingForm.submit();
+    if (pendingForm) window.formSubmissionGuard.submitOnce(pendingForm);
     closeDeleteModal();
   });
 

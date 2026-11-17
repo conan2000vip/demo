@@ -127,7 +127,7 @@ class ProfileControllerTest {
                 new RedirectAttributesModelMap());
 
         assertEquals("redirect:/profile/30/sleep?startDate=2026-11-01&endDate=2026-11-12", result);
-        verify(profileService).switchProfile(session, user.getId(), 30L);
+        verify(profileService, never()).switchProfile(session, user.getId(), 30L);
     }
 
     @Test
@@ -152,5 +152,30 @@ class ProfileControllerTest {
 
         assertEquals("redirect:/profile/profile-manage", result);
         verify(profileService).switchProfile(session, user.getId(), 30L);
+    }
+
+    @Test
+    void switchingProfileToHomeDoesNotChangeSessionCurrentProfile() {
+        ProfileService profileService = mock(ProfileService.class);
+        ProfileController controller = new ProfileController(
+                profileService, mock(SecurityContextUtil.class), mock(UserRepository.class));
+        MockHttpSession session = new MockHttpSession();
+        User user = new User();
+        user.setId(100L);
+        session.setAttribute(SessionConstants.LOGIN_USER, user);
+        session.setAttribute(SessionConstants.CURRENT_PROFILE_ID, 10L);
+        Profile profile = new Profile();
+        profile.setName("Family member");
+        org.mockito.Mockito.when(profileService.getProfile(user.getId(), 30L)).thenReturn(profile);
+        String result = controller.switchProfile(
+                30L,
+                session,
+                "http://localhost:8081/profile/10/home?startDate=2026-11-01",
+                "/profile/10/home?startDate=2026-11-01",
+                new RedirectAttributesModelMap());
+
+        assertEquals("redirect:/profile/30/home?startDate=2026-11-01", result);
+        assertEquals(10L, session.getAttribute(SessionConstants.CURRENT_PROFILE_ID));
+        verify(profileService, never()).switchProfile(session, user.getId(), 30L);
     }
 }

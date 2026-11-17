@@ -45,7 +45,7 @@ function initClickableCards() {
                 returnTo.value = `${window.location.pathname}${window.location.search}`;
                 form.append(returnTo);
                 document.body.append(form);
-                form.submit();
+                window.formSubmissionGuard.submitOnce(form);
                 return;
             }
 

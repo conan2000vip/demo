@@ -19,7 +19,6 @@ import com.healthlog.demo.exception.BusinessException;
 import com.healthlog.demo.service.helper.CurrentUserResolver;
 import com.healthlog.demo.service.home.HomeService;
 import com.healthlog.demo.service.home.HomeSummaryChartService;
-import com.healthlog.demo.service.profile.ProfileService;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +31,6 @@ public class HomeController {
     private final CurrentUserResolver currentUserResolver;
     private final HomeService homeService;
     private final HomeSummaryChartService homeSummaryChartService;
-    private final ProfileService profileService;
 
     @GetMapping
     public String showHomePage(@PathVariable Long profileId,
@@ -44,28 +42,11 @@ public class HomeController {
         if (user == null)
             return "redirect:/auth/login";
 
-        // プロファイル切り替えの判定
-        Long switchTargetId = (Long) session.getAttribute(SessionConstants.PROFILE_SWITCH_TARGET_ID);
-        boolean isProfileSwitch = profileId.equals(switchTargetId);
-        if (isProfileSwitch) {
-            session.removeAttribute(SessionConstants.PROFILE_SWITCH_TARGET_ID);
-        }
-
-        // 認証済みプロファイルIDをセッションから取得
-        Long authenticatedProfileId = (Long) session.getAttribute(SessionConstants.AUTHENTICATED_PROFILE_ID);
-        Long currentProfileId = (Long) session.getAttribute(SessionConstants.CURRENT_PROFILE_ID);
-        boolean isCurrentProfile = profileId.equals(currentProfileId);
-        if (!isProfileSwitch && !isCurrentProfile && profileService.hasPin(user.getId(), profileId)
-                && !profileId.equals(authenticatedProfileId)) {
-            return "redirect:/profile/" + profileId + "/select";
-        }
-
-        // ユーザーがログインしている場合、activeProfileIdをセッションに保存する
-        profileService.switchProfile(session, user.getId(), profileId);
         Map<String, Object> homeData = homeService.getHomeData(profileId, user.getId());
         homeData.forEach(model::addAttribute);
 
         // セッションから認証済みプロファイルIDを取得して、モデルに追加する
+        Long authenticatedProfileId = (Long) session.getAttribute(SessionConstants.AUTHENTICATED_PROFILE_ID);
         model.addAttribute("isOwnProfile", profileId.equals(authenticatedProfileId));
         model.addAttribute("profileId", profileId);
         model.addAttribute("filterStartDate", startDate);

@@ -290,6 +290,7 @@
   }
 
   async function submitPinRemoval(form, errorId, onFail) {
+    if (!window.formSubmissionGuard.begin(form)) return;
     const data = new FormData(form);
     const toggle = document.getElementById('pinEnabled');
     if (toggle) data.set(toggle.name, 'false');   // server vẫn nhận pinEnabled=false, nút gạt trên màn hình giữ nguyên
@@ -306,6 +307,7 @@
       const message = serverError ? serverError.textContent.trim() : '';
 
       if (message) {
+        window.formSubmissionGuard.reset(form);
         onFail(message);   // sai: hiện lỗi trong modal, không tải lại trang
         return;
       }
@@ -314,7 +316,8 @@
     } catch (error) {
       if (toggle) toggle.checked = false;    // lỗi mạng: quay về cách gửi cũ
       rememberScrollPosition();
-      form.submit();
+      window.formSubmissionGuard.reset(form);
+      window.formSubmissionGuard.submitOnce(form);
     }
   }
 

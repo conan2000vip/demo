@@ -121,6 +121,6 @@ document.addEventListener("DOMContentLoaded", () => {
         resendForm.appendChild(resetFlowField);
 
         document.body.appendChild(resendForm);
-        resendForm.submit();
+        window.formSubmissionGuard.submitOnce(resendForm);
     });
 });

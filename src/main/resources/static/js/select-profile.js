@@ -12,7 +12,6 @@
     const pinError = document.getElementById('selectPinError');
     const passwordError = document.getElementById('selectAccountPasswordError');
     const profileId = pinModal?.dataset.profileId;
-    let isSubmittingPin = false;
 
     function resetPinInputs() {
         resetPinModalDigits(pinDigits, pinInput);
@@ -36,7 +35,6 @@
         clearPasswordInput();
         if (pinError) pinError.textContent = '';
         if (passwordError) passwordError.textContent = '';
-        isSubmittingPin = false;
     }
 
     pinModal?.querySelectorAll('[data-select-pin-close]').forEach((element) => {
@@ -86,7 +84,7 @@
             return;
         }
         if (passwordInput) passwordInput.value = password;
-        passwordForm?.submit();
+        passwordForm?.requestSubmit();
     };
 
     confirmPasswordButton?.addEventListener('click', submitAccountPassword);
@@ -112,8 +110,7 @@
             return true;
         };
         const submitPin = () => {
-            if (!validatePin() || isSubmittingPin) return;
-            isSubmittingPin = true;
+            if (!validatePin()) return;
             pinForm?.requestSubmit();
         };
         pinDigits.forEach((input, index) => {
