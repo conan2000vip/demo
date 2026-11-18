@@ -23,6 +23,7 @@ import com.healthlog.demo.entity.User;
 import com.healthlog.demo.exception.BusinessException;
 import com.healthlog.demo.repository.UserRepository;
 import com.healthlog.demo.service.profile.ProfileService;
+import com.healthlog.demo.service.helper.TabProfileContext;
 import com.healthlog.demo.util.SecurityContextUtil;
 
 import jakarta.servlet.http.HttpSession;
@@ -60,7 +61,7 @@ public class ProfileController {
     public String showSelectProfileScreen(HttpSession session, Model model) {
         User user = getCurrentUser(session);
         if (user == null) {
-            return "redirect:/auth/login";
+            return redirect("/auth/login");
         }
         model.addAttribute("profiles", profileService.getProfiles(user.getId()));
         return "profile/select-profile";
@@ -70,7 +71,7 @@ public class ProfileController {
     public String selectProfile(@PathVariable Long id, HttpSession session, Model model) {
         User user = getCurrentUser(session);
         if (user == null) {
-            return "redirect:/auth/login";
+            return redirect("/auth/login");
         }
         if (profileService.hasPin(user.getId(), id)) {
             model.addAttribute("profiles", profileService.getProfiles(user.getId()));
@@ -87,7 +88,7 @@ public class ProfileController {
     public String verifyPin(@PathVariable Long id, @RequestParam String pin, HttpSession session, Model model) {
         User user = getCurrentUser(session);
         if (user == null) {
-            return "redirect:/auth/login";
+            return redirect("/auth/login");
         }
         try {
             profileService.verifyPin(user.getId(), id, pin);
@@ -108,7 +109,7 @@ public class ProfileController {
             HttpSession session, Model model) {
         User user = getCurrentUser(session);
         if (user == null) {
-            return "redirect:/auth/login";
+            return redirect("/auth/login");
         }
         try {
             profileService.removePinWithAccountPassword(user.getId(), id, accountPassword);
@@ -128,16 +129,19 @@ public class ProfileController {
         profileService.switchProfile(session, userId, id);
         // 入口画面で選択したプロファイルを認証済みとして保持する。
         // ヘッダー切替では現在表示するプロファイルだけを変更する。
-        session.setAttribute(SessionConstants.AUTHENTICATED_PROFILE_ID, id);
+        TabProfileContext.setAttribute(session, SessionConstants.AUTHENTICATED_PROFILE_ID, id);
     }
 
     private String redirectAfterProfileAuthentication(HttpSession session, Long profileId) {
-        Object returnTo = session.getAttribute(SessionConstants.PIN_RETURN_TO);
-        session.removeAttribute(SessionConstants.PIN_RETURN_TO);
+        Object returnTo = TabProfileContext.getAttribute(session, SessionConstants.PIN_RETURN_TO);
+        TabProfileContext.removeAttribute(session, SessionConstants.PIN_RETURN_TO);
         if (returnTo instanceof String path && path.startsWith("/profile/") && !path.startsWith("//")) {
-            return "redirect:" + path;
+            if ("/profile/profile-manage".equals(path)) {
+                path = "/profile/" + profileId + "/profile-manage";
+            }
+            return redirect(path);
         }
-        return "redirect:/profile/" + profileId + "/home";
+        return redirect("/profile/" + profileId + "/home");
     }
 
     // === 2. プロファイル管理画面 ===
@@ -145,18 +149,41 @@ public class ProfileController {
     public String manageProfile(HttpSession session, Model model) {
         User user = getCurrentUser(session);
         if (user == null) {
-            return "redirect:/auth/login";
+            return redirect("/auth/login");
         }
-        Long authenticatedProfileId = (Long) session.getAttribute(SessionConstants.AUTHENTICATED_PROFILE_ID);
-        Long currentProfileId = (Long) session.getAttribute(SessionConstants.CURRENT_PROFILE_ID);
+        Long currentProfileId = (Long) TabProfileContext.getAttribute(session, SessionConstants.CURRENT_PROFILE_ID);
+        Long authenticatedProfileId = (Long) TabProfileContext.getAttribute(session,
+                SessionConstants.AUTHENTICATED_PROFILE_ID);
+        if (authenticatedProfileId == null) {
+            if (currentProfileId == null) {
+                return redirect("/profile/select");
+            }
+            return redirect("/profile/" + currentProfileId + "/select");
+        }
+        if (currentProfileId == null) {
+            currentProfileId = authenticatedProfileId;
+        }
+        return redirect("/profile/" + currentProfileId + "/profile-manage");
+    }
+
+    @GetMapping("/{profileId}/profile-manage")
+    public String manageProfile(@PathVariable Long profileId, HttpSession session, Model model) {
+        User user = getCurrentUser(session);
+        if (user == null) {
+            return redirect("/auth/login");
+        }
+        profileService.switchProfile(session, user.getId(), profileId);
+        Long authenticatedProfileId = (Long) TabProfileContext.getAttribute(session,
+                SessionConstants.AUTHENTICATED_PROFILE_ID);
+        Long currentProfileId = (Long) TabProfileContext.getAttribute(session, SessionConstants.CURRENT_PROFILE_ID);
         if (authenticatedProfileId == null) {
             return currentProfileId == null
-                    ? "redirect:/profile/select"
-                    : "redirect:/profile/" + currentProfileId + "/select";
+                    ? redirect("/profile/select")
+                    : redirect("/profile/" + currentProfileId + "/select");
         }
         profileService.getProfile(user.getId(), authenticatedProfileId);
         if (!profileService.hasAnyProfile(user.getId())) {
-            return "redirect:/profile/new";
+            return redirect("/profile/new");
         }
         List<Profile> profiles = profileService.getProfiles(user.getId());
         model.addAttribute("profiles", profiles);
@@ -178,23 +205,17 @@ public class ProfileController {
             RedirectAttributes redirectAttributes) {
         User user = getCurrentUser(session);
         if (user == null) {
-            return "redirect:/auth/login";
+            return redirect("/auth/login");
         }
         String redirectUrl = buildRedirectUrl(returnTo != null ? returnTo : referer, id);
         try {
             Profile profile = profileService.getProfile(user.getId(), id);
-            if (!isProfileScopedUrl(redirectUrl)) {
-                profileService.switchProfile(session, user.getId(), id);
-            }
+            profileService.switchProfile(session, user.getId(), id);
             redirectAttributes.addFlashAttribute("message", profile.getName() + " プロファイルを切り替えました");
         } catch (BusinessException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
-        return "redirect:" + redirectUrl;
-    }
-
-    private boolean isProfileScopedUrl(String url) {
-        return Pattern.compile("^/profile/\\d+(?:/.*)?(?:\\?.*)?$").matcher(url).matches();
+        return redirect(redirectUrl);
     }
 
     // === 4. ProfileFormDtoを使用した新規プロファイル作成処理 ===
@@ -202,14 +223,14 @@ public class ProfileController {
     public String newProfileForm(HttpSession session, Model model) {
         User user = getCurrentUser(session);
         if (user == null) {
-            return "redirect:/auth/login";
+            return redirect("/auth/login");
         }
         boolean isFirstProfile = !profileService.hasAnyProfile(user.getId());
         if (!isFirstProfile && !canManageAllProfiles(user.getId(), session)) {
-            return "redirect:/profile/profile-manage";
+            return redirect(profileManagementPath(session, user.getId()));
         }
         if (!isFirstProfile && profileService.isProfileLimitReached(user.getId())) {
-            return "redirect:/profile/profile-manage";
+            return redirect(profileManagementPath(session, user.getId()));
         }
         model.addAttribute("profile", new ProfileFormDto());
         model.addAttribute("isFirstProfile", !profileService.hasAnyProfile(user.getId()));
@@ -224,13 +245,13 @@ public class ProfileController {
             HttpSession session, Model model, RedirectAttributes redirectAttributes) {
         User user = getCurrentUser(session);
         if (user == null) {
-            return "redirect:/auth/login";
+            return redirect("/auth/login");
         }
 
         boolean isFirstProfile = !profileService.hasAnyProfile(user.getId());
         if (!isFirstProfile && !canManageAllProfiles(user.getId(), session)) {
             redirectAttributes.addFlashAttribute("error", "新しいプロファイルを作成する権限がありません");
-            return "redirect:/profile/profile-manage";
+            return redirect(profileManagementPath(session, user.getId()));
         }
         if (bindingResult.hasErrors()) {
             model.addAttribute("isFirstProfile", isFirstProfile);
@@ -243,8 +264,8 @@ public class ProfileController {
         try {
             Profile createdProfile = profileService.create(user.getId(), formDto);
             if (isFirstProfile) {
-                session.setAttribute(SessionConstants.CURRENT_PROFILE_ID, createdProfile.getId());
-                session.setAttribute(SessionConstants.AUTHENTICATED_PROFILE_ID, createdProfile.getId());
+                TabProfileContext.setAttribute(session, SessionConstants.CURRENT_PROFILE_ID, createdProfile.getId());
+                TabProfileContext.setAttribute(session, SessionConstants.AUTHENTICATED_PROFILE_ID, createdProfile.getId());
             }
             redirectAttributes.addFlashAttribute("message", createdProfile.getName() + " のプロファイルを作成しました");
         } catch (BusinessException e) {
@@ -256,7 +277,7 @@ public class ProfileController {
             return "profile/profile-form";
         }
 
-        return "redirect:/profile/profile-manage";
+        return redirect(profileManagementPath(session, user.getId()));
     }
 
     // === 5. ProfileFormDtoを使用したプロファイル編集処理 ===
@@ -265,12 +286,12 @@ public class ProfileController {
             RedirectAttributes redirectAttributes) {
         User user = getCurrentUser(session);
         if (user == null) {
-            return "redirect:/auth/login";
+            return redirect("/auth/login");
         }
 
         if (!canEditProfile(user.getId(), id, session)) {
             redirectAttributes.addFlashAttribute("error", "このプロファイルを編集する権限がありません");
-            return "redirect:/profile/profile-manage";
+            return redirect(profileManagementPath(session, user.getId()));
         }
 
         try {
@@ -296,12 +317,12 @@ public class ProfileController {
             @RequestParam String pinAction, @RequestParam String accountPassword) {
         User user = getCurrentUser(session);
         if (user == null) {
-            return "redirect:/auth/login";
+            return redirect("/auth/login");
         }
 
         if (!canEditProfile(user.getId(), id, session)) {
             redirectAttributes.addFlashAttribute("error", "このプロファイルを編集する権限がありません");
-            return "redirect:/profile/profile-manage";
+            return redirect(profileManagementPath(session, user.getId()));
         }
 
         if (bindingResult.hasErrors()) {
@@ -319,16 +340,16 @@ public class ProfileController {
             if ("REMOVE_ACCOUNT_PASSWORD".equalsIgnoreCase(pinAction)) {
                 profileService.removePinWithAccountPassword(user.getId(), id, accountPassword);
                 redirectAttributes.addFlashAttribute("message", "PINを削除しました");
-                return "redirect:/profile/" + id + "/edit";
+                return redirect("/profile/" + id + "/edit");
             }
             Profile updatedProfile = profileService.update(user.getId(), formDto);
             if ("SAVE".equalsIgnoreCase(pinAction)) {
                 redirectAttributes.addFlashAttribute("pinSaved", true);
-                return "redirect:/profile/" + id + "/edit";
+                return redirect("/profile/" + id + "/edit");
             }
             if ("REMOVE".equalsIgnoreCase(pinAction)) {
                 redirectAttributes.addFlashAttribute("message", "PINを削除しました");
-                return "redirect:/profile/" + id + "/edit";
+                return redirect("/profile/" + id + "/edit");
             }
             redirectAttributes.addFlashAttribute("message", updatedProfile.getName() + " のプロファイルを更新しました");
         } catch (BusinessException e) {
@@ -355,7 +376,7 @@ public class ProfileController {
             return "profile/profile-form";
         }
 
-        return "redirect:/profile/profile-manage";
+        return redirect(profileManagementPath(session, user.getId()));
     }
 
     // === 6. プロファイル削除処理 ===
@@ -364,15 +385,16 @@ public class ProfileController {
             RedirectAttributes redirectAttributes) {
         User user = getCurrentUser(session);
         if (user == null) {
-            return "redirect:/auth/login";
+            return redirect("/auth/login");
         }
 
         if (!canDeleteProfile(user.getId(), profileId, session)) {
             redirectAttributes.addFlashAttribute("error", "このプロファイルを削除する権限がありません");
-            return "redirect:/profile/profile-manage";
+            return redirect(profileManagementPath(session, user.getId()));
         }
 
-        Long authenticatedProfileId = (Long) session.getAttribute(SessionConstants.AUTHENTICATED_PROFILE_ID);
+        Long authenticatedProfileId = (Long) TabProfileContext.getAttribute(session,
+                SessionConstants.AUTHENTICATED_PROFILE_ID);
         boolean deleted = false;
         try {
             profileService.delete(user.getId(), profileId, session);
@@ -383,15 +405,16 @@ public class ProfileController {
         }
 
         if (deleted && authenticatedProfileId != null && authenticatedProfileId.equals(profileId)) {
-            session.removeAttribute(SessionConstants.AUTHENTICATED_PROFILE_ID);
-            session.removeAttribute(SessionConstants.CURRENT_PROFILE_ID);
-            return "redirect:/profile/select";
+            TabProfileContext.removeAttribute(session, SessionConstants.AUTHENTICATED_PROFILE_ID);
+            TabProfileContext.removeAttribute(session, SessionConstants.CURRENT_PROFILE_ID);
+            return redirect("/profile/select");
         }
-        return "redirect:/profile/profile-manage";
+        return redirect(profileManagementPath(session, user.getId()));
     }
 
     private boolean canEditProfile(Long userId, Long targetProfileId, HttpSession session) {
-        Long authenticatedProfileId = (Long) session.getAttribute(SessionConstants.AUTHENTICATED_PROFILE_ID);
+        Long authenticatedProfileId = (Long) TabProfileContext.getAttribute(session,
+                SessionConstants.AUTHENTICATED_PROFILE_ID);
         Profile authenticatedProfile = authenticatedProfileId == null ? null
                 : profileService.getProfile(userId, authenticatedProfileId);
         Profile currentProfile = profileService.resolveCurrentProfile(session, userId);
@@ -407,7 +430,8 @@ public class ProfileController {
     }
 
     private boolean canDeleteProfile(Long userId, Long targetProfileId, HttpSession session) {
-        Long authenticatedProfileId = (Long) session.getAttribute(SessionConstants.AUTHENTICATED_PROFILE_ID);
+        Long authenticatedProfileId = (Long) TabProfileContext.getAttribute(session,
+                SessionConstants.AUTHENTICATED_PROFILE_ID);
         Profile authenticatedProfile = authenticatedProfileId == null ? null
                 : profileService.getProfile(userId, authenticatedProfileId);
         Profile currentProfile = profileService.resolveCurrentProfile(session, userId);
@@ -422,7 +446,8 @@ public class ProfileController {
     }
 
     private boolean canManageAllProfiles(Long userId, HttpSession session) {
-        Long authenticatedProfileId = (Long) session.getAttribute(SessionConstants.AUTHENTICATED_PROFILE_ID);
+        Long authenticatedProfileId = (Long) TabProfileContext.getAttribute(session,
+                SessionConstants.AUTHENTICATED_PROFILE_ID);
         if (authenticatedProfileId == null) {
             return false;
         }
@@ -433,7 +458,8 @@ public class ProfileController {
     }
 
     private void addProfileManagementPermissions(Model model, Long userId, HttpSession session) {
-        Long authenticatedProfileId = (Long) session.getAttribute(SessionConstants.AUTHENTICATED_PROFILE_ID);
+        Long authenticatedProfileId = (Long) TabProfileContext.getAttribute(session,
+                SessionConstants.AUTHENTICATED_PROFILE_ID);
         Profile currentProfile = profileService.resolveCurrentProfile(session, userId);
         boolean selfMode = authenticatedProfileId != null && currentProfile != null
                 && authenticatedProfileId.equals(currentProfile.getId());
@@ -479,5 +505,15 @@ public class ProfileController {
         } catch (IllegalArgumentException e) {
             return null;
         }
+    }
+
+    private String redirect(String path) {
+        return "redirect:" + TabProfileContext.appendCurrentTabId(path);
+    }
+
+    private String profileManagementPath(HttpSession session, Long userId) {
+        Profile currentProfile = profileService.resolveCurrentProfile(session, userId);
+        return currentProfile == null ? "/profile/profile-manage"
+                : "/profile/" + currentProfile.getId() + "/profile-manage";
     }
 }

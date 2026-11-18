@@ -17,6 +17,7 @@ import com.healthlog.demo.constant.SessionConstants;
 import com.healthlog.demo.entity.User;
 import com.healthlog.demo.exception.BusinessException;
 import com.healthlog.demo.service.helper.CurrentUserResolver;
+import com.healthlog.demo.service.helper.TabProfileContext;
 import com.healthlog.demo.service.home.HomeService;
 import com.healthlog.demo.service.home.HomeSummaryChartService;
 
@@ -46,7 +47,8 @@ public class HomeController {
         homeData.forEach(model::addAttribute);
 
         // セッションから認証済みプロファイルIDを取得して、モデルに追加する
-        Long authenticatedProfileId = (Long) session.getAttribute(SessionConstants.AUTHENTICATED_PROFILE_ID);
+        Long authenticatedProfileId = (Long) TabProfileContext.getAttribute(session,
+                SessionConstants.AUTHENTICATED_PROFILE_ID);
         model.addAttribute("isOwnProfile", profileId.equals(authenticatedProfileId));
         model.addAttribute("profileId", profileId);
         model.addAttribute("filterStartDate", startDate);

@@ -160,7 +160,7 @@ class HomeFamilyServiceImplTest {
         Map<String, Object> member = buildMember();
 
         assertEquals("DANGER", member.get("status"));
-        assertEquals("3日未記録 ほか1件", member.get("statusLabel"));
+        assertEquals("3日未記録", member.get("statusLabel"));
     }
 
     @Test

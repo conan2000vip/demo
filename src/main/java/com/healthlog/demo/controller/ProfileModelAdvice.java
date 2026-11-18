@@ -14,6 +14,7 @@ import com.healthlog.demo.service.profile.ProfileService;
 import com.healthlog.demo.entity.Profile;
 import com.healthlog.demo.entity.ProfileShareSetting.Category;
 import com.healthlog.demo.service.helper.ProfileAccessValidation;
+import com.healthlog.demo.service.helper.TabProfileContext;
 import com.healthlog.demo.util.SecurityContextUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,6 +31,9 @@ public class ProfileModelAdvice {
 
     @ModelAttribute
     public void addProfileMenuAttributes(HttpServletRequest request, HttpSession session, Model model) {
+        String tabId = TabProfileContext.ensureTabId(request);
+        TabProfileContext.initializeFromLegacy(session, tabId);
+        model.addAttribute("tabId", tabId);
         User user = (User) session.getAttribute(SessionConstants.LOGIN_USER);
         if (user == null) {
             String email = securityContextUtil.getCurrentUserEmail();

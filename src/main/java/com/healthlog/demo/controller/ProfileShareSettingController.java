@@ -14,6 +14,7 @@ import com.healthlog.demo.entity.User;
 import com.healthlog.demo.constant.SessionConstants;
 import com.healthlog.demo.service.profile.ProfileShareService;
 import com.healthlog.demo.service.profile.ProfileService;
+import com.healthlog.demo.service.helper.TabProfileContext;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -104,12 +105,14 @@ public class ProfileShareSettingController {
 
     private ResponseEntity<Object> validateShareSettingsPermission(
             Long userId, Long requestedProfileId, HttpSession session) {
-        Long authenticatedProfileId = (Long) session.getAttribute(SessionConstants.AUTHENTICATED_PROFILE_ID);
+        Long authenticatedProfileId = (Long) TabProfileContext.getAttribute(session,
+                SessionConstants.AUTHENTICATED_PROFILE_ID);
         if (authenticatedProfileId == null) {
             Profile selectedProfile = profileService.resolveCurrentProfile(session, userId);
             if (selectedProfile != null && selectedProfile.isPrimary()) {
                 authenticatedProfileId = selectedProfile.getId();
-                session.setAttribute(SessionConstants.AUTHENTICATED_PROFILE_ID, authenticatedProfileId);
+                TabProfileContext.setAttribute(session, SessionConstants.AUTHENTICATED_PROFILE_ID,
+                        authenticatedProfileId);
             }
         }
         if (authenticatedProfileId == null || !authenticatedProfileId.equals(requestedProfileId)) {

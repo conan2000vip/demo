@@ -26,6 +26,7 @@ import com.healthlog.demo.service.auth.LoginService;
 import com.healthlog.demo.service.auth.PasswordResetService;
 import com.healthlog.demo.service.auth.RegisterService;
 import com.healthlog.demo.service.auth.VerifyCodeService;
+import com.healthlog.demo.service.helper.TabProfileContext;
 import com.healthlog.demo.service.profile.ProfileService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -68,12 +69,12 @@ public class AuthController {
 
             // プロファイルが存在しない場合は新規作成画面へ、存在する場合は選択画面へリダイレクト
             if (!profileService.hasAnyProfile(user.getId())) {
-                return "redirect:/profile/new";
+                return "redirect:" + TabProfileContext.appendTabId(request, "/profile/new");
             }
 
             profileService.resolveCurrentProfile(session, user.getId());
-            session.removeAttribute(SessionConstants.AUTHENTICATED_PROFILE_ID);
-            return "redirect:/profile/select";
+            TabProfileContext.removeAttribute(session, SessionConstants.AUTHENTICATED_PROFILE_ID);
+            return "redirect:" + TabProfileContext.appendTabId(request, "/profile/select");
 
         } catch (BusinessException e) {
             model.addAttribute("errorMessage", e.getMessage());

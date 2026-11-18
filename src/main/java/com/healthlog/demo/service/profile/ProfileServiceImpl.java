@@ -16,6 +16,7 @@ import com.healthlog.demo.exception.BusinessException;
 import com.healthlog.demo.repository.ProfileRepository;
 import com.healthlog.demo.repository.UserRepository;
 import com.healthlog.demo.service.helper.ProfileAccessValidation;
+import com.healthlog.demo.service.helper.TabProfileContext;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -188,10 +189,11 @@ public class ProfileServiceImpl implements ProfileService {
 
         profileRepository.delete(profile);
 
-        Long currentId = (Long) session.getAttribute(SessionConstants.CURRENT_PROFILE_ID);
+        Long currentId = (Long) TabProfileContext.getAttribute(session, SessionConstants.CURRENT_PROFILE_ID);
         if (currentId != null && currentId.equals(profileId)) {
             profileRepository.findByUser_IdAndIsPrimaryTrue(userId)
-                    .ifPresent(primary -> session.setAttribute(SessionConstants.CURRENT_PROFILE_ID, primary.getId()));
+                    .ifPresent(primary -> TabProfileContext.setAttribute(session, SessionConstants.CURRENT_PROFILE_ID,
+                            primary.getId()));
         }
     }
 
@@ -199,13 +201,13 @@ public class ProfileServiceImpl implements ProfileService {
     @Transactional
     public void switchProfile(HttpSession session, Long userId, Long profileId) {
         Profile profile = profileAccessValidation.validateCanViewProfile(profileId, userId);
-        session.setAttribute(SessionConstants.CURRENT_PROFILE_ID, profile.getId());
+        TabProfileContext.setAttribute(session, SessionConstants.CURRENT_PROFILE_ID, profile.getId());
     }
 
     @Override
     @Transactional(readOnly = true)
     public Profile resolveCurrentProfile(HttpSession session, Long userId) {
-        Long currentId = (Long) session.getAttribute(SessionConstants.CURRENT_PROFILE_ID);
+        Long currentId = (Long) TabProfileContext.getAttribute(session, SessionConstants.CURRENT_PROFILE_ID);
 
         if (currentId != null) {
             Optional<Profile> profile = profileRepository.findByIdAndUser_Id(currentId, userId);
@@ -215,7 +217,8 @@ public class ProfileServiceImpl implements ProfileService {
         }
 
         Optional<Profile> primary = profileRepository.findByUser_IdAndIsPrimaryTrue(userId);
-        primary.ifPresent(profile -> session.setAttribute(SessionConstants.CURRENT_PROFILE_ID, profile.getId()));
+        primary.ifPresent(
+                profile -> TabProfileContext.setAttribute(session, SessionConstants.CURRENT_PROFILE_ID, profile.getId()));
         return primary.orElse(null);
     }
 

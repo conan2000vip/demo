@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import com.healthlog.demo.constant.SessionConstants;
+import com.healthlog.demo.service.helper.TabProfileContext;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,7 +24,7 @@ public class ProfilePinAuthenticationInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws IOException {
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute(SessionConstants.AUTHENTICATED_PROFILE_ID) != null) {
+        if (session == null || TabProfileContext.getAttribute(session, SessionConstants.AUTHENTICATED_PROFILE_ID) != null) {
             return true;
         }
 
@@ -42,7 +43,8 @@ public class ProfilePinAuthenticationInterceptor implements HandlerInterceptor {
 
         if ("GET".equalsIgnoreCase(request.getMethod())) {
             String query = request.getQueryString();
-            session.setAttribute(SessionConstants.PIN_RETURN_TO, path + (query == null ? "" : "?" + query));
+            TabProfileContext.setAttribute(session, SessionConstants.PIN_RETURN_TO,
+                    path + (query == null ? "" : "?" + query));
         }
 
         Matcher profileRoute = PROFILE_SCOPED_ROUTE.matcher(path);
@@ -50,12 +52,12 @@ public class ProfilePinAuthenticationInterceptor implements HandlerInterceptor {
         if (profileRoute.matches()) {
             redirectPath = "/profile/" + profileRoute.group(1) + "/select";
         } else {
-            Long currentProfileId = (Long) session.getAttribute(SessionConstants.CURRENT_PROFILE_ID);
+            Long currentProfileId = (Long) TabProfileContext.getAttribute(session, SessionConstants.CURRENT_PROFILE_ID);
             redirectPath = currentProfileId == null
                     ? "/profile/select"
                     : "/profile/" + currentProfileId + "/select";
         }
-        response.sendRedirect(request.getContextPath() + redirectPath);
+        response.sendRedirect(request.getContextPath() + TabProfileContext.appendTabId(request, redirectPath));
         return false;
     }
 

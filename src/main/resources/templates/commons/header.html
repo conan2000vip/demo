@@ -4,11 +4,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="profile-tab-id" th:content="${tabId}" />
   <link rel="stylesheet" th:href="@{/css/common.css}" />
 </head>
 
 <body>
-  <header th:fragment="header(activePage)" class="app-header">
+  <header th:fragment="header(activePage)" class="app-header" th:attr="data-profile-tab-id=${tabId}">
     <div class="app-header__inner">
       <a th:href="${currentProfile != null} ? @{/profile/{id}/home(id=${currentProfile.id})} : 'javascript:void(0)'" class="app-header__brand"
         th:style="${currentProfile == null} ? 'cursor: default;' : ''">
@@ -58,7 +59,8 @@
             <img th:src="@{/image/notes.png}" alt="" class="app-header__nav-icon" />
             <span>健康メモ</span>
           </a>
-          <a th:href="@{/profile/profile-manage}" class="app-header__nav-item" th:classappend="${activePage == 'profile'} ? ' is-active' : ''">
+          <a th:href="@{/profile/{id}/profile-manage(id=${currentProfile.id})}" class="app-header__nav-item"
+            th:classappend="${activePage == 'profile'} ? ' is-active' : ''">
             <img th:src="@{/image/profile.png}" alt="" class="app-header__nav-icon" />
             <span>プロファイル管理</span>
           </a>
@@ -126,7 +128,7 @@
             </ul>
 
             <div class="app-header__dropdown-divider" th:if="${profileList != null and !profileList.isEmpty()}"></div>
-            <a th:href="@{/profile/profile-manage}" class="app-header__manage-link">
+            <a th:href="@{/profile/{id}/profile-manage(id=${currentProfile.id})}" class="app-header__manage-link">
               <img th:src="@{/image/profile.png}" alt="" class="app-header__nav-icon" />
               <span>プロファイル管理</span>
             </a>

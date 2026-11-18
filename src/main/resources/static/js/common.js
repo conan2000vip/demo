@@ -1,4 +1,26 @@
 // 共通画面処理（common.js）
+const profileTabMeta = document.querySelector('meta[name="profile-tab-id"]');
+const profileTabHeader = document.querySelector(".app-header[data-profile-tab-id]");
+window.profileTabId = profileTabMeta?.content || profileTabHeader?.dataset.profileTabId || null;
+
+window.addProfileTabIdToUrl = (value) => {
+  if (!window.profileTabId || !value) return value;
+  const url = new URL(value, window.location.href);
+  if (url.origin !== window.location.origin) return value;
+  url.searchParams.set("tabId", window.profileTabId);
+  return url.pathname + url.search + url.hash;
+};
+
+const originalFetch = window.fetch.bind(window);
+window.fetch = (input, init) => {
+  if (input instanceof Request) {
+    const requestUrl = window.addProfileTabIdToUrl(input.url);
+    if (requestUrl === input.url) return originalFetch(input, init);
+    return originalFetch(new Request(requestUrl, input), init);
+  }
+  return originalFetch(window.addProfileTabIdToUrl(input), init);
+};
+
 function resetPinModalDigits(digits, hiddenInput) {
   digits.forEach((digit) => {
     digit.value = "";
@@ -36,6 +58,7 @@ window.formSubmissionGuard = window.formSubmissionGuard || (() => {
   }
 
   function submitOnce(form) {
+    addTabIdToForm(form);
     if (!begin(form)) return false;
     form.submit();
     return true;
@@ -45,6 +68,7 @@ window.formSubmissionGuard = window.formSubmissionGuard || (() => {
 })();
 
 document.addEventListener("DOMContentLoaded", () => {
+  initTabProfileContext();
   // Lucideアイコンを画面に描画する。
   if (window.lucide) {
     lucide.createIcons();
@@ -94,6 +118,41 @@ document.addEventListener("DOMContentLoaded", () => {
     window.formSubmissionGuard.listenerInstalled = true;
   }
 });
+
+function initTabProfileContext() {
+  if (!window.profileTabId) return;
+
+  const currentUrl = new URL(window.location.href);
+  if (currentUrl.searchParams.get("tabId") !== window.profileTabId) {
+    currentUrl.searchParams.set("tabId", window.profileTabId);
+    window.history.replaceState(window.history.state, "", currentUrl);
+  }
+
+  document.querySelectorAll("a[href], [data-href]").forEach((element) => {
+    if (element instanceof HTMLAnchorElement) {
+      element.href = window.addProfileTabIdToUrl(element.href);
+    } else {
+      element.dataset.href = window.addProfileTabIdToUrl(element.dataset.href);
+    }
+  });
+
+  document.querySelectorAll("form").forEach(addTabIdToForm);
+  document.addEventListener("submit", (event) => {
+    if (event.target instanceof HTMLFormElement) addTabIdToForm(event.target);
+  }, true);
+}
+
+function addTabIdToForm(form) {
+  if (!window.profileTabId) return;
+  let input = form.querySelector('input[name="tabId"]');
+  if (!input) {
+    input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "tabId";
+    form.append(input);
+  }
+  input.value = window.profileTabId;
+}
 
 function initProfileSwitchReturnTo() {
   document.querySelectorAll('form[action*="/profile/switch/"]').forEach((form) => {

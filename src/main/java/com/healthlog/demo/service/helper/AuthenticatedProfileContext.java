@@ -16,6 +16,6 @@ public class AuthenticatedProfileContext {
     private final HttpSession session;
 
     public Long getProfileId() {
-        return (Long) session.getAttribute(SessionConstants.AUTHENTICATED_PROFILE_ID);
+        return (Long) TabProfileContext.getAttribute(session, SessionConstants.AUTHENTICATED_PROFILE_ID);
     }
 }

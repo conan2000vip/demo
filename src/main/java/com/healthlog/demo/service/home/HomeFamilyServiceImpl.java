@@ -106,7 +106,7 @@ public class HomeFamilyServiceImpl implements HomeFamilyService {
             } else {
                 boolean danger = hasLv4Feedback || daysSince >= NO_RECORD_DAYS;
                 status = danger ? "DANGER" : "WARN";
-                statusLabel = issues.size() == 1 ? issues.get(0) : issues.get(0) + " ほか" + (issues.size() - 1) + "件";
+                statusLabel = issues.get(0);
             }
 
             Map<String, Object> m = new HashMap<>();

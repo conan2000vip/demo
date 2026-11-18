@@ -58,6 +58,22 @@ class ProfileControllerTest {
     }
 
     @Test
+    void legacyProfileManagementUrlRedirectsToProfileScopedUrl() {
+        ProfileService profileService = mock(ProfileService.class);
+        ProfileController controller = new ProfileController(
+                profileService, mock(SecurityContextUtil.class), mock(UserRepository.class));
+        MockHttpSession session = new MockHttpSession();
+        User user = new User();
+        user.setId(100L);
+        session.setAttribute(SessionConstants.LOGIN_USER, user);
+        session.setAttribute(SessionConstants.CURRENT_PROFILE_ID, 30L);
+        session.setAttribute(SessionConstants.AUTHENTICATED_PROFILE_ID, 30L);
+
+        assertEquals("redirect:/profile/30/profile-manage",
+                controller.manageProfile(session, new ConcurrentModel()));
+    }
+
+    @Test
     void switchingProfileFromManagementKeepsManagementPageWithoutManagementPermissions() {
         ProfileService profileService = mock(ProfileService.class);
         ProfileController controller = new ProfileController(
@@ -79,7 +95,7 @@ class ProfileControllerTest {
         when(profileService.isProfileLimitReached(user.getId())).thenReturn(false);
         ConcurrentModel model = new ConcurrentModel();
 
-        String result = controller.manageProfile(session, model);
+        String result = controller.manageProfile(30L, session, model);
 
         assertEquals("profile/profile-manage", result);
         assertEquals(false, model.getAttribute("canManageAllProfiles"));
@@ -101,7 +117,7 @@ class ProfileControllerTest {
 
         String result = controller.verifyPin(30L, "1234", session, new ConcurrentModel());
 
-        assertEquals("redirect:/profile/profile-manage", result);
+        assertEquals("redirect:/profile/30/profile-manage", result);
         assertEquals(30L, session.getAttribute(SessionConstants.AUTHENTICATED_PROFILE_ID));
         verify(profileService).verifyPin(user.getId(), 30L, "1234");
     }
@@ -127,7 +143,7 @@ class ProfileControllerTest {
                 new RedirectAttributesModelMap());
 
         assertEquals("redirect:/profile/30/sleep?startDate=2026-11-01&endDate=2026-11-12", result);
-        verify(profileService, never()).switchProfile(session, user.getId(), 30L);
+        verify(profileService).switchProfile(session, user.getId(), 30L);
     }
 
     @Test
@@ -146,16 +162,16 @@ class ProfileControllerTest {
         String result = controller.switchProfile(
                 30L,
                 session,
-                "http://localhost:8081/profile/profile-manage",
-                "/profile/profile-manage",
+                "http://localhost:8081/profile/45/profile-manage",
+                "/profile/45/profile-manage",
                 new RedirectAttributesModelMap());
 
-        assertEquals("redirect:/profile/profile-manage", result);
+        assertEquals("redirect:/profile/30/profile-manage", result);
         verify(profileService).switchProfile(session, user.getId(), 30L);
     }
 
     @Test
-    void switchingProfileToHomeDoesNotChangeSessionCurrentProfile() {
+    void switchingProfileFromHomeUpdatesCurrentProfileForThisTab() {
         ProfileService profileService = mock(ProfileService.class);
         ProfileController controller = new ProfileController(
                 profileService, mock(SecurityContextUtil.class), mock(UserRepository.class));
@@ -176,6 +192,6 @@ class ProfileControllerTest {
 
         assertEquals("redirect:/profile/30/home?startDate=2026-11-01", result);
         assertEquals(10L, session.getAttribute(SessionConstants.CURRENT_PROFILE_ID));
-        verify(profileService, never()).switchProfile(session, user.getId(), 30L);
+        verify(profileService).switchProfile(session, user.getId(), 30L);
     }
 }

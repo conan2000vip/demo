@@ -30,7 +30,8 @@
           基本情報および健康目標値を入力してください。
         </p>
       </div>
-      <a th:unless="${isFirstProfile}" th:href="@{/profile/profile-manage}" class="profile-form-page__close" title="閉じる">
+      <a th:unless="${isFirstProfile}" th:href="@{/profile/{id}/profile-manage(id=${currentProfile.id})}"
+        class="profile-form-page__close" title="閉じる">
         <img th:src="@{/image/close.png}" alt="閉じる" />
       </a>
       <div class="alert alert--error" th:if="${errorMessage}">
@@ -306,7 +307,8 @@
           </div>
         </fieldset>
         <div class="profile-form__actions">
-          <a th:unless="${isFirstProfile}" th:href="@{/profile/profile-manage}" class="btn btn--ghost">キャンセル</a>
+          <a th:unless="${isFirstProfile}" th:href="@{/profile/{id}/profile-manage(id=${currentProfile.id})}"
+            class="btn btn--ghost">キャンセル</a>
           <button type="submit" class="btn btn--primary btn--block">
             <span th:text="${profile.id != null} ? '更新する' : '作成する'">作成する</span>
           </button>

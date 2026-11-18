@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
     private final ProfilePinAuthenticationInterceptor profilePinAuthenticationInterceptor;
+    private final TabProfileContextInterceptor tabProfileContextInterceptor;
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
@@ -18,6 +19,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(org.springframework.web.servlet.config.annotation.InterceptorRegistry registry) {
+        registry.addInterceptor(tabProfileContextInterceptor);
         registry.addInterceptor(profilePinAuthenticationInterceptor).addPathPatterns("/profile/**");
     }
 }

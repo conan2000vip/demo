@@ -22,11 +22,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 @RestController
 @RequestMapping("/api/test-seeder")
@@ -177,6 +180,95 @@ public class TestSeederController {
         return ResponseEntity.ok(response);
     }
 
+    // API: /api/test-seeder/random?profileId=30&days=60&seed=123&missingPercent=15
+    // ランダムな日次データを作成する。seed指定で再現可能。省略すると毎回異なるデータになる。
+    @GetMapping("/random")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> generateRandomData(@RequestParam Long profileId,
+            @RequestParam(defaultValue = "30") int days, @RequestParam(required = false) Long seed,
+            @RequestParam(defaultValue = "15") int missingPercent) {
+
+        Profile profile = profileRepository.findById(profileId)
+                .orElseThrow(() -> new IllegalArgumentException("Profile ID not found: " + profileId));
+
+        weightRepository.deleteByProfile_Id(profileId);
+        weightRepository.flush();
+        sleepRepository.deleteByProfile_Id(profileId);
+        sleepRepository.flush();
+        waterRepository.deleteByProfile_Id(profileId);
+        waterRepository.flush();
+        stepRepository.deleteByProfile_Id(profileId);
+        stepRepository.flush();
+
+        long usedSeed = seed != null ? seed : System.nanoTime();
+        Random r = new Random(usedSeed);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(days - 1);
+        double weightBase = 55 + r.nextDouble() * 20; // プロファイルごとに基準体重を変える
+        int created = 0;
+
+        for (int i = 0; i < days; i++) {
+            LocalDate d = startDate.plusDays(i);
+
+            // 項目ごとに独立して欠損させる（グラフに途切れを作る）
+            if (r.nextInt(100) >= missingPercent) {
+                Weight w = new Weight();
+                w.setProfile(profile);
+                w.setRecordedDate(d);
+                w.setWeight(BigDecimal.valueOf(weightBase + r.nextGaussian() * 1.2).setScale(1, RoundingMode.HALF_UP));
+                w.setMeasuredAt(LocalDateTime.of(d, LocalTime.of(8, 0)));
+                w.setHeight(new BigDecimal("170.0"));
+                w.setMemo("RANDOM TEST SEEDER");
+                weightRepository.save(w);
+                created++;
+            }
+            if (r.nextInt(100) >= missingPercent) {
+                int minutes = 300 + r.nextInt(240); // 5.0〜9.0時間
+                Sleep s = new Sleep();
+                s.setProfile(profile);
+                s.setRecordedDate(d);
+                s.setStartTime(LocalTime.of(23, 0));
+                s.setEndTime(LocalTime.of(23, 0).plusMinutes(minutes));
+                s.setSleepType(Sleep.SleepType.NIGHT);
+                s.setSleepMinutes(minutes);
+                s.setMemo("RANDOM TEST SEEDER");
+                sleepRepository.save(s);
+                created++;
+            }
+            if (r.nextInt(100) >= missingPercent) {
+                int times = 2 + r.nextInt(4); // 2〜5回
+                for (int k = 0; k < times; k++) {
+                    createWaterLog(profile, d, LocalTime.of(7 + k * 3, 0), 200 + r.nextInt(400));
+                }
+                created++;
+            }
+            if (r.nextInt(100) >= missingPercent) {
+                Step st = new Step();
+                st.setProfile(profile);
+                st.setRecordedDate(d);
+                st.setSteps(1500 + r.nextInt(13000)); // 1500〜14500
+                st.setMemo("RANDOM TEST SEEDER");
+                stepRepository.save(st);
+                created++;
+            }
+
+            backdate("weight_logs", profileId, d);
+            backdate("sleep_logs", profileId, d);
+            backdate("water_logs", profileId, d);
+            backdate("step_logs", profileId, d);
+        }
+
+        Map<String, Object> res = new HashMap<>();
+        res.put("status", "SUCCESS");
+        res.put("profileId", profileId);
+        res.put("seed", usedSeed); // 同じデータを再生成したい時はこの値を指定する
+        res.put("startDate", startDate.toString());
+        res.put("endDate", endDate.toString());
+        res.put("days", days);
+        res.put("recordsCreatedItems", created);
+        return ResponseEntity.ok(res);
+    }
+
     // へルパーメソッド: Water Logを作成する
     private void createWaterLog(Profile profile, LocalDate date, LocalTime time, int amount) {
 
@@ -197,4 +289,5 @@ public class TestSeederController {
                 .setParameter("ts", date.atTime(12, 0)).setParameter("pid", profileId).setParameter("d", date)
                 .executeUpdate();
     }
+
 }
