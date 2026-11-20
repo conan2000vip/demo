@@ -7,6 +7,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -37,21 +38,29 @@ public class ProfileFormDto {
     private String gender;
 
     @NotNull(message = "身長を入力してください")
-    @DecimalMin(value = "0.1", message = "身長は0より大きい値を入力してください")
-    @DecimalMax(value = "300.0", message = "身長の値が正しくありません")
+    @DecimalMin(value = "10", message = "身長は10〜350cmの範囲で入力してください")
+    @DecimalMax(value = "350.0", message = "身長は10〜350cmの範囲で入力してください")
+    @Digits(integer = 3, fraction = 1, message = "小数点以下1桁まで入力してください")
     private BigDecimal height;
 
-    @DecimalMin(value = "0.1", message = "目標体重は0より大きい値を入力してください")
+    @DecimalMin(value = "1", message = "体重目標は1〜700kgの範囲で入力してください")
+    @DecimalMax(value = "700.0", message = "体重目標は1〜700kgの範囲で入力してください")
+    @Digits(integer = 3, fraction = 1, message = "小数点以下1桁まで入力してください")
     private BigDecimal targetWeight;
 
-    @Min(value = 0, message = "水分目標は0以上の値を入力してください")
+    @Min(value = 0, message = "水分目標は0〜10000mlの範囲で入力してください")
+    @DecimalMax(value = "10000", message = "水分目標は0〜10000mlの範囲で入力してください")
+    @Digits(integer = 5, fraction = 0, message = "水分目標は数値で入力してください（整数のみ）")
     private Integer waterGoalMl;
 
-    @Min(value = 0, message = "歩数目標は0以上の値を入力してください")
+    @Min(value = 0, message = "歩数目標は0〜200000歩の範囲で入力してください")
+    @DecimalMax(value = "200000", message = "歩数目標は0〜200000歩の範囲で入力してください")
+    @Digits(integer = 6, fraction = 0, message = "歩数目標は数値で入力してください（整数のみ）")
     private Integer stepGoal;
 
-    @DecimalMin(value = "0.0", message = "睡眠目標は0〜24の範囲で入力してください")
-    @DecimalMax(value = "24.0", message = "睡眠目標は0〜24の範囲で入力してください")
+    @DecimalMin(value = "0", message = "睡眠目標は0〜24の範囲で入力してください")
+    @DecimalMax(value = "24", message = "睡眠目標は0〜24の範囲で入力してください")
+    @Digits(integer = 2, fraction = 1, message = "小数点以下1桁まで入力してください")
     private BigDecimal dailySleepGoal;
 
     private String avatar = "avatar_01";

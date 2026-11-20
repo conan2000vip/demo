@@ -75,6 +75,7 @@ function initModal() {
   // 就寝時刻と起床時刻から睡眠時間（分）を計算する関数
   function computeSleepMinutes(startVal, endVal) {
     if (!startVal || !endVal) return null;
+    if (!isValidTime(startVal) || !isValidTime(endVal)) return NaN;
     const [sh, sm] = startVal.split(":").map(Number);
     const [eh, em] = endVal.split(":").map(Number);
     let startMinutes = sh * 60 + sm;
@@ -85,25 +86,16 @@ function initModal() {
     return endMinutes - startMinutes;
   }
 
-  // 入力時にエラーをクリア
-  [dateInput, startTimeInput, endTimeInput].forEach((input) => {
-    if (input) input.addEventListener("input", () => clearError(input.id));
-  });
-
-  [dateInput, startTimeInput, endTimeInput].forEach((input) => {
-    if (input) input.addEventListener("input", () => {
-      validateDuration();
-      updateWakeDateHint();
-    });
-  });
-  if (sleepTypeInput) {
-    sleepTypeInput.addEventListener("change", validateDuration);
+  function isValidTime(value) {
+    if (!/^\d{2}:\d{2}$/.test(value)) return false;
+    const [hours, minutes] = value.split(":").map(Number);
+    return hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59;
   }
 
   // バリデーション
   function validateDuration() {
     const minutes = computeSleepMinutes(startTimeInput.value, endTimeInput.value);
-    if (minutes === null) {
+    if (minutes === null || Number.isNaN(minutes)) {
       return true;
     }
     if (minutes <= 0) {
@@ -127,12 +119,29 @@ function initModal() {
     return true;
   }
 
+  function validateTimeInput(inputName) {
+    const isStart = inputName === "startTime";
+    const isValid = isStart ? validateStartTime() : validateEndTime();
+    const otherTimeIsValid = isStart ? isValidTime(endTimeInput.value) : isValidTime(startTimeInput.value);
+
+    if (isValid && otherTimeIsValid) {
+      validateDuration();
+    } else if (isStart && !isValid && otherTimeIsValid) {
+      clearError("endTime");
+    }
+    updateWakeDateHint();
+  }
+
   function validateDate() {
     if (!dateInput.value) {
       showError("recordedDate", "日付を選択してください");
       return false;
     }
     const selected = new Date(dateInput.value);
+    if (Number.isNaN(selected.getTime())) {
+      showError("recordedDate", "正しい日付を入力してください。");
+      return false;
+    }
     const today = new Date();
     today.setHours(23, 59, 59, 999);
     if (selected > today) {
@@ -148,6 +157,10 @@ function initModal() {
       showError("startTime", "就寝時刻を入力してください");
       return false;
     }
+    if (!isValidTime(startTimeInput.value)) {
+      showError("startTime", "正しい就寝時刻を入力してください");
+      return false;
+    }
     clearError("startTime");
     return true;
   }
@@ -157,17 +170,62 @@ function initModal() {
       showError("endTime", "起床時刻を入力してください");
       return false;
     }
+    if (!isValidTime(endTimeInput.value)) {
+      showError("endTime", "正しい起床時刻を入力してください");
+      return false;
+    }
     clearError("endTime");
     return true;
   }
 
+  function validateSleepType() {
+    if (!["NIGHT", "NAP"].includes(sleepTypeInput.value)) {
+      showError("sleepType", "睡眠の種別を選択してください");
+      return false;
+    }
+    clearError("sleepType");
+    return true;
+  }
+
+  function validateMemo() {
+    if (memoInput.value.length > 500) {
+      showError("memo", "メモは500文字以内で入力してください");
+      return false;
+    }
+    clearError("memo");
+    return true;
+  }
+
+  dateInput.addEventListener("input", () => {
+    validateDate();
+    updateWakeDateHint();
+  });
+  dateInput.addEventListener("change", () => {
+    validateDate();
+    updateWakeDateHint();
+  });
+  startTimeInput.addEventListener("input", () => validateTimeInput("startTime"));
+  startTimeInput.addEventListener("change", () => validateTimeInput("startTime"));
+  endTimeInput.addEventListener("input", () => validateTimeInput("endTime"));
+  endTimeInput.addEventListener("change", () => validateTimeInput("endTime"));
+  sleepTypeInput.addEventListener("change", () => {
+    validateSleepType();
+    if (isValidTime(startTimeInput.value) && isValidTime(endTimeInput.value)) {
+      validateDuration();
+    }
+  });
+  memoInput.addEventListener("input", validateMemo);
+  memoInput.addEventListener("blur", validateMemo);
+
   form.addEventListener("submit", (event) => {
     const isDateValid = validateDate();
+    const isSleepTypeValid = validateSleepType();
     const isStartValid = validateStartTime();
     const isEndValid = validateEndTime();
     const isDurationValid = validateDuration();
+    const isMemoValid = validateMemo();
 
-    if (!isDateValid || !isStartValid || !isEndValid || !isDurationValid) {
+    if (!isDateValid || !isSleepTypeValid || !isStartValid || !isEndValid || !isDurationValid || !isMemoValid) {
       event.preventDefault();
     }
   });
@@ -193,7 +251,7 @@ function initModal() {
   }
 
   function clearAllErrors() {
-    ["recordedDate", "startTime", "endTime"].forEach(clearError);
+    ["recordedDate", "sleepType", "startTime", "endTime", "memo"].forEach(clearError);
   }
 
   function todayIso() {

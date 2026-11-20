@@ -1,7 +1,9 @@
 package com.healthlog.demo.controller;
 
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.Map;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -63,20 +65,21 @@ public class WaterController {
 
     @PostMapping("/save")
     public String save(@PathVariable Long profileId, @RequestParam(required = false) Long recordId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate recordedDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime recordedTime,
-            @RequestParam String drinkType, @RequestParam int amountMl, @RequestParam(required = false) String memo,
+            @RequestParam(required = false) String recordedDate,
+            @RequestParam(required = false) String recordedTime,
+            @RequestParam(required = false) String drinkType, @RequestParam(required = false) String amountMl,
+            @RequestParam(required = false) String memo,
             HttpSession session, RedirectAttributes flash) {
         User user = currentUserResolver.resolve(session);
         if (user == null)
             return "redirect:/auth/login";
-        Water input = new Water();
-        input.setRecordedDate(recordedDate);
-        input.setRecordedTime(recordedTime);
-        input.setDrinkType(drinkType);
-        input.setAmountMl(amountMl);
-        input.setMemo(memo);
         try {
+            Water input = new Water();
+            input.setRecordedDate(parseRecordedDate(recordedDate));
+            input.setRecordedTime(parseRecordedTime(recordedTime));
+            input.setDrinkType(drinkType);
+            input.setAmountMl(parseAmountMl(amountMl));
+            input.setMemo(memo);
             if (recordId == null) {
                 waterService.create(profileId, user.getId(), input);
                 flash.addFlashAttribute("message", "水分記録を保存しました。");
@@ -88,6 +91,47 @@ public class WaterController {
             flash.addFlashAttribute("error", exception.getMessage());
         }
         return "redirect:/profile/" + profileId + "/water";
+    }
+
+    private LocalDate parseRecordedDate(String value) {
+        if (value == null || value.isBlank()) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "日付を選択してください。");
+        }
+        try {
+            return LocalDate.parse(value);
+        } catch (DateTimeParseException exception) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "正しい日付を入力してください。");
+        }
+    }
+
+    private int parseAmountMl(String value) {
+        if (value == null || value.isBlank()) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "水分量を入力してください。");
+        }
+        if (!value.matches("-?\\d+")) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "水分量は整数で入力してください。");
+        }
+        BigInteger amount;
+        try {
+            amount = new BigInteger(value);
+        } catch (NumberFormatException exception) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "水分量は整数で入力してください。");
+        }
+        if (amount.compareTo(BigInteger.ONE) < 0 || amount.compareTo(BigInteger.valueOf(5000)) > 0) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "水分量は1〜5000mlの範囲で入力してください。");
+        }
+        return amount.intValue();
+    }
+
+    private LocalTime parseRecordedTime(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            return LocalTime.parse(value);
+        } catch (DateTimeParseException exception) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "正しい記録時刻を入力してください。");
+        }
     }
 
     @PostMapping("/{logId}/delete")

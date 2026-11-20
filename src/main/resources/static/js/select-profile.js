@@ -87,10 +87,17 @@
         passwordForm?.requestSubmit();
     };
 
+    const validateAccountPassword = () => {
+        if (!passwordError) return Boolean(passwordInput?.value);
+        passwordError.textContent = passwordInput?.value
+            ? ''
+            : 'アカウントのパスワードを入力してください。';
+        return Boolean(passwordInput?.value);
+    };
+
     confirmPasswordButton?.addEventListener('click', submitAccountPassword);
-    passwordInput?.addEventListener('input', () => {
-        if (passwordError) passwordError.textContent = '';
-    });
+    passwordInput?.addEventListener('input', validateAccountPassword);
+    passwordInput?.addEventListener('blur', validateAccountPassword);
     passwordInput?.addEventListener('keydown', (event) => {
         if (event.key === 'Enter') {
             event.preventDefault();
@@ -109,6 +116,13 @@
             }
             return true;
         };
+        const updatePinError = () => {
+            if (pinError) {
+                pinError.textContent = pinInput.value.length === 4
+                    ? ''
+                    : '4桁のPINを入力してください。';
+            }
+        };
         const submitPin = () => {
             if (!validatePin()) return;
             pinForm?.requestSubmit();
@@ -117,7 +131,7 @@
             input.addEventListener('input', () => {
                 input.value = input.value.replace(/\D/g, '').slice(0, 1);
                 pinInput.value = pinDigits.map((digit) => digit.value).join('');
-                if (pinError) pinError.textContent = '';
+                updatePinError();
                 if (input.value && pinDigits[index + 1]) {
                     pinDigits[index + 1].focus();
                 } else if (index === pinDigits.length - 1 && input.value) {
@@ -142,6 +156,7 @@
                     digit.value = pasted[digitIndex] || '';
                 });
                 pinInput.value = pasted;
+                updatePinError();
                 if (pasted.length === 4) {
                     submitPin();
                 } else {

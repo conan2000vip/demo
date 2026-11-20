@@ -46,6 +46,7 @@ function initModal() {
   const drinkTypeInput = document.getElementById("drinkType")
   const amountInput = document.getElementById("amountMl")
   const memoInput = document.getElementById("memo")
+  const integerPattern = /^-?\d+$/
 
   if (!overlay || !form) {
     return
@@ -159,21 +160,6 @@ function initModal() {
   });
 
   /* =====================================================
-       入力時にエラー表示を解除
-       ===================================================== */
-  [dateInput, drinkTypeInput, amountInput].forEach((input) => {
-    if (!input) {
-      return
-    }
-    input.addEventListener("input", () => {
-      clearError(input.id)
-    })
-    input.addEventListener("change", () => {
-      clearError(input.id)
-    })
-  })
-
-  /* =====================================================
        日付チェック
        ===================================================== */
   function validateDate() {
@@ -196,7 +182,8 @@ function initModal() {
        飲み物チェック
        ===================================================== */
   function validateDrinkType() {
-    if (!drinkTypeInput.value) {
+    const allowedDrinkTypes = ["WATER", "TEA", "COFFEE", "JUICE", "MILK", "SPORTS_DRINK", "OTHER"]
+    if (!allowedDrinkTypes.includes(drinkTypeInput.value)) {
       showError("drinkType", "飲み物を選択してください")
       return false
     }
@@ -208,19 +195,41 @@ function initModal() {
        水分量チェック
        ===================================================== */
   function validateAmount() {
-    const value = amountInput.value
+    const value = amountInput.value.trim()
     if (!value) {
       showError("amountMl", "水分量を入力してください")
       return false
     }
+    if (!integerPattern.test(value)) {
+      showError("amountMl", "水分量は整数で入力してください")
+      return false
+    }
     const amount = Number(value)
-    if (Number.isNaN(amount) || amount < 1 || amount > 5000) {
+    if (!Number.isSafeInteger(amount) || amount < 1 || amount > 5000) {
       showError("amountMl", "水分量は1〜5000mlの範囲で入力してください")
       return false
     }
     clearError("amountMl")
     return true
   }
+
+  function validateMemo() {
+    if (memoInput.value.length > 500) {
+      showError("memo", "メモは500文字以内で入力してください")
+      return false
+    }
+    clearError("memo")
+    return true
+  }
+
+  dateInput.addEventListener("input", validateDate)
+  dateInput.addEventListener("change", validateDate)
+  drinkTypeInput.addEventListener("change", validateDrinkType)
+  amountInput.addEventListener("input", validateAmount)
+  amountInput.addEventListener("change", validateAmount)
+  amountInput.addEventListener("blur", validateAmount)
+  memoInput.addEventListener("input", validateMemo)
+  memoInput.addEventListener("blur", validateMemo)
 
   /* =====================================================
        送信時バリデーション
@@ -229,11 +238,13 @@ function initModal() {
     const isDateValid = validateDate()
     const isDrinkTypeValid = validateDrinkType()
     const isAmountValid = validateAmount()
+    const isMemoValid = validateMemo()
 
     if (
       !isDateValid ||
       !isDrinkTypeValid ||
-      !isAmountValid
+      !isAmountValid ||
+      !isMemoValid
     ) {
       event.preventDefault()
       return
@@ -283,7 +294,7 @@ function initModal() {
        全エラー解除
        ===================================================== */
   function clearAllErrors() {
-    ["recordedDate", "drinkType", "amountMl"].forEach(clearError)
+    ["recordedDate", "drinkType", "amountMl", "memo"].forEach(clearError)
   }
 
   /* =====================================================

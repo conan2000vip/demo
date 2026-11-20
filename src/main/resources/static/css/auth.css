@@ -264,8 +264,15 @@ body {
     box-shadow: 0 0 0 3px rgba(70, 87, 233, 0.12);
 }
 
-.input-box input.has-error {
+.input-box input.has-error,
+.input-group:has(> .field-error.is-visible) .input-box input {
     border-color: var(--color-error);
+}
+
+.input-box input.has-error:focus,
+.input-group:has(> .field-error.is-visible) .input-box input:focus {
+    border-color: var(--color-error);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.16);
 }
 
 .toggle-password {
@@ -501,6 +508,16 @@ body {
 }
 
 .otp-box.has-error {
+    border-color: var(--color-error);
+}
+
+.otp-box.has-error:focus,
+#verifyForm:has(#codeError.is-visible) .otp-box:focus {
+    border-color: var(--color-error);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.16);
+}
+
+#verifyForm:has(#codeError.is-visible) .otp-box {
     border-color: var(--color-error);
 }
 

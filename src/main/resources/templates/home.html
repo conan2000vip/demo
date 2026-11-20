@@ -45,7 +45,7 @@
         <div class="goal-chip goal-chip--weight" th:if="${goals != null and goals.containsKey('targetWeight')}">
           <img th:src="@{/image/scales.png}" alt="" class="goal-chip__icon" />
           <div>
-            <p class="goal-chip__label">目標体重</p>
+            <p class="goal-chip__label">体重目標</p>
             <p class="goal-chip__value"
               th:text="${goals['targetWeight'] != null ? #numbers.formatDecimal(goals['targetWeight'], 1, 1) + ' kg' : '-'}">
               55.0 kg

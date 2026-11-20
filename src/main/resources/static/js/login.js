@@ -63,14 +63,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // ★ リアルタイムイベントの設定
     // =========================================================
     if (emailInput) {
-        // 入力中は以前のエラー表示を隠す。
-        emailInput.addEventListener('input', () => clearError(emailInput, emailError));
-        // メール欄から移動したときに形式を検証する。
+        emailInput.addEventListener('input', validateEmail);
         emailInput.addEventListener('blur', validateEmail);
     }
 
     if (passwordInput) {
-        passwordInput.addEventListener('input', () => clearError(passwordInput, passwordError));
+        passwordInput.addEventListener('input', validatePassword);
         passwordInput.addEventListener('blur', validatePassword);
     }
 

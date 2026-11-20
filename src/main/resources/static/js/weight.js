@@ -42,6 +42,7 @@ function initModal() {
   const weightInput = document.getElementById("weight");
   const heightInput = document.getElementById("height");
   const memoInput = document.getElementById("memo");
+  const numericPattern = /^-?\d+(?:\.\d*)?$/;
 
   if (!overlay || !form) return;
 
@@ -133,16 +134,12 @@ function initModal() {
     });
   });
 
-  // ★変更：日付が変更されたら、その時点の現在時刻と合成してhiddenへ反映
+  // 日付変更時に hidden の送信値を更新し、入力値を即時検証する。
   measuredAtDateInput.addEventListener("change", () => {
     syncMeasuredAtFromDate();
-    clearError("measuredAt");
+    validateMeasuredAt();
   });
-
-  // 入力時にエラーをクリア（体重・身長は従来通り）
-  [weightInput, heightInput].forEach((input) => {
-    if (input) input.addEventListener("input", () => clearError(input.id));
-  });
+  measuredAtDateInput.addEventListener("input", validateMeasuredAt);
 
   // ★変更：バリデーション対象は「日付」のみ。時刻は自動付与のため未来チェック対象外
   function validateMeasuredAt() {
@@ -163,22 +160,34 @@ function initModal() {
 
   // 警告を表示済みかどうかを保持する。
   let isWeightWarned = false;
-  function validateWeight() {
-    const value = weightInput.value;
+  function validateWeight(checkLargeWeightWarning = true) {
+    const value = weightInput.value.trim();
     if (!value) {
       showError("weight", "体重を入力してください");
       isWeightWarned = false;
       return false;
     }
+    if (!numericPattern.test(value)) {
+      showError("weight", "体重は数値で入力してください");
+      isWeightWarned = false;
+      return false;
+    }
     const num = parseFloat(value);
-    if (Number.isNaN(num) || num < 1.0 || num > 700.0) {
-      showError("weight", "正しい体重を入力してください (1〜700kg)");
+    const errors = [];
+    if (num < 1.0 || num > 700.0) {
+      errors.push("体重は1〜700kgの範囲で入力してください");
+    }
+    if ((value.split(".")[1] || "").length > 1) {
+      errors.push("小数点以下1桁まで入力してください");
+    }
+    if (errors.length > 0) {
+      showError("weight", errors.join(" "));
       isWeightWarned = false;
       return false;
     }
 
     // 200kgを超え、まだ警告していない場合は赤字で警告して状態を保持する。
-    if (num > 200.0 && !isWeightWarned) {
+    if (checkLargeWeightWarning && num > 200.0 && !isWeightWarned) {
       showError("weight", "数値が大きすぎます。小数点の押し忘れはありませんか？（※もう一度「保存」を押すとこのまま登録されます）");
       isWeightWarned = true; // 警告を表示済みにする。
       return false; // 初回は保存を止め、警告を確認できるようにする。
@@ -189,30 +198,66 @@ function initModal() {
   // ユーザーが入力値を修正したら警告状態をリセットする。
   weightInput.addEventListener("input", () => {
     isWeightWarned = false;
-    clearError("weight");
+    if (weightInput.value.trim()) {
+      validateWeight(false);
+    } else {
+      clearError("weight");
+    }
   });
+  weightInput.addEventListener("blur", () => validateWeight(false));
 
   function validateHeight() {
-    const value = heightInput.value;
+    const value = heightInput.value.trim();
     if (!value) {
       clearError("height");
       return true;
     }
+    if (!numericPattern.test(value)) {
+      showError("height", "身長は数値で入力してください");
+      return false;
+    }
     const num = parseFloat(value);
-    if (Number.isNaN(num) || num < 10 || num > 350) {
-      showError("height", "身長は10〜350cmの範囲で入力してください");
+    const errors = [];
+    if (num < 10 || num > 350) {
+      errors.push("身長は10〜350cmの範囲で入力してください");
+    }
+    if ((value.split(".")[1] || "").length > 1) {
+      errors.push("小数点以下1桁まで入力してください");
+    }
+    if (errors.length > 0) {
+      showError("height", errors.join(" "));
       return false;
     }
     clearError("height");
     return true;
   }
+  heightInput.addEventListener("input", () => {
+    if (heightInput.value.trim()) {
+      validateHeight();
+    } else {
+      clearError("height");
+    }
+  });
+  heightInput.addEventListener("blur", validateHeight);
+
+  function validateMemo() {
+    if (memoInput.value.length > 500) {
+      showError("memo", "メモは500文字以内で入力してください");
+      return false;
+    }
+    clearError("memo");
+    return true;
+  }
+  memoInput.addEventListener("input", validateMemo);
+  memoInput.addEventListener("blur", validateMemo);
 
   form.addEventListener("submit", (event) => {
     const isMeasuredAtValid = validateMeasuredAt();
     const isWeightValid = validateWeight();
     const isHeightValid = validateHeight();
+    const isMemoValid = validateMemo();
 
-    if (!isMeasuredAtValid || !isWeightValid || !isHeightValid) {
+    if (!isMeasuredAtValid || !isWeightValid || !isHeightValid || !isMemoValid) {
       event.preventDefault();
       return;
     }
@@ -243,6 +288,6 @@ function initModal() {
   }
 
   function clearAllErrors() {
-    ["measuredAt", "weight", "height"].forEach(clearError);
+    ["measuredAt", "weight", "height", "memo"].forEach(clearError);
   }
 }

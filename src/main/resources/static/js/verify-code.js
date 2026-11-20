@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const resendBtn = document.getElementById("resendBtn");
     const resendTimerText = document.getElementById("resendTimerText");
+    let codeValidationRequested = false;
 
     // ---- 画面表示時に最初の入力欄へ自動フォーカス ----
     if (boxes[0]) boxes[0].focus();
@@ -25,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 boxes[index + 1].focus();
             }
             syncCombined();
+            if (codeValidationRequested) validateCode();
         });
 
         // ---- 空欄でBackspaceを押したら前の入力欄へ移動 ----
@@ -56,6 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const nextEmpty = boxes.findIndex((b) => !b.value);
             (nextEmpty === -1 ? boxes[boxes.length - 1] : boxes[nextEmpty]).focus();
             syncCombined();
+            if (codeValidationRequested) validateCode();
         });
     });
 
@@ -63,16 +66,22 @@ document.addEventListener("DOMContentLoaded", () => {
         combinedInput.value = boxes.map((b) => b.value).join("");
     }
 
+    function validateCode() {
+        syncCombined();
+        const isComplete = combinedInput.value.length === boxes.length;
+        boxes.forEach((box) => box.classList.toggle("has-error", !isComplete && !box.value));
+        codeError.classList.toggle("is-visible", !isComplete);
+        if (!isComplete) {
+            codeError.querySelector("span").textContent = "6桁すべて入力してください";
+        }
+        return isComplete;
+    }
+
     // ---- 送信前にコードを結合し、6桁すべて入力されているか確認 ----
     form.addEventListener("submit", (e) => {
-        syncCombined();
-        if (combinedInput.value.length < boxes.length) {
+        codeValidationRequested = true;
+        if (!validateCode()) {
             e.preventDefault();
-            boxes.forEach((b) => {
-                if (!b.value) b.classList.add("has-error");
-            });
-            codeError.classList.add("is-visible");
-            codeError.querySelector("span").textContent = "6桁すべて入力してください";
         }
     });
 

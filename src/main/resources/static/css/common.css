@@ -1719,8 +1719,34 @@ textarea {
     color: #9ca3af;
 }
 
-.form .invalid {
+.form :is(input, select, textarea).invalid,
+.form :is(input, select, textarea).has-error,
+.form :is(input, select, textarea).is-invalid,
+.form .input-group:has(.field-error.show, .field-error.is-visible) :is(input:not([type="hidden"]), select, textarea),
+.profile-form :is(input, select, textarea).invalid,
+.profile-form .input-group:has(.field-error.show, .field-error.is-visible) :is(input:not([type="hidden"]), select, textarea) {
     border-color: var(--wp-danger);
+}
+
+.form :is(input, select, textarea).invalid:focus,
+.form :is(input, select, textarea).has-error:focus,
+.form :is(input, select, textarea).is-invalid:focus,
+.form .input-group:has(.field-error.show, .field-error.is-visible) :is(input:not([type="hidden"]), select, textarea):focus,
+.profile-form :is(input, select, textarea).invalid:focus,
+.profile-form .input-group:has(.field-error.show, .field-error.is-visible) :is(input:not([type="hidden"]), select, textarea):focus {
+    border-color: var(--wp-danger);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.16);
+}
+
+.chart-range-picker:has(.chart-range-picker__error:not([hidden])) .chart-range-picker__dates input,
+.csv-modal__panel:has(#csvExportError:not(:empty)) .csv-modal__dates input {
+    border-color: var(--wp-danger);
+}
+
+.chart-range-picker:has(.chart-range-picker__error:not([hidden])) .chart-range-picker__dates input:focus,
+.csv-modal__panel:has(#csvExportError:not(:empty)) .csv-modal__dates input:focus {
+    border-color: var(--wp-danger);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.16);
 }
 
 .field-error {

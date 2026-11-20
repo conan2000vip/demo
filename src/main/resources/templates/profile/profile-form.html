@@ -30,7 +30,7 @@
           基本情報および健康目標値を入力してください。
         </p>
       </div>
-      <a th:unless="${isFirstProfile}" th:href="@{/profile/{id}/profile-manage(id=${currentProfile.id})}"
+      <a th:unless="${isFirstProfile}" th:href="@{/profile/profile-manage}"
         class="profile-form-page__close" title="閉じる">
         <img th:src="@{/image/close.png}" alt="閉じる" />
       </a>
@@ -98,7 +98,7 @@
 
             <div class="input-group">
               <label for="height">身長 (cm)<span class="required">*</span></label>
-              <input type="text" id="height" th:field="*{height}" inputmode="decimal" autocomplete="off" placeholder="170.0" maxlength="5" />
+              <input type="text" id="height" th:field="*{height}" inputmode="decimal" autocomplete="off" placeholder="170.0" />
               <span class="field-error show" th:if="${#fields.hasErrors('height')}" th:errors="*{height}"></span>
             </div>
           </div>
@@ -271,43 +271,43 @@
           <legend>健康目標</legend>
           <div class="input-row">
             <div class="input-group">
-              <label for="targetWeight">目標体重 (kg)</label>
-              <input type="text" inputmode="decimal" id="targetWeight" th:field="*{targetWeight}" placeholder="例：65.0" />
+              <label for="targetWeight">体重目標 (kg)</label>
+              <input type="text" inputmode="decimal" id="targetWeight" th:field="*{targetWeight}" placeholder="例：65.0" aria-describedby="targetWeightError" />
               <span class="field-hint" th:if="${profile.targetWeight == null}">おすすめ目標：現在の体重や身長に合わせて設定してください</span>
               <span class="field-hint" th:if="${profile.targetWeight != null}">現在の目標：<span th:text="${profile.targetWeight}"></span>
                 kg</span>
-              <span class="field-error show" th:if="${#fields.hasErrors('targetWeight')}" th:errors="*{targetWeight}"></span>
+              <span id="targetWeightError" class="field-error show" th:if="${#fields.hasErrors('targetWeight')}" th:errors="*{targetWeight}"></span>
             </div>
 
             <div class="input-group">
               <label for="waterGoalMl">水分目標 (ml/日)</label>
-              <input type="text" inputmode="numeric" id="waterGoalMl" th:field="*{waterGoalMl}" placeholder="1500" />
+              <input type="text" inputmode="numeric" id="waterGoalMl" th:field="*{waterGoalMl}" placeholder="1500" aria-describedby="waterGoalMlError" />
               <span class="field-hint" th:if="${profile.waterGoalMl == null}">おすすめ目標：1500 ml</span>
               <span class="field-hint" th:if="${profile.waterGoalMl != null}">現在の目標：<span th:text="${profile.waterGoalMl}"></span>ml</span>
-              <span class="field-error show" th:if="${#fields.hasErrors('waterGoalMl')}" th:errors="*{waterGoalMl}"></span>
+              <span id="waterGoalMlError" class="field-error show" th:if="${#fields.hasErrors('waterGoalMl')}" th:errors="*{waterGoalMl}"></span>
             </div>
           </div>
 
           <div class="input-row">
             <div class="input-group">
               <label for="stepGoal">歩数目標 (歩/日)</label>
-              <input type="text" inputmode="numeric" id="stepGoal" th:field="*{stepGoal}" placeholder="8000" />
+              <input type="text" inputmode="numeric" id="stepGoal" th:field="*{stepGoal}" placeholder="8000" aria-describedby="stepGoalError" />
               <span class="field-hint" th:if="${profile.stepGoal == null}">おすすめ目標：8000 歩</span>
               <span class="field-hint" th:if="${profile.stepGoal != null}">現在の目標：<span th:text="${profile.stepGoal}"></span>歩</span>
-              <span class="field-error show" th:if="${#fields.hasErrors('stepGoal')}" th:errors="*{stepGoal}"></span>
+              <span id="stepGoalError" class="field-error show" th:if="${#fields.hasErrors('stepGoal')}" th:errors="*{stepGoal}"></span>
             </div>
 
             <div class="input-group">
               <label for="dailySleepGoal">睡眠目標 (時間/日)</label>
-              <input type="text" inputmode="decimal" id="dailySleepGoal" th:field="*{dailySleepGoal}" placeholder="8.0" />
+              <input type="text" inputmode="decimal" id="dailySleepGoal" th:field="*{dailySleepGoal}" placeholder="8.0" aria-describedby="dailySleepGoalError" />
               <span class="field-hint" th:if="${profile.dailySleepGoal == null}">おすすめ目標：8.0 時間</span>
               <span class="field-hint" th:if="${profile.dailySleepGoal != null}">現在の目標：<span th:text="${profile.dailySleepGoal}"></span>時間</span>
-              <span class="field-error show" th:if="${#fields.hasErrors('dailySleepGoal')}" th:errors="*{dailySleepGoal}"></span>
+              <span id="dailySleepGoalError" class="field-error show" th:if="${#fields.hasErrors('dailySleepGoal')}" th:errors="*{dailySleepGoal}"></span>
             </div>
           </div>
         </fieldset>
         <div class="profile-form__actions">
-          <a th:unless="${isFirstProfile}" th:href="@{/profile/{id}/profile-manage(id=${currentProfile.id})}"
+          <a th:unless="${isFirstProfile}" th:href="@{/profile/profile-manage}"
             class="btn btn--ghost">キャンセル</a>
           <button type="submit" class="btn btn--primary btn--block">
             <span th:text="${profile.id != null} ? '更新する' : '作成する'">作成する</span>
@@ -318,6 +318,7 @@
   </main>
 
   <script th:src="@{/js/common.js}"></script>
+  <script th:src="@{/js/profile-goals.js}"></script>
   <script th:src="@{/js/verify-pin.js}"></script>
 </body>
 

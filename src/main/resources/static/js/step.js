@@ -104,15 +104,6 @@ function initModal() {
     });
   });
 
-  // 入力中にエラーをクリアする。
-  recordedDateInput.addEventListener("input", () => clearError("recordedDate"));
-
-  // 歩数を修正したら警告状態をリセットする。
-  stepsInput.addEventListener("input", () => {
-    isStepsWarned = false;
-    clearError("steps");
-  });
-
   // 日付を検証する。
   function validateRecordedDate() {
     if (!recordedDateInput.value) {
@@ -134,8 +125,8 @@ function initModal() {
   }
 
   // 歩数を検証する。
-  function validateSteps() {
-    const value = stepsInput.value;
+  function validateSteps(checkLargeStepsWarning = true) {
+    const value = stepsInput.value.trim();
 
     if (value === "") {
       showError("steps", "歩数を入力してください");
@@ -143,15 +134,21 @@ function initModal() {
       return false;
     }
 
+    if (!/^-?\d+$/.test(value)) {
+      showError("steps", "歩数は整数で入力してください");
+      isStepsWarned = false;
+      return false;
+    }
+
     const steps = Number(value);
 
-    if (!Number.isInteger(steps) || steps < 0 || steps > 200000) {
+    if (!Number.isSafeInteger(steps) || steps < 0 || steps > 200000) {
       showError("steps", "歩数は0〜200000歩の範囲で入力してください");
       isStepsWarned = false;
       return false;
     }
 
-    if (steps > 50000 && !isStepsWarned) {
+    if (checkLargeStepsWarning && steps > 50000 && !isStepsWarned) {
       showError("steps", "歩数が非常に大きいです。入力内容に間違いはありませんか？（※もう一度「保存」を押すと登録されます）");
       isStepsWarned = true; // 警告を表示済みにする。
       return false; // 初回は一時停止し、ユーザーの確認を求める。
@@ -162,11 +159,32 @@ function initModal() {
     return true;
   }
 
+  function validateMemo() {
+    if (memoInput.value.length > 500) {
+      showError("memo", "メモは500文字以内で入力してください");
+      return false;
+    }
+    clearError("memo");
+    return true;
+  }
+
+  recordedDateInput.addEventListener("input", validateRecordedDate);
+  recordedDateInput.addEventListener("change", validateRecordedDate);
+  stepsInput.addEventListener("input", () => {
+    isStepsWarned = false;
+    validateSteps(false);
+  });
+  stepsInput.addEventListener("change", () => validateSteps(false));
+  stepsInput.addEventListener("blur", () => validateSteps(false));
+  memoInput.addEventListener("input", validateMemo);
+  memoInput.addEventListener("blur", validateMemo);
+
   form.addEventListener("submit", (event) => {
     const isRecordedDateValid = validateRecordedDate();
     const isStepsValid = validateSteps();
+    const isMemoValid = validateMemo();
 
-    if (!isRecordedDateValid || !isStepsValid) {
+    if (!isRecordedDateValid || !isStepsValid || !isMemoValid) {
       event.preventDefault();
     }
   });
@@ -194,7 +212,7 @@ function initModal() {
   }
 
   function clearAllErrors() {
-    ["recordedDate", "steps"].forEach(clearError);
+    ["recordedDate", "steps", "memo"].forEach(clearError);
   }
 
   // 現在日付をYYYY-MM-DD形式で返す。

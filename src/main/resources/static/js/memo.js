@@ -66,11 +66,6 @@ function initModal() {
         });
     });
 
-    // 入力時にエラーをクリア
-    [recordedDateInput, titleInput, contentInput].forEach((input) => {
-        if (input) input.addEventListener("input", () => clearError(input.id));
-    });
-
     // バリデーション
     function validateRecordedDate() {
         if (!recordedDateInput.value) {
@@ -118,6 +113,13 @@ function initModal() {
         clearError("content");
         return true;
     }
+
+    recordedDateInput.addEventListener("input", validateRecordedDate);
+    recordedDateInput.addEventListener("change", validateRecordedDate);
+    titleInput.addEventListener("input", validateTitle);
+    titleInput.addEventListener("blur", validateTitle);
+    contentInput.addEventListener("input", validateContent);
+    contentInput.addEventListener("blur", validateContent);
 
     form.addEventListener("submit", (event) => {
         const isRecordedDateValid = validateRecordedDate();

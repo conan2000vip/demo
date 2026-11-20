@@ -368,7 +368,16 @@ function initChartRangePicker() {
   function updateRangeDisplay() {
     updateLabel();
     syncQuickRange();
-    if (error) error.hidden = true;
+    validateRange();
+  }
+
+  function validateRange() {
+    const invalid = Boolean(startInput.value && endInput.value && startInput.value > endInput.value);
+    if (error) {
+      error.textContent = invalid ? "終了日は開始日以降の日付を指定してください。" : "";
+      error.hidden = !invalid;
+    }
+    return !invalid;
   }
 
   if (!startInput.value && !endInput.value) {
@@ -399,11 +408,7 @@ function initChartRangePicker() {
   });
 
   form.addEventListener("submit", (event) => {
-    if (startInput.value && endInput.value && startInput.value > endInput.value) {
-      event.preventDefault();
-      error.textContent = "終了日は開始日以降の日付を指定してください。";
-      error.hidden = false;
-    }
+    if (!validateRange()) event.preventDefault();
   });
 
   document.addEventListener("click", (event) => {
@@ -487,17 +492,25 @@ function initFilterForm() {
   }
 
   form.addEventListener("submit", (event) => {
-    if (startInput.value && endInput.value && startInput.value > endInput.value) {
+    if (!validateFilterRange()) {
       event.preventDefault();
-      showFilterError("終了日は開始日以降の日付を指定してください。");
       return;
     }
     removeFilterError();
   });
 
-  const onDateChange = () => {
+  function validateFilterRange() {
+    if (startInput.value && endInput.value && startInput.value > endInput.value) {
+      showFilterError("終了日は開始日以降の日付を指定してください。");
+      return false;
+    }
     removeFilterError();
+    return true;
+  }
+
+  const onDateChange = () => {
     syncActiveRange();
+    validateFilterRange();
   };
   startInput.addEventListener("input", onDateChange);
   startInput.addEventListener("change", onDateChange);
@@ -1053,6 +1066,12 @@ function initCsvExportModal() {
       .map((box) => box.value);
   }
 
+  function validateSelectedTypes() {
+    const isValid = selectedTypes().length > 0;
+    showError(typesError, isValid ? "" : "出力するデータを1つ以上選択してください。");
+    return isValid;
+  }
+
   function labelOf(type) {
     const box = Array.from(typeOptions).find((item) => item.value === type);
     return box ? box.dataset.label || type : type;
@@ -1328,6 +1347,7 @@ function initCsvExportModal() {
   });
 
   [startInput, endInput].forEach((input) => {
+    input.addEventListener("input", validateDateRange);
     input.addEventListener("change", () => {
       syncRangeOptions(true);
       formatSelectedPeriod();
@@ -1337,7 +1357,7 @@ function initCsvExportModal() {
 
   typeOptions.forEach((box) => {
     box.addEventListener("change", () => {
-      showError(typesError, "");
+      validateSelectedTypes();
       // 取得済みの項目はそのまま使い、足りない項目だけ読み込む代わりに、単純化のため全て読み直す
       loadPreview();
     });
@@ -1361,11 +1381,8 @@ function initCsvExportModal() {
       return;
     }
     if (!validateDateRange()) return;
+    if (!validateSelectedTypes()) return;
     const types = selectedTypes();
-    if (!types.length) {
-      showError(typesError, "出力するデータを1つ以上選択してください。");
-      return;
-    }
 
     // データ項目ごとにCSVファイルを出力する。ブラウザが連続ダウンロードを止めないよう、少し間隔をあける
     types.forEach((type, index) => {

@@ -192,13 +192,14 @@
 
         <div class="input-group">
           <label for="steps">歩数 <span class="required">*</span></label>
-          <input type="number" id="steps" name="steps" min="0" max="100000" placeholder="8000" required />
+          <input type="number" id="steps" name="steps" min="0" max="200000" placeholder="8000" required />
           <div id="stepsError" class="field-error"><span></span></div>
         </div>
 
         <div class="input-group">
           <label for="memo">メモ</label>
           <textarea id="memo" name="memo" rows="3" maxlength="500" placeholder="気づいたことなど..."></textarea>
+          <div id="memoError" class="field-error"><span></span></div>
         </div>
 
         <div class="modal__footer">

@@ -1344,6 +1344,14 @@ body.share-settings-open {
   color: #b5bcc4;
 }
 
+.profile-form .input-group input.invalid {
+  border-color: #e53935;
+}
+
+.profile-form .field-error {
+  margin-top: 4px;
+}
+
 .profile-form .required {
   color: #e53935;
 }
@@ -1720,6 +1728,17 @@ body.share-settings-open {
   border-color: var(--wp-primary);
   background: #fff;
   box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.13);
+}
+
+.pin-modal:has(.pin-modal__error:not(:empty)) .pin-digit-input,
+.pin-modal:has(.pin-modal__error:not(:empty)) input:not(.pin-digit-input):not([type="hidden"]) {
+  border-color: #dc3545;
+}
+
+.pin-modal:has(.pin-modal__error:not(:empty)) .pin-digit-input:focus,
+.pin-modal:has(.pin-modal__error:not(:empty)) input:not(.pin-digit-input):not([type="hidden"]):focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12);
 }
 
 /* Nút 戻る dạng <a> (trang select) */

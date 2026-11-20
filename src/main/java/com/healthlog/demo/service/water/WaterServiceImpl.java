@@ -161,7 +161,7 @@ public class WaterServiceImpl extends BaseLogService<Water, Water> implements Wa
         }
         try {
             water.setDrinkType(DrinkType.valueOf(water.getDrinkType()).name());
-        } catch (RuntimeException exception) {
+        } catch (IllegalArgumentException | NullPointerException exception) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "飲み物を選択してください。");
         }
         if (water.getMemo() != null && water.getMemo().length() > 500) {
