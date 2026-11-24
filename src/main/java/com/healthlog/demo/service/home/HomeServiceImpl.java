@@ -2,6 +2,7 @@ package com.healthlog.demo.service.home;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,27 +35,32 @@ public class HomeServiceImpl implements HomeService {
         LocalDate today = LocalDate.now(ZoneId.systemDefault());
         Profile currentProfile = profileAccessValidation.validateCanViewProfile(targetProfileId, currentUserId);
         List<Profile> profileList = profileService.getProfiles(currentUserId);
+        Map<Category, Boolean> readAccess = new EnumMap<>(Category.class);
+        for (Category category : Category.values()) {
+            readAccess.put(category,
+                    profileAccessValidation.hasReadAccess(targetProfileId, currentUserId, category));
+        }
 
         List<Profile> others = profileList.stream().filter(p -> !p.getId().equals(currentProfile.getId())).toList();
         List<Map<String, Object>> familyMembers = homeFamilyService.buildFamilyMembers(others, currentUserId, today);
 
         Map<String, Object> data = new HashMap<>();
         data.put("currentProfile", currentProfile);
-        data.put("goals", visibleGoals(currentProfile, currentUserId));
+        data.put("goals", visibleGoals(currentProfile, readAccess));
         data.put("profileList", profileList);
         data.put("today", homeTodayService.buildToday(targetProfileId, currentUserId));
-        boolean canViewWeight = profileAccessValidation.hasReadAccess(targetProfileId, currentUserId, Category.weight);
-        boolean canViewSleep = profileAccessValidation.hasReadAccess(targetProfileId, currentUserId, Category.sleep);
-        boolean canViewWater = profileAccessValidation.hasReadAccess(targetProfileId, currentUserId, Category.water);
-        boolean canViewStep = profileAccessValidation.hasReadAccess(targetProfileId, currentUserId, Category.step);
+        boolean canViewWeight = readAccess.get(Category.weight);
+        boolean canViewSleep = readAccess.get(Category.sleep);
+        boolean canViewWater = readAccess.get(Category.water);
+        boolean canViewStep = readAccess.get(Category.step);
         data.put("canViewWeight", canViewWeight);
         data.put("canViewSleep", canViewSleep);
         data.put("canViewWater", canViewWater);
         data.put("canViewStep", canViewStep);
-        data.put("canViewMemo", profileAccessValidation.hasReadAccess(targetProfileId, currentUserId, Category.memo));
+        data.put("canViewMemo", readAccess.get(Category.memo));
         data.put("familyMembers", familyMembers);
         data.put("familySummary", homeFamilyService.buildFamilySummary(familyMembers));
-        List<FeedbackItem> feedbackList = visibleFeedback(targetProfileId, currentUserId);
+        List<FeedbackItem> feedbackList = visibleFeedback(targetProfileId, readAccess);
         data.put("feedbackList", feedbackList);
         data.put("hasRestrictedFeedbackCategories",
                 !canViewWeight || !canViewSleep || !canViewWater || !canViewStep);
@@ -84,35 +90,35 @@ public class HomeServiceImpl implements HomeService {
         return data;
     }
 
-    private Map<String, Object> visibleGoals(Profile profile, Long userId) {
+    private Map<String, Object> visibleGoals(Profile profile, Map<Category, Boolean> readAccess) {
         Map<String, Object> goals = new HashMap<>();
-        if (profileAccessValidation.hasReadAccess(profile.getId(), userId, Category.weight)) {
+        if (readAccess.get(Category.weight)) {
             goals.put("targetWeight", profile.getTargetWeight());
         }
-        if (profileAccessValidation.hasReadAccess(profile.getId(), userId, Category.sleep)) {
+        if (readAccess.get(Category.sleep)) {
             goals.put("formattedSleepGoal", profile.getFormattedSleepGoal());
         }
-        if (profileAccessValidation.hasReadAccess(profile.getId(), userId, Category.water)) {
+        if (readAccess.get(Category.water)) {
             goals.put("waterGoalMl", profile.getWaterGoalMl());
         }
-        if (profileAccessValidation.hasReadAccess(profile.getId(), userId, Category.step)) {
+        if (readAccess.get(Category.step)) {
             goals.put("stepGoal", profile.getStepGoal());
         }
         return goals;
     }
 
-    private List<FeedbackItem> visibleFeedback(Long profileId, Long userId) {
+    private List<FeedbackItem> visibleFeedback(Long profileId, Map<Category, Boolean> readAccess) {
         List<FeedbackItem> feedback = new java.util.ArrayList<>();
-        if (profileAccessValidation.hasReadAccess(profileId, userId, Category.weight)) {
+        if (readAccess.get(Category.weight)) {
             feedback.addAll(feedbackService.getWeightFeedback(profileId));
         }
-        if (profileAccessValidation.hasReadAccess(profileId, userId, Category.sleep)) {
+        if (readAccess.get(Category.sleep)) {
             feedback.addAll(feedbackService.getSleepFeedback(profileId));
         }
-        if (profileAccessValidation.hasReadAccess(profileId, userId, Category.water)) {
+        if (readAccess.get(Category.water)) {
             feedback.addAll(feedbackService.getWaterFeedback(profileId));
         }
-        if (profileAccessValidation.hasReadAccess(profileId, userId, Category.step)) {
+        if (readAccess.get(Category.step)) {
             feedback.addAll(feedbackService.getStepFeedback(profileId));
         }
         return feedback;

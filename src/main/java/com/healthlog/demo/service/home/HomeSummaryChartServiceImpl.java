@@ -2,11 +2,11 @@ package com.healthlog.demo.service.home;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
 
@@ -42,11 +42,16 @@ public class HomeSummaryChartServiceImpl implements HomeSummaryChartService {
     public Map<String, Object> getSummaryChartData(Long profileId, Long currentUserId, LocalDate from, LocalDate to) {
         profileAccessValidation.validateCanViewProfile(profileId, currentUserId);
         DateRangerFilter range = new DateRangerFilter(from, to);
+        Map<Category, Boolean> readAccess = readAccessByCategory(profileId, currentUserId);
 
-        Map<String, Object> weight = chartOrEmpty(profileId, currentUserId, range, Category.weight);
-        Map<String, Object> sleep = chartOrEmpty(profileId, currentUserId, range, Category.sleep);
-        Map<String, Object> water = chartOrEmpty(profileId, currentUserId, range, Category.water);
-        Map<String, Object> step = chartOrEmpty(profileId, currentUserId, range, Category.step);
+        Map<String, Object> weight = chartOrEmpty(profileId, currentUserId, range, Category.weight,
+                readAccess.get(Category.weight));
+        Map<String, Object> sleep = chartOrEmpty(profileId, currentUserId, range, Category.sleep,
+                readAccess.get(Category.sleep));
+        Map<String, Object> water = chartOrEmpty(profileId, currentUserId, range, Category.water,
+                readAccess.get(Category.water));
+        Map<String, Object> step = chartOrEmpty(profileId, currentUserId, range, Category.step,
+                readAccess.get(Category.step));
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("from", from);
@@ -58,8 +63,8 @@ public class HomeSummaryChartServiceImpl implements HomeSummaryChartService {
         result.put("sleep", series(sleep));
         result.put("water", series(water));
         result.put("step", series(step));
-        result.put("hasEverLogged", hasEverLogged(profileId, currentUserId, charts));
-        result.put("hasUnsharedData", hasUnsharedData(profileId, currentUserId));
+        result.put("hasEverLogged", hasEverLogged(profileId, charts, readAccess));
+        result.put("hasUnsharedData", hasUnsharedData(profileId, readAccess));
         return result;
     }
 
@@ -89,19 +94,12 @@ public class HomeSummaryChartServiceImpl implements HomeSummaryChartService {
     @Override
     public boolean hasUnsharedData(Long profileId, Long currentUserId) {
         profileAccessValidation.validateCanViewProfile(profileId, currentUserId);
-        return (!profileAccessValidation.hasReadAccess(profileId, currentUserId, Category.weight)
-                    && weightRepository.existsByProfile_Id(profileId))
-                || (!profileAccessValidation.hasReadAccess(profileId, currentUserId, Category.sleep)
-                    && sleepRepository.existsByProfile_Id(profileId))
-                || (!profileAccessValidation.hasReadAccess(profileId, currentUserId, Category.water)
-                    && waterRepository.existsByProfile_Id(profileId))
-                || (!profileAccessValidation.hasReadAccess(profileId, currentUserId, Category.step)
-                    && stepRepository.existsByProfile_Id(profileId));
+        return hasUnsharedData(profileId, readAccessByCategory(profileId, currentUserId));
     }
 
     private Map<String, Object> chartOrEmpty(Long profileId, Long currentUserId, DateRangerFilter range,
-            Category category) {
-        if (!profileAccessValidation.hasReadAccess(profileId, currentUserId, category)) {
+            Category category, boolean canRead) {
+        if (!canRead) {
             return Map.of("labels", List.of(), "values", List.of(), "chartMode", "EMPTY");
         }
         return switch (category) {
@@ -146,13 +144,30 @@ public class HomeSummaryChartServiceImpl implements HomeSummaryChartService {
     }
 
     /** 選択期間に値があればtrue。なければ全期間を確認する。 */
-    private boolean hasEverLogged(Long profileId, Long currentUserId, List<Map<String, Object>> charts) {
+    private boolean hasEverLogged(Long profileId, List<Map<String, Object>> charts,
+            Map<Category, Boolean> readAccess) {
         if (charts.stream().anyMatch(this::hasAnyValue)) {
             return true;
         }
-        DateRangerFilter allTime = new DateRangerFilter(LocalDate.of(2000, 1, 1), LocalDate.now());
-        return Stream.of(Category.weight, Category.sleep, Category.water, Category.step)
-                .anyMatch(category -> hasAnyValue(chartOrEmpty(profileId, currentUserId, allTime, category)));
+        return (readAccess.get(Category.weight) && weightRepository.existsByProfile_Id(profileId))
+                || (readAccess.get(Category.sleep) && sleepRepository.existsByProfile_Id(profileId))
+                || (readAccess.get(Category.water) && waterRepository.existsByProfile_Id(profileId))
+                || (readAccess.get(Category.step) && stepRepository.existsByProfile_Id(profileId));
+    }
+
+    private Map<Category, Boolean> readAccessByCategory(Long profileId, Long currentUserId) {
+        Map<Category, Boolean> readAccess = new EnumMap<>(Category.class);
+        for (Category category : List.of(Category.weight, Category.sleep, Category.water, Category.step)) {
+            readAccess.put(category, profileAccessValidation.hasReadAccess(profileId, currentUserId, category));
+        }
+        return readAccess;
+    }
+
+    private boolean hasUnsharedData(Long profileId, Map<Category, Boolean> readAccess) {
+        return (!readAccess.get(Category.weight) && weightRepository.existsByProfile_Id(profileId))
+                || (!readAccess.get(Category.sleep) && sleepRepository.existsByProfile_Id(profileId))
+                || (!readAccess.get(Category.water) && waterRepository.existsByProfile_Id(profileId))
+                || (!readAccess.get(Category.step) && stepRepository.existsByProfile_Id(profileId));
     }
 
     private boolean hasAnyValue(Map<String, Object> chart) {

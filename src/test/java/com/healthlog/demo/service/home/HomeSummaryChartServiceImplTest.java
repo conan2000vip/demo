@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
@@ -74,6 +76,30 @@ class HomeSummaryChartServiceImplTest {
 
         assertEquals("DAY", result.get("chartMode"));
         assertEquals(java.util.List.of("2026-11-06"), result.get("labels"));
+    }
+
+    @Test
+    @DisplayName("確認済み期間が空でも全期間の記録確認にグラフデータを再取得しない")
+    void checksForHistoricalLogsWithoutReloadingChartData() {
+        Dependencies dependencies = new Dependencies();
+        when(dependencies.access.hasReadAccess(PROFILE_ID, USER_ID, Category.weight)).thenReturn(true);
+        when(dependencies.weightService.chartData(
+                org.mockito.ArgumentMatchers.eq(PROFILE_ID),
+                org.mockito.ArgumentMatchers.eq(USER_ID),
+                org.mockito.ArgumentMatchers.any()))
+                .thenReturn(Map.of("labels", java.util.List.of(), "values", java.util.List.of(), "chartMode", "EMPTY"));
+        when(dependencies.weightRepository.existsByProfile_Id(PROFILE_ID)).thenReturn(true);
+
+        Map<String, Object> result = dependencies.service().getSummaryChartData(
+                PROFILE_ID, USER_ID, LocalDate.now().minusDays(6), LocalDate.now());
+
+        assertTrue((Boolean) result.get("hasEverLogged"));
+        verify(dependencies.weightService, times(1)).chartData(
+                org.mockito.ArgumentMatchers.eq(PROFILE_ID),
+                org.mockito.ArgumentMatchers.eq(USER_ID),
+                org.mockito.ArgumentMatchers.any());
+        verify(dependencies.weightRepository).existsByProfile_Id(PROFILE_ID);
+        verify(dependencies.access, times(1)).hasReadAccess(PROFILE_ID, USER_ID, Category.weight);
     }
 
     private static class Dependencies {

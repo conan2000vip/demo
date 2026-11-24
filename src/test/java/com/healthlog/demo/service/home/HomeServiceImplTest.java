@@ -2,6 +2,8 @@ package com.healthlog.demo.service.home;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -59,5 +61,10 @@ class HomeServiceImplTest {
         Map<String, Object> result = service.getHomeData(PROFILE_ID, USER_ID);
 
         assertTrue((Boolean) result.get("hasRestrictedFeedbackCategories"));
+        verify(access, times(1)).hasReadAccess(PROFILE_ID, USER_ID, Category.weight);
+        verify(access, times(1)).hasReadAccess(PROFILE_ID, USER_ID, Category.sleep);
+        verify(access, times(1)).hasReadAccess(PROFILE_ID, USER_ID, Category.water);
+        verify(access, times(1)).hasReadAccess(PROFILE_ID, USER_ID, Category.step);
+        verify(access, times(1)).hasReadAccess(PROFILE_ID, USER_ID, Category.memo);
     }
 }

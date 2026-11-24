@@ -9,15 +9,21 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.healthlog.demo.dto.common.DateRangerFilter;
 import com.healthlog.demo.entity.Profile;
+import com.healthlog.demo.entity.ProfileShareSetting.Category;
 import com.healthlog.demo.entity.Sleep;
+import com.healthlog.demo.entity.Step;
+import com.healthlog.demo.entity.Water;
+import com.healthlog.demo.entity.Weight;
 import com.healthlog.demo.exception.BusinessException;
+import com.healthlog.demo.repository.SleepRepository;
+import com.healthlog.demo.repository.StepRepository;
+import com.healthlog.demo.repository.WaterRepository;
+import com.healthlog.demo.repository.WeightRepository;
+import com.healthlog.demo.service.helper.ProfileAccessValidation;
 import com.healthlog.demo.service.profile.ProfileService;
-import com.healthlog.demo.service.sleep.SleepService;
-import com.healthlog.demo.service.step.StepService;
-import com.healthlog.demo.service.water.WaterService;
-import com.healthlog.demo.service.weight.WeightService;
+import com.healthlog.demo.service.weight.BmiCalculator;
+import com.healthlog.demo.service.weight.BmiCalculator.BmiStatus;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,22 +39,23 @@ public class HomeTodayServiceImpl implements HomeTodayService {
     private static final BigDecimal WEIGHT_TOLERANCE_KG = BigDecimal.valueOf(0.5);
 
     private final ProfileService profileService;
-    private final WeightService weightService;
-    private final SleepService sleepService;
-    private final WaterService waterService;
-    private final StepService stepService;
+    private final ProfileAccessValidation profileAccessValidation;
+    private final WeightRepository weightRepository;
+    private final SleepRepository sleepRepository;
+    private final WaterRepository waterRepository;
+    private final StepRepository stepRepository;
+    private final BmiCalculator bmiCalculator;
 
     @Override
     public Map<String, Object> buildToday(Long profileId, Long currentUserId) {
         LocalDate todayDate = LocalDate.now();
-        DateRangerFilter range = new DateRangerFilter(todayDate, todayDate);
         Profile profile = profileService.getProfile(currentUserId, profileId);
 
         Map<String, Object> today = createDefaults();
-        applyWeight(today, profile, profileId, currentUserId, range);
-        applySleep(today, profile, profileId, currentUserId, range);
-        applyWater(today, profile, profileId, currentUserId, range);
-        applyStep(today, profile, profileId, currentUserId, range);
+        applyWeight(today, profile, profileId, currentUserId, todayDate);
+        applySleep(today, profile, profileId, currentUserId, todayDate);
+        applyWater(today, profile, profileId, currentUserId, todayDate);
+        applyStep(today, profile, profileId, currentUserId, todayDate);
         return today;
     }
 
@@ -78,18 +85,22 @@ public class HomeTodayServiceImpl implements HomeTodayService {
     }
 
     private void applyWeight(Map<String, Object> today, Profile profile, Long profileId, Long userId,
-            DateRangerFilter range) {
+            LocalDate todayDate) {
         try {
-            Map<String, Object> result = weightService.list(profileId, userId, range, 0);
-            Map<String, Object> stats = (Map<String, Object>) result.get("stats");
-            BigDecimal latest = stats != null ? (BigDecimal) stats.get("latest") : null;
-            if (latest == null) {
+            profileAccessValidation.validateAndGetProfile(profileId, userId, Category.weight);
+            Weight latestLog = weightRepository
+                    .findFirstByProfile_IdAndRecordedDateOrderByIdDesc(profileId, todayDate).orElse(null);
+            if (latestLog == null || latestLog.getWeight() == null) {
                 return;
             }
+            BigDecimal latest = latestLog.getWeight();
+            BigDecimal height = latestLog.getHeight() != null ? latestLog.getHeight() : profile.getHeight();
+            BigDecimal bmi = bmiCalculator.calculateBMI(latest, height);
+            BmiStatus bmiStatus = bmiCalculator.statusOf(bmi);
             today.put("weightKg", latest);
-            today.put("bmi", stats.get("bmi"));
-            today.put("bmiStatus", stats.get("bmiStatus"));
-            today.put("bmiStatusCode", stats.get("bmiStatusCode"));
+            today.put("bmi", bmi);
+            today.put("bmiStatus", bmiStatus != null ? bmiStatus.label() : null);
+            today.put("bmiStatusCode", bmiStatus != null ? bmiStatus.code() : null);
 
             BigDecimal target = profile.getTargetWeight();
             if (target == null || target.compareTo(BigDecimal.ZERO) <= 0) {
@@ -113,17 +124,17 @@ public class HomeTodayServiceImpl implements HomeTodayService {
     }
 
     private void applySleep(Map<String, Object> today, Profile profile, Long profileId, Long userId,
-            DateRangerFilter range) {
+            LocalDate todayDate) {
         try {
-            Map<String, Object> result = sleepService.list(profileId, userId, range, 0);
-            List<?> logs = (List<?>) result.get("logs");
-            if (logs == null || logs.isEmpty()) {
+            profileAccessValidation.validateAndGetProfile(profileId, userId, Category.sleep);
+            List<Sleep> logs = sleepRepository.findByProfile_IdAndRecordedDateOrderByStartTimeAsc(profileId, todayDate);
+            if (logs.isEmpty()) {
                 return;
             }
             int total = 0;
             boolean valid = false;
-            for (Object o : logs) {
-                if (o instanceof Sleep s && s.getSleepMinutes() != null) {
+            for (Sleep s : logs) {
+                if (s.getSleepMinutes() != null) {
                     total += s.getSleepMinutes();
                     valid = true;
                 }
@@ -158,11 +169,11 @@ public class HomeTodayServiceImpl implements HomeTodayService {
     }
 
     private void applyWater(Map<String, Object> today, Profile profile, Long profileId, Long userId,
-            DateRangerFilter range) {
+            LocalDate todayDate) {
         try {
-            Map<String, Object> result = waterService.list(profileId, userId, range, 0);
-            Map<String, Object> stats = (Map<String, Object>) result.get("stats");
-            Integer total = stats != null ? (Integer) stats.get("todayTotal") : null;
+            profileAccessValidation.validateAndGetProfile(profileId, userId, Category.water);
+            List<Water> logs = waterRepository.findByProfile_IdAndRecordedDateOrderByIdAsc(profileId, todayDate);
+            Integer total = logs.isEmpty() ? null : logs.stream().mapToInt(Water::getAmountMl).sum();
             if (total == null) {
                 return;
             }
@@ -190,11 +201,11 @@ public class HomeTodayServiceImpl implements HomeTodayService {
     }
 
     private void applyStep(Map<String, Object> today, Profile profile, Long profileId, Long userId,
-            DateRangerFilter range) {
+            LocalDate todayDate) {
         try {
-            Map<String, Object> result = stepService.list(profileId, userId, range, 0);
-            Map<String, Object> stats = (Map<String, Object>) result.get("stats");
-            Integer steps = stats != null ? (Integer) stats.get("todaySteps") : null;
+            profileAccessValidation.validateAndGetProfile(profileId, userId, Category.step);
+            Step log = stepRepository.findFirstByProfile_IdAndRecordedDate(profileId, todayDate).orElse(null);
+            Integer steps = log != null ? log.getSteps() : null;
             if (steps == null) {
                 return;
             }
