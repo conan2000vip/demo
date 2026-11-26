@@ -71,6 +71,11 @@
   letter-spacing: 0.03em;
 }
 
+.profile-card__badge--viewing {
+  background: var(--wp-primary-light);
+  color: var(--wp-primary);
+}
+
 .profile-card__name {
   display: block;
   min-width: 0;

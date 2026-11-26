@@ -311,21 +311,10 @@ textarea {
 
 .app-header__profile-check {
     margin-left: auto;
-    width: 16px;
-    height: 16px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
-    justify-content: center;
-}
-
-.app-header__profile-check img {
-    width: 30px;
-    height: 30px;
-    max-width: 30px;
-    max-height: 30px;
-    object-fit: contain;
-    display: block;
+    justify-content: flex-end;
 }
 
 .app-header__manage-link {
@@ -383,6 +372,18 @@ textarea {
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.app-header__profile-current {
+    align-self: flex-start;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--wp-primary-light);
+    color: var(--wp-primary);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.4;
     white-space: nowrap;
 }
 
@@ -1858,13 +1859,6 @@ textarea {
 
     .app-header__profile-list {
         max-height: 226px;
-    }
-
-    .app-header__profile-check img {
-        width: 20px;
-        height: 20px;
-        max-width: 20px;
-        max-height: 20px;
     }
 
     .app-header__dropdown {

@@ -120,7 +120,7 @@
                       <span class="app-header__profile-relation" th:text="${p.isPrimary} ? '本人' : ${p.relationship}">本人</span>
                     </span>
                     <span class="app-header__profile-check">
-                      <img th:src="@{/image/check.png}" alt="" th:if="${p.id == currentProfile.id}" />
+                      <span class="app-header__profile-current" th:if="${p.id == currentProfile.id}">閲覧中</span>
                     </span>
                   </button>
                 </form>
